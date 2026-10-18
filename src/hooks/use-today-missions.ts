@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { FunctionError, Functions } from '@/lib/functions';
+import { FunctionError, Functions, type JudgedBy } from '@/lib/functions';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Tables } from '@/types/database';
@@ -14,8 +14,8 @@ type UserMission = Tables<'user_missions'>;
 export type TodayMissions = {
   daily: Mission[];
   weekly: Mission | null;
-  /** 'ai' = recommend-missions 결과, 'seed' = AI 실패 시 규칙 기반 대체 */
-  source: 'ai' | 'seed';
+  /** 'ai' = AI 추천, 'rule' = 시드 규칙 기반 (서버 대체 또는 함수 호출 실패 시 앱 대체) */
+  source: JudgedBy;
   /** mission_id → 진행 중이거나 완료한 user_mission */
   progress: Record<string, UserMission>;
 };
@@ -41,13 +41,13 @@ async function fetchProgress(profileId: string) {
 async function fetchToday(profile: Profile, refresh: boolean): Promise<TodayMissions> {
   const progressRows = await fetchProgress(profile.id);
   let picked: { daily: Mission[]; weekly: Mission | null };
-  let source: TodayMissions['source'] = 'ai';
+  let source: JudgedBy;
   try {
-    picked = await Functions.recommendMissions(refresh);
+    ({ source, ...picked } = await Functions.recommendMissions(refresh));
   } catch (e) {
     if (refresh) throw e;
     picked = await fetchSeedMissions(profile);
-    source = 'seed';
+    source = 'rule';
   }
 
   // 진행 중인 주간 미션이 있으면 새 추천 대신 그것을 보여 준다

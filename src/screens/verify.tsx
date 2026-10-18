@@ -15,7 +15,7 @@ import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { FunctionError, Functions, type JudgeResult } from '@/lib/functions';
+import { FunctionError, Functions, type JudgedBy, type JudgeResult } from '@/lib/functions';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import { preparePhoto } from '@/utils/prepare-photo';
@@ -23,6 +23,17 @@ import { preparePhoto } from '@/utils/prepare-photo';
 const MaxNote = 100;
 
 type Photo = { uri: string; bytes: Uint8Array };
+
+/** AI가 판정했을 때만 ai-card로 표시한다 (DESIGN.md §5.3) */
+function ResultMessage({ text, judgedBy }: { text: string; judgedBy: JudgedBy }) {
+  const theme = useTheme();
+  if (judgedBy === 'ai') return <AiCard>{text}</AiCard>;
+  return (
+    <View style={[styles.message, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+      <AppText>{text}</AppText>
+    </View>
+  );
+}
 
 /** S5 인증 (PRD F4 / DESIGN.md §5.2) */
 export function Verify({ userMissionId }: { userMissionId: string }) {
@@ -112,7 +123,7 @@ export function Verify({ userMissionId }: { userMissionId: string }) {
           <Animated.View entering={ZoomIn.springify().damping(15).stiffness(200)}>
             <Feather name="check-circle" size={32} color={theme.success} />
           </Animated.View>
-          <AiCard>{result.message}</AiCard>
+          <ResultMessage text={result.message} judgedBy={result.judged_by} />
           {result.rewards.map((f, i) => (
             <Animated.View
               key={f.id}
@@ -171,7 +182,7 @@ export function Verify({ userMissionId }: { userMissionId: string }) {
 
       {result?.result === 'retry' && (
         <View style={styles.block}>
-          <AiCard>{result.message}</AiCard>
+          <ResultMessage text={result.message} judgedBy={result.judged_by} />
         </View>
       )}
 
@@ -256,6 +267,12 @@ const styles = StyleSheet.create({
   toggleText: {
     flex: 1,
     gap: 2,
+  },
+  message: {
+    alignSelf: 'stretch',
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    padding: Spacing.md,
   },
   result: {
     marginTop: Spacing.xxl,

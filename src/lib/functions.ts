@@ -28,12 +28,16 @@ async function invoke<T>(name: string, body: object): Promise<T> {
   return data as T;
 }
 
-export type Recommendation = { daily: Mission[]; weekly: Mission | null };
+/** 'ai' = 생성형 AI 결과, 'rule' = AI를 쓸 수 없을 때의 규칙 기반 대체 */
+export type JudgedBy = 'ai' | 'rule';
+
+export type Recommendation = { daily: Mission[]; weekly: Mission | null; source: JudgedBy };
 export type JudgeResult = {
   result: 'pass' | 'retry' | 'privacy';
   message: string;
   streak: number | null;
   rewards: Furniture[];
+  judged_by: JudgedBy;
 };
 
 export const Functions = {
@@ -43,5 +47,7 @@ export const Functions = {
   verifyMission: (verificationId: string) => invoke<JudgeResult>('verify-mission', { verification_id: verificationId }),
   /** F6 댓글 검수 */
   moderateComment: (commentId: string) =>
-    invoke<{ status: 'approved' | 'rejected' | 'crisis' | 'pending' }>('moderate-comment', { comment_id: commentId }),
+    invoke<{ status: 'approved' | 'rejected' | 'crisis' | 'pending'; judged_by: JudgedBy | null }>('moderate-comment', {
+      comment_id: commentId,
+    }),
 };
