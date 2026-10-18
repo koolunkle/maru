@@ -1,5 +1,6 @@
 // F4 사진 인증 판정 + F5 출석 + F7 가구 보상 (PRD §6)
-// POST { verification_id } → { result, message, streak, rewards: Furniture[] }
+// POST { verification_id } → { result, message, streak, rewards: Furniture[], judged_by: 'ai' | 'rule' }
+// AI를 쓸 수 없으면 app_config.verify_fallback에 따라 통과('pass') 또는 재시도 안내('retry_later')
 // 클라이언트가 사진 업로드 → verifications insert(ai_result null) 후 호출한다.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { encodeBase64 } from 'jsr:@std/encoding@1/base64';
@@ -107,10 +108,17 @@ Deno.serve(
     } catch (e) {
       console.error('anthropic', anthropicSetup, e);
     }
+    let judgedBy: 'ai' | 'rule' = 'ai';
     if (!judged) {
-      // 다시 시도할 수 있도록 진행 중 상태로 되돌린다
-      await admin.from('user_missions').update({ status: 'in_progress' }).eq('id', um.id);
-      throw new HttpError(503, 'ai_unavailable');
+      const { data: config } = await admin.from('app_config').select('value').eq('key', 'verify_fallback').maybeSingle();
+      if (config?.value !== 'pass') {
+        // 다시 시도할 수 있도록 진행 중 상태로 되돌린다
+        await admin.from('user_missions').update({ status: 'in_progress' }).eq('id', um.id);
+        throw new HttpError(503, 'ai_unavailable');
+      }
+      // PRD F4 '관대한 판정' 원칙에 따라 통과 처리
+      judged = { result: 'pass', message: FallbackMessage.pass };
+      judgedBy = 'rule';
     }
 
     const message =
@@ -127,7 +135,7 @@ Deno.serve(
 
     if (judged.result === 'retry') {
       await admin.from('user_missions').update({ status: 'in_progress' }).eq('id', um.id);
-      return json({ result: 'retry', message, streak: null, rewards: [] });
+      return json({ result: 'retry', message, streak: null, rewards: [], judged_by: judgedBy });
     }
 
     // 완료 처리
@@ -170,6 +178,6 @@ Deno.serve(
       await admin.from('user_furniture').insert(earned.map((f: { id: string }) => ({ user_id: userId, furniture_id: f.id })));
     }
 
-    return json({ result: judged.result, message, streak: streak.streak, rewards: earned });
+    return json({ result: judged.result, message, streak: streak.streak, rewards: earned, judged_by: judgedBy });
   }),
 );

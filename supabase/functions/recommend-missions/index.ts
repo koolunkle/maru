@@ -1,13 +1,14 @@
 // F2. AI 미션 추천 (PRD §6 F2)
-// POST { refresh?: boolean } → { daily: Mission[], weekly: Mission | null }
+// POST { refresh?: boolean } → { daily: Mission[], weekly: Mission | null, source: 'ai' | 'rule' }
 // - 당일(KST) 추천이 있으면 그대로 반환, refresh는 하루 1회
-// - AI 실패 시 503 → 클라이언트가 시드 규칙으로 대체한다
+// - AI를 쓸 수 없으면 365 서울챌린지 시드에서 규칙대로 골라 저장한다(source: 'rule')
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@0.135.0/helpers/zod';
 import { z } from 'npm:zod@4.6.7';
 
 import { admin, anthropic, anthropicSetup, Models, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
+import { pickSeeds } from '../_shared/fallback.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
 import { addDays, kstDate } from '../_shared/kst.ts';
 
@@ -44,7 +45,7 @@ const System = `당신은 서울에 사는 청년에게 하루 5분짜리 작은
 - 사진 한 장으로 인증할 수 있는 미션만 낸다. 다른 사람의 얼굴이 찍혀야 하는 미션은 내지 않는다.
 ${CopyRules}`;
 
-type MissionRow = { id: string; title: string; category: string; difficulty: number; minutes: number };
+type MissionRow = { id: string; source: string; title: string; category: string; difficulty: number; minutes: number };
 
 function sanitize(m: AiMission, maxMinutes: number | null): AiMission | null {
   const text = `${m.title} ${m.verify_hint} ${m.reason}`;
@@ -76,9 +77,11 @@ Deno.serve(
       const ids = [...existing.daily_mission_ids, existing.weekly_mission_id].filter(Boolean);
       const { data } = await admin.from('missions').select('*').in('id', ids);
       const byId = new Map((data ?? []).map((m: MissionRow) => [m.id, m]));
+      const daily = existing.daily_mission_ids.map((id: string) => byId.get(id)).filter(Boolean);
       return json({
-        daily: existing.daily_mission_ids.map((id: string) => byId.get(id)).filter(Boolean),
+        daily,
         weekly: byId.get(existing.weekly_mission_id) ?? null,
+        source: daily.some((m: MissionRow) => m.source === 'ai') ? 'ai' : 'rule',
       });
     }
     if (existing && existing.refresh_count >= 1) throw new HttpError(409, 'refresh_limit');
@@ -94,7 +97,7 @@ Deno.serve(
         .gte('started_at', `${addDays(today, -14)}T00:00:00+09:00`)
         .order('started_at', { ascending: false })
         .limit(30),
-      admin.from('missions').select('seed_no, title, category, difficulty, minutes').eq('source', 'seed'),
+      admin.from('missions').select('*').eq('source', 'seed'),
       admin
         .from('events')
         .select('id, title, place, start_date, end_date')
@@ -103,6 +106,17 @@ Deno.serve(
         .lte('start_date', addDays(today, 7))
         .limit(10),
     ]);
+
+    async function save(dailyIds: string[], weeklyId: string | null) {
+      const { error } = await admin.from('daily_recommendations').upsert({
+        user_id: userId,
+        rec_date: today,
+        daily_mission_ids: dailyIds,
+        weekly_mission_id: weeklyId,
+        refresh_count: existing ? existing.refresh_count + 1 : 0,
+      });
+      if (error) throw error;
+    }
 
     const context = {
       user: {
@@ -113,7 +127,13 @@ Deno.serve(
         preferences: profile.preferences,
       },
       recent_missions: history.data ?? [],
-      seoul_challenge: seeds.data ?? [],
+      seoul_challenge: (seeds.data ?? []).map(({ seed_no, title, category, difficulty, minutes }: Record<string, unknown>) => ({
+        seed_no,
+        title,
+        category,
+        difficulty,
+        minutes,
+      })),
       events: events.data ?? [],
       today,
     };
@@ -134,14 +154,25 @@ Deno.serve(
     } catch (e) {
       console.error('anthropic', anthropicSetup, e);
     }
-    if (!parsed) throw new HttpError(503, 'ai_unavailable');
 
-    const daily = parsed.daily
+    const daily = (parsed?.daily ?? [])
       .map((m) => sanitize(m, profile.daily_minutes))
       .filter((m): m is AiMission => m !== null)
       .slice(0, 3);
-    const weekly = sanitize(parsed.weekly, null);
-    if (daily.length < 3 || !weekly) throw new HttpError(503, 'ai_invalid_output');
+    const weekly = parsed ? sanitize(parsed.weekly, null) : null;
+
+    // AI 결과가 없거나 규칙을 어기면 시드 규칙으로 대체
+    if (daily.length < 3 || !weekly) {
+      const exclude = existing ? [...existing.daily_mission_ids, existing.weekly_mission_id].filter(Boolean) : [];
+      let picked = pickSeeds(seeds.data ?? [], profile, exclude);
+      // 직전 추천을 빼고 3개가 안 되면 전체에서 다시 고른다
+      if (picked.daily.length < 3) picked = pickSeeds(seeds.data ?? [], profile);
+      await save(
+        picked.daily.map((m) => m.id),
+        picked.weekly?.id ?? null,
+      );
+      return json({ ...picked, source: 'rule' });
+    }
 
     const eventIds = new Set((events.data ?? []).map((e: { id: string }) => e.id));
     const rows = [...daily, weekly].map((m) => ({
@@ -158,15 +189,10 @@ Deno.serve(
     const { data: inserted, error } = await admin.from('missions').insert(rows).select('*');
     if (error) throw error;
 
-    const { error: recError } = await admin.from('daily_recommendations').upsert({
-      user_id: userId,
-      rec_date: today,
-      daily_mission_ids: inserted.slice(0, 3).map((m: MissionRow) => m.id),
-      weekly_mission_id: inserted[3].id,
-      refresh_count: existing ? existing.refresh_count + 1 : 0,
-    });
-    if (recError) throw recError;
-
-    return json({ daily: inserted.slice(0, 3), weekly: inserted[3] });
+    await save(
+      inserted.slice(0, 3).map((m: MissionRow) => m.id),
+      inserted[3].id,
+    );
+    return json({ daily: inserted.slice(0, 3), weekly: inserted[3], source: 'ai' });
   }),
 );

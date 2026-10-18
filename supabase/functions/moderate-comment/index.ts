@@ -1,5 +1,6 @@
 // F6 익명 댓글 검수 (PRD §6 F6)
-// POST { comment_id } → { status: 'approved' | 'rejected' | 'crisis' | 'pending' }
+// POST { comment_id } → { status: 'approved' | 'rejected' | 'crisis' | 'pending', judged_by: 'ai' | null }
+// AI 검수에 실패하면 pending으로 남겨 공개하지 않는다
 // 클라이언트가 댓글 insert 직후 호출한다. 공개는 pg_cron(publish_due_comments)이 처리.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@0.135.0/helpers/zod';
@@ -23,7 +24,7 @@ Deno.serve(
 
     const { data: c } = await admin.from('comments').select('id, user_id, body, status').eq('id', comment_id).single();
     if (!c || c.user_id !== userId) throw new HttpError(404, 'not_found');
-    if (c.status !== 'pending') return json({ status: c.status });
+    if (c.status !== 'pending') return json({ status: c.status, judged_by: null });
 
     let status: z.infer<typeof ResultSchema>['status'] | null = null;
     try {
@@ -42,9 +43,9 @@ Deno.serve(
       console.error('anthropic', anthropicSetup, e);
     }
     // 검수 실패 시 pending 유지 → 공개되지 않는다
-    if (!status) return json({ status: 'pending' });
+    if (!status) return json({ status: 'pending', judged_by: null });
 
     await admin.from('comments').update({ status }).eq('id', c.id);
-    return json({ status });
+    return json({ status, judged_by: 'ai' });
   }),
 );
