@@ -87,7 +87,7 @@
 | DB | Supabase Postgres + RLS | |
 | 파일 | Supabase Storage, 버킷 `verifications`(private) | 피드 노출은 signed URL(유효 1시간) |
 | 서버 로직 | Supabase Edge Functions | Claude API 키는 함수 환경 변수에만 |
-| AI | Claude API | 댓글 검수는 경량 모델 |
+| AI | Gemini API (기본) / Claude API 전환 가능 | Edge Function `_shared/ai.ts` 한 곳에서 호출. `AI_PROVIDER`로 선택, 댓글 검수는 경량 모델 |
 | 예약 작업 | pg_cron | 댓글 공개, 문화행사 동기화 |
 | 데이터 | 365 서울챌린지 2026년 2기 36개 과제 [^seoulchallenge], 서울 열린데이터광장 문화행사 | 시드 원본 `data/seoul-challenge-2026-2.json` |
 | 배포 | EAS Hosting | `npx expo export -p web` → `eas deploy --prod` |
@@ -342,7 +342,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 ### 8.2 기술
 
 - 필수 기능은 웹에서 동작해야 한다. 네이티브 전용 API 사용 금지.
-- Claude API 키는 Edge Function 환경 변수에만 둔다.
+- AI API 키(`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`)는 Edge Function 환경 변수에만 둔다.
 - AI를 쓸 수 없을 때(키·크레딧·장애·시간 초과) 규칙 기반으로 대체하고 앱은 계속 동작한다. 결과에는 `source`/`judged_by`(`ai` | `rule`)를 붙이고, `rule` 결과는 ai-card로 표시하지 않는다.
   - F2 추천: 365 서울챌린지 시드에서 규칙대로 선택해 저장('다른 미션 보기' 포함)
   - F4 판정: `app_config.verify_fallback` = `pass`(통과 처리, 기본값) 또는 `retry_later`(진행 중으로 되돌리고 재시도 안내)
@@ -354,6 +354,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 - 실시간 채팅, 1:1 메시지, 연락처 교환 없음.
 - 위기 감지는 진단이 아니다. 감지 시 공식 창구 안내만 한다.
 - 수집하지 않음: 이메일, 전화번호, 실명, 위치 좌표(구 단위만).
+- Gemini 무료 등급은 입력(사진·댓글)이 Google의 제품 개선과 사람 검토에 쓰일 수 있다. 시연 기간에만 쓰고, 실제 운영 전에는 유료 등급 또는 Claude로 전환한다.
 - 출처 표기: 365 서울챌린지, 서울 열린데이터광장, Pretendard(OFL) — S9 하단.
 
 ### 8.4 미결 사항

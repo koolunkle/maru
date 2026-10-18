@@ -23,6 +23,16 @@ npx eas-cli@latest deploy --prod
 
 `EXPO_PUBLIC_*` 값은 export 시점에 번들에 들어간다. publishable 키만 넣는다.
 
+## AI 설정 (Supabase Edge Function Secrets)
+
+| 이름 | 용도 |
+| --- | --- |
+| `GEMINI_API_KEY` | Gemini 사용 (있으면 기본 제공자) |
+| `ANTHROPIC_API_KEY`, `ANTHROPIC_WORKSPACE_ID` | Claude 사용 |
+| `AI_PROVIDER` | `gemini` 또는 `anthropic`으로 강제 선택 (선택 사항) |
+
+시크릿을 바꾼 뒤에는 함수를 다시 배포해야 반영된다. Gemini 무료 등급은 입력이 Google의 제품 개선과 사람 검토에 쓰일 수 있으므로 시연 기간에만 쓰고, 운영 시에는 유료 등급 또는 Claude로 전환한다.
+
 ## 시연 모드
 
 댓글 공개 지연 1분·공개 작업 매분 실행. Supabase SQL에서 전환한다.
