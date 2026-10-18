@@ -11,6 +11,29 @@ npm run web                  # 웹
 npm start                    # Expo Go (폰)
 ```
 
+## 배포 (EAS Hosting)
+
+- 운영 URL: https://seoul-challenge.expo.app
+- EAS 프로젝트: `@koolunkle/seoul-challenge`
+
+```bash
+npx expo export -p web
+npx eas-cli@latest deploy --prod
+```
+
+`EXPO_PUBLIC_*` 값은 export 시점에 번들에 들어간다. publishable 키만 넣는다.
+
+## 시연 모드
+
+댓글 공개 지연 1분·공개 작업 매분 실행. Supabase SQL에서 전환한다.
+
+```sql
+select public.set_demo_mode(true);   -- 시연
+select public.set_demo_mode(false);  -- 운영 (3시간, 10분 주기)
+```
+
+AI를 쓸 수 없을 때 사진 판정 처리: `app_config.verify_fallback` = `"pass"`(통과) | `"retry_later"`(재시도 안내).
+
 ## 검사
 
 ```bash
