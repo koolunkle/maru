@@ -1,5 +1,5 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { Feed } from '@/screens/feed';
 
 export default function FeedRoute() {
-  return <ComingSoon title="피드" />;
+  return <Feed />;
 }
