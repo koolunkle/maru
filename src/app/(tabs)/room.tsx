@@ -1,5 +1,5 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { Room } from '@/screens/room';
 
 export default function RoomRoute() {
-  return <ComingSoon title="내 방" />;
+  return <Room />;
 }

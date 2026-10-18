@@ -1,5 +1,5 @@
-import { ComingSoon } from '@/components/coming-soon';
+import { Record } from '@/screens/record';
 
 export default function RecordRoute() {
-  return <ComingSoon title="기록" />;
+  return <Record />;
 }
