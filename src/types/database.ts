@@ -495,6 +495,20 @@ export type Database = {
     }
     Functions: {
       expire_due_missions: { Args: never; Returns: number }
+      get_feed: {
+        Args: { before?: string; page_size?: number }
+        Returns: {
+          category: Database["public"]["Enums"]["mission_category"]
+          created_at: string
+          id: string
+          mission_id: string
+          mission_title: string
+          nickname: string
+          photo_path: string
+          text: string | null
+          user_id: string
+        }[]
+      }
       get_nicknames: {
         Args: { user_ids: string[] }
         Returns: {
@@ -507,6 +521,12 @@ export type Database = {
         Returns: {
           count: number
           mission_id: string
+        }[]
+      }
+      get_participant_nicknames: {
+        Args: { mission: string }
+        Returns: {
+          nickname: string
         }[]
       }
       publish_due_comments: { Args: never; Returns: number }
