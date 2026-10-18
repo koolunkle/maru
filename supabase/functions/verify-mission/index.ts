@@ -4,10 +4,10 @@
 // 클라이언트가 사진 업로드 → verifications insert(ai_result null) 후 호출한다.
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { encodeBase64 } from 'jsr:@std/encoding@1/base64';
-import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@0.135.0/helpers/zod';
 import { z } from 'npm:zod@4.6.7';
 
-import { admin, anthropic, anthropicSetup, Models, requireUserId } from '../_shared/clients.ts';
+import { generateJson } from '../_shared/ai.ts';
+import { admin, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
 import { addDays, kstDate, weekStart } from '../_shared/kst.ts';
@@ -77,37 +77,14 @@ Deno.serve(
 
     await admin.from('user_missions').update({ status: 'judging' }).eq('id', um.id);
 
-    let judged: z.infer<typeof JudgeSchema> | null = null;
-    try {
-      const response = await anthropic.messages.parse(
-        {
-          model: Models.main,
-          max_tokens: 2000,
-          output_config: { effort: 'low', format: zodOutputFormat(JudgeSchema) },
-          system: System,
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: image } },
-                {
-                  type: 'text',
-                  text: JSON.stringify({
-                    mission: um.missions.title,
-                    verify_hint: um.missions.verify_hint,
-                    user_note: v.text ?? '',
-                  }),
-                },
-              ],
-            },
-          ],
-        },
-        { timeout: 20_000 },
-      );
-      if (response.stop_reason !== 'refusal') judged = response.parsed_output;
-    } catch (e) {
-      console.error('anthropic', anthropicSetup, e);
-    }
+    let judged = await generateJson({
+      tier: 'main',
+      system: System,
+      text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, user_note: v.text ?? '' }),
+      image,
+      schema: JudgeSchema,
+      timeoutMs: 20_000,
+    });
     let judgedBy: 'ai' | 'rule' = 'ai';
     if (!judged) {
       const { data: config } = await admin.from('app_config').select('value').eq('key', 'verify_fallback').maybeSingle();

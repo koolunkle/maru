@@ -3,10 +3,10 @@
 // - 당일(KST) 추천이 있으면 그대로 반환, refresh는 하루 1회
 // - AI를 쓸 수 없으면 365 서울챌린지 시드에서 규칙대로 골라 저장한다(source: 'rule')
 import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
-import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@0.135.0/helpers/zod';
 import { z } from 'npm:zod@4.6.7';
 
-import { admin, anthropic, anthropicSetup, Models, requireUserId } from '../_shared/clients.ts';
+import { generateJson } from '../_shared/ai.ts';
+import { admin, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
 import { pickSeeds } from '../_shared/fallback.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
@@ -138,22 +138,13 @@ Deno.serve(
       today,
     };
 
-    let parsed: z.infer<typeof OutputSchema> | null = null;
-    try {
-      const response = await anthropic.messages.parse(
-        {
-          model: Models.main,
-          max_tokens: 4000,
-          output_config: { effort: 'low', format: zodOutputFormat(OutputSchema) },
-          system: System,
-          messages: [{ role: 'user', content: JSON.stringify(context) }],
-        },
-        { timeout: 15_000 },
-      );
-      if (response.stop_reason !== 'refusal') parsed = response.parsed_output;
-    } catch (e) {
-      console.error('anthropic', anthropicSetup, e);
-    }
+    const parsed = await generateJson({
+      tier: 'main',
+      system: System,
+      text: JSON.stringify(context),
+      schema: OutputSchema,
+      timeoutMs: 25_000,
+    });
 
     const daily = (parsed?.daily ?? [])
       .map((m) => sanitize(m, profile.daily_minutes))
