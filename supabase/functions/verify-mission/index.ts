@@ -6,7 +6,7 @@ import { encodeBase64 } from 'jsr:@std/encoding@1/base64';
 import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@0.135.0/helpers/zod';
 import { z } from 'npm:zod@4.6.7';
 
-import { admin, anthropic, Models, requireUserId } from '../_shared/clients.ts';
+import { admin, anthropic, anthropicSetup, Models, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
 import { addDays, kstDate, weekStart } from '../_shared/kst.ts';
@@ -105,7 +105,7 @@ Deno.serve(
       );
       if (response.stop_reason !== 'refusal') judged = response.parsed_output;
     } catch (e) {
-      console.error('anthropic', e);
+      console.error('anthropic', anthropicSetup, e);
     }
     if (!judged) {
       // 다시 시도할 수 있도록 진행 중 상태로 되돌린다

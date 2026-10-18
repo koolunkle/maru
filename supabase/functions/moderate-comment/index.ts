@@ -5,7 +5,7 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@0.135.0/helpers/zod';
 import { z } from 'npm:zod@4.6.7';
 
-import { admin, anthropic, Models, requireUserId } from '../_shared/clients.ts';
+import { admin, anthropic, anthropicSetup, Models, requireUserId } from '../_shared/clients.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
 
 const ResultSchema = z.object({ status: z.enum(['approved', 'rejected', 'crisis']) });
@@ -39,7 +39,7 @@ Deno.serve(
       );
       if (response.stop_reason !== 'refusal') status = response.parsed_output?.status ?? null;
     } catch (e) {
-      console.error('anthropic', e);
+      console.error('anthropic', anthropicSetup, e);
     }
     // 검수 실패 시 pending 유지 → 공개되지 않는다
     if (!status) return json({ status: 'pending' });
