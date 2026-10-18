@@ -41,6 +41,8 @@ function RootStack() {
       <Stack.Protected guard={signedIn && onboarded}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
+        <Stack.Screen name="mission/[id]/index" />
+        <Stack.Screen name="mission/[id]/verify" />
       </Stack.Protected>
     </Stack>
   );

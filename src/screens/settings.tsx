@@ -1,9 +1,9 @@
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
+import { BackHeader } from '@/components/back-header';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { CategoryLabel, DailyMinuteOptions } from '@/constants/domain';
@@ -39,22 +39,12 @@ function Row({ label, value, icon, onPress }: RowProps) {
 
 /** S9 설정 (DESIGN.md §5.2) */
 export function Settings() {
-  const theme = useTheme();
   const { profile } = useSession();
   const minutes = DailyMinuteOptions.find((o) => o.value === profile?.daily_minutes)?.label;
 
   return (
     <Screen>
-      <View style={styles.header}>
-        <PressableScale
-          accessibilityRole="button"
-          accessibilityLabel="뒤로"
-          onPress={() => router.back()}
-          style={styles.back}>
-          <Feather name="chevron-left" size={24} color={theme.ink} />
-        </PressableScale>
-        <AppText variant="titleLg">설정</AppText>
-      </View>
+      <BackHeader title="설정" />
 
       <View style={styles.group}>
         <Row label="닉네임" value={profile?.nickname} />
@@ -83,19 +73,6 @@ export function Settings() {
 }
 
 const styles = StyleSheet.create({
-  header: {
-    height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xxs,
-  },
-  back: {
-    width: 44,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: -12,
-  },
   group: {
     marginTop: Spacing.md,
   },

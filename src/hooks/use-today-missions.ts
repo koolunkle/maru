@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import { FunctionError, Functions } from '@/lib/functions';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Tables } from '@/types/database';
@@ -8,39 +9,55 @@ import { pickSeedMissions } from '@/utils/pick-seed-missions';
 
 type Mission = Tables<'missions'>;
 type Profile = Tables<'profiles'>;
+type UserMission = Tables<'user_missions'>;
 
-type TodayMissions = {
+export type TodayMissions = {
   daily: Mission[];
   weekly: Mission | null;
-  /** 'ai' = daily_recommendations 결과, 'seed' = 규칙 기반 대체 */
+  /** 'ai' = recommend-missions 결과, 'seed' = AI 실패 시 규칙 기반 대체 */
   source: 'ai' | 'seed';
+  /** mission_id → 진행 중이거나 완료한 user_mission */
+  progress: Record<string, UserMission>;
 };
 
-async function fetchTodayMissions(profile: Profile): Promise<TodayMissions> {
-  const today = kstDate();
-  const { data: rec, error: recError } = await supabase
-    .from('daily_recommendations')
-    .select('daily_mission_ids, weekly_mission_id')
-    .eq('user_id', profile.id)
-    .eq('rec_date', today)
-    .maybeSingle();
-  if (recError) throw recError;
-
-  if (rec) {
-    const ids = [...rec.daily_mission_ids, ...(rec.weekly_mission_id ? [rec.weekly_mission_id] : [])];
-    const { data: missions, error } = await supabase.from('missions').select('*').in('id', ids);
-    if (error) throw error;
-    const byId = new Map(missions.map((m) => [m.id, m]));
-    return {
-      daily: rec.daily_mission_ids.flatMap((id) => byId.get(id) ?? []),
-      weekly: (rec.weekly_mission_id && byId.get(rec.weekly_mission_id)) || null,
-      source: 'ai',
-    };
-  }
-
+async function fetchSeedMissions(profile: Profile) {
   const { data: seeds, error } = await supabase.from('missions').select('*').eq('source', 'seed');
   if (error) throw error;
-  return { ...pickSeedMissions(seeds, profile, today, kstDate(kstEndOfWeek())), source: 'seed' };
+  return pickSeedMissions(seeds, profile, kstDate(), kstDate(kstEndOfWeek()));
+}
+
+/** 오늘 시작했거나 아직 진행 중인 미션 (주간 미션은 날이 바뀌어도 이어진다) */
+async function fetchProgress(profileId: string) {
+  const { data, error } = await supabase
+    .from('user_missions')
+    .select('*, missions(*)')
+    .eq('user_id', profileId)
+    .or(`status.in.(in_progress,judging),started_at.gte.${kstDate()}T00:00:00+09:00`)
+    .order('started_at', { ascending: false });
+  if (error) throw error;
+  return data;
+}
+
+async function fetchToday(profile: Profile, refresh: boolean): Promise<TodayMissions> {
+  const progressRows = await fetchProgress(profile.id);
+  let picked: { daily: Mission[]; weekly: Mission | null };
+  let source: TodayMissions['source'] = 'ai';
+  try {
+    picked = await Functions.recommendMissions(refresh);
+  } catch (e) {
+    if (refresh) throw e;
+    picked = await fetchSeedMissions(profile);
+    source = 'seed';
+  }
+
+  // 진행 중인 주간 미션이 있으면 새 추천 대신 그것을 보여 준다
+  const activeWeekly = progressRows.find((um) => um.type === 'weekly' && um.status !== 'expired');
+  return {
+    daily: picked.daily,
+    weekly: activeWeekly?.missions ?? picked.weekly,
+    source,
+    progress: Object.fromEntries(progressRows.map(({ missions: _m, ...um }) => [um.mission_id, um])),
+  };
 }
 
 /** S3 홈: 오늘의 일일 3개 + 주간 1개 (PRD F2) */
@@ -49,23 +66,45 @@ export function useTodayMissions() {
   const [data, setData] = useState<TodayMissions | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  // 프로필 객체는 출석 갱신 등으로 자주 바뀌므로, 재조회는 사용자(id)가 바뀔 때와 reload 때만 한다.
+  const profileRef = useRef(profile);
+  useEffect(() => {
+    profileRef.current = profile;
+  });
+  const profileId = profile?.id;
 
   useEffect(() => {
-    if (!profile) return;
+    const current = profileRef.current;
+    if (!profileId || !current) return;
     let active = true;
-    fetchTodayMissions(profile).then(
+    fetchToday(current, false).then(
       (result) => active && setData(result),
       (e: unknown) => active && setError(e instanceof Error ? e : new Error(String(e))),
     );
     return () => {
       active = false;
     };
-  }, [profile, attempt]);
+  }, [profileId, attempt]);
 
   const reload = useCallback(() => {
     setError(null);
     setAttempt((n) => n + 1);
   }, []);
 
-  return { data, error, reload };
+  /** '다른 미션 보기' — 하루 1회. 이미 썼으면 'refresh_limit' */
+  const refresh = useCallback(async (): Promise<'ok' | 'limit' | 'failed'> => {
+    if (!profile) return 'failed';
+    setRefreshing(true);
+    try {
+      setData(await fetchToday(profile, true));
+      return 'ok';
+    } catch (e) {
+      return e instanceof FunctionError && e.code === 'refresh_limit' ? 'limit' : 'failed';
+    } finally {
+      setRefreshing(false);
+    }
+  }, [profile]);
+
+  return { data, error, reload, refresh, refreshing };
 }

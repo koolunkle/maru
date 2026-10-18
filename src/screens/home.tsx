@@ -1,5 +1,6 @@
 import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -11,13 +12,47 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useTodayMissions } from '@/hooks/use-today-missions';
 import { useSession } from '@/providers/session-provider';
+import type { Tables } from '@/types/database';
 import { formatKstToday } from '@/utils/date';
+
+type Mission = Tables<'missions'>;
+
+const RefreshNotice = {
+  limit: '다른 미션은 하루에 한 번만 볼 수 있어요',
+  failed: '지금은 새 미션을 가져오지 못했어요',
+} as const;
 
 /** S3 홈 (DESIGN.md §5.2) */
 export function Home() {
   const theme = useTheme();
-  const { profile } = useSession();
-  const { data, error, reload } = useTodayMissions();
+  const { profile, refreshProfile } = useSession();
+  const { data, error, reload, refresh, refreshing } = useTodayMissions();
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // 인증을 마치고 돌아오면 진행 상태·연속 출석을 다시 읽는다 (첫 진입은 훅이 이미 불러온다)
+  const firstFocus = useRef(true);
+  useFocusEffect(
+    useCallback(() => {
+      if (firstFocus.current) {
+        firstFocus.current = false;
+        return;
+      }
+      reload();
+      refreshProfile();
+    }, [reload, refreshProfile]),
+  );
+
+  function open(mission: Mission, type: 'daily' | 'weekly') {
+    router.push({ pathname: '/mission/[id]', params: { id: mission.id, type } });
+  }
+
+  async function showOthers() {
+    setNotice(null);
+    const result = await refresh();
+    if (result !== 'ok') setNotice(RefreshNotice[result]);
+  }
+
+  const anyStarted = data ? data.daily.some((m) => data.progress[m.id]) : false;
 
   return (
     <Screen edges={['top']}>
@@ -54,14 +89,31 @@ export function Home() {
             </AppText>
           </View>
         ) : (
-          data.daily.map((m) => <MissionCard key={m.id} mission={m} />)
+          data.daily.map((m) => (
+            <MissionCard key={m.id} mission={m} status={data.progress[m.id]?.status} onPress={() => open(m, 'daily')} />
+          ))
         )}
       </View>
 
       {data?.weekly && (
         <View style={styles.section}>
           <AppText variant="titleMd">이번 주 미션</AppText>
-          <MissionCard mission={data.weekly} />
+          <MissionCard
+            mission={data.weekly}
+            status={data.progress[data.weekly.id]?.status}
+            onPress={() => data.weekly && open(data.weekly, 'weekly')}
+          />
+        </View>
+      )}
+
+      {data && !anyStarted && (
+        <View style={styles.others}>
+          <Button label="다른 미션 보기" variant="ghost" onPress={showOthers} loading={refreshing} />
+          {notice && (
+            <AppText variant="caption" color="steel" style={styles.center}>
+              {notice}
+            </AppText>
+          )}
         </View>
       )}
     </Screen>
@@ -95,5 +147,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.sm,
     paddingVertical: Spacing.xxl,
+  },
+  others: {
+    marginTop: Spacing.md,
+    gap: Spacing.xxs,
+  },
+  center: {
+    textAlign: 'center',
   },
 });
