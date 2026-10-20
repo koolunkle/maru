@@ -243,8 +243,8 @@ flowchart LR
 
 ### F8. 미션·보상 개인화
 
-- 실행 조건: 미션 결과(`completed`/`expired`) 3건 누적 시 또는 주 1회.
-- 규칙(필수): 연속 2회 `expired` → 난이도 −1, 연속 3회 `completed` → +1. 범위 1~5.
+- 실행 조건: 미션 결과(`completed`/`expired`)가 확정될 때마다 DB 트리거(`adjust_difficulty`)가 판단한다.
+- 규칙(필수): 연속 2회 `expired` → 난이도 −1, 연속 3회 `completed` → +1. 범위 1~5. 연속 횟수는 마지막 조정(`difficulty_changed_at`) 이후 결과만 센다.
 - AI(선택, P2): 기록을 요약해 `preferences`(선호 카테고리 최대 3, 선호 시간대 morning/afternoon/evening) 갱신.
 - 보상 개인화: 미획득 가구 중 가장 많이 완료한 카테고리와 연결된 가구를 다음 보상 후보로 표시.
 
@@ -254,10 +254,10 @@ flowchart LR
 
 | 테이블 | 컬럼 |
 | --- | --- |
-| `profiles` | id(=auth.uid), nickname, categories enum[], district, daily_minutes, difficulty, preferences, streak, last_attended, rest_used_week, onboarded_at |
+| `profiles` | id(=auth.uid), nickname, categories enum[], district, daily_minutes, difficulty, difficulty_changed_at, preferences, streak, last_attended, rest_used_week, onboarded_at |
 | `missions` | id, source(`seed`/`ai`/`event`), seed_no, official_title, official_level, title, category, difficulty, minutes, verify_hint, reason, event_id, created_for(ai 미션 대상자) |
 | `daily_recommendations` | (user_id, rec_date) PK, daily_mission_ids, weekly_mission_id, refresh_count(0~1) |
-| `user_missions` | id, user_id, mission_id, type(`daily`/`weekly`), status(`in_progress`/`judging`/`completed`/`expired`), due_at, started_at, completed_at |
+| `user_missions` | id, user_id, mission_id, type(`daily`/`weekly`), status(`in_progress`/`judging`/`completed`/`expired`), due_at, started_at, completed_at, resolved_at(결과 확정 시각) |
 | `verifications` | id, user_mission_id, user_id, photo_path, text, ai_result(`pass`/`retry`/`privacy`), ai_message, is_public |
 | `mission_participants` | (mission_id, user_id) PK |
 | `comments` | id, verification_id, user_id, body, status, publish_at |
@@ -290,7 +290,6 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 | `recommend-missions` | user_id | 미션 4개 | F2 |
 | `verify-mission` | user_mission_id, photo_path, text | ai_result, message | F4 |
 | `moderate-comment` | comment_id | status | 댓글 insert 직후 |
-| `personalize` | user_id | difficulty, preferences | F8 |
 | `sync-events` | — | upsert 건수 | pg_cron 매일 05:00 KST |
 
 ---
