@@ -196,6 +196,34 @@ components:
     border: "1.5px dashed {colors.hairline-strong}"
     rounded: "{rounded.md}"
     size: 64px
+  growth-card:
+    backgroundColor: "{colors.surface}"
+    border: "1px solid {colors.hairline}"
+    rounded: "{rounded.lg}"
+    padding: 16px
+    iconSize: 48px
+    iconColor: "{colors.success}"
+    meterHeight: 6px
+    meterColor: "{colors.success}"
+  relay-item:
+    backgroundColor: "{colors.surface-sunken}"
+    textColor: "{colors.ink}"
+    typography: "{typography.body-sm}"
+    rounded: "{rounded.md}"
+    padding: 12px
+  letter-card:
+    backgroundColor: "{colors.surface}"
+    border: "1px solid {colors.hairline}"
+    rounded: "{rounded.lg}"
+    padding: 20px
+  list-row:
+    height: 56px
+    borderBottom: "1px solid {colors.hairline}"
+  bottom-sheet:
+    backgroundColor: "{colors.surface}"
+    rounded: "{rounded.xl} {rounded.xl} 0 0"
+    padding: 24px
+    scrim: "rgba(0,0,0,0.3)"
 ---
 
 # DESIGN — 맞춤형 서울챌린지
@@ -320,7 +348,7 @@ components:
 | 카드 간격 | 12px |
 | 섹션 간격 | 32px |
 | 하단 고정 버튼 | 좌우 20px, 하단 16px + safe area, 위 경계 elevation 1 |
-| 탭 바 | 64px + safe area. 아이콘 24px + `label` |
+| 탭 바 | 64px + safe area. 아이콘 24px + `label`. 탭 5개와 Feather 아이콘: 홈 `sun`, 피드 `message-circle`, 기록 `calendar`, 내 방 `home`, 휴게소 `coffee` |
 | 아이콘 | `@expo/vector-icons`의 Feather, 기본 24px, 선 굵기 기본값 |
 
 ### 5.2 화면별 구조 (위 → 아래)
@@ -333,9 +361,24 @@ components:
 | S4 미션 상세 | 상단 틴트 영역(카테고리 `tint`, 높이 160px, 미션명 `title-lg`, 라벨 줄) → 인증 힌트 `card-base` → 추천 이유 `ai-card` → 같이 할래요 행(인원 `body-sm` + `button-secondary` 작은 높이 40px) / 하단 고정: "시작하기" 또는 "인증하기" |
 | S5 인증 | 사진 영역 1:1, `rounded.lg`, 비어 있으면 `surface-sunken` + `camera` 아이콘 + "사진 추가" → 16px → `text-input` 소감(3줄, 우하단 "0/100" `caption`) → 공개 토글 행 / 하단 고정: "제출하기". 판정 중: 전체 오버레이 대신 버튼을 로딩 상태로. 결과: `ai-card`에 결과 문구 + 보상 시 `reward-badge` |
 | S6 피드 | 게시물 `card-base`: 닉네임 `label` + 시각 `caption` → 사진 1:1 → 소감 `body-md` → 빠른 반응 칩 3개 → 댓글 목록(`body-sm`, 들여쓰기 없음) → 댓글 입력 1줄 |
-| S7 기록 | 이번 주 달성률 `display` 숫자 + 막대(높이 8px, `primary`, 배경 `surface-sunken`) → 32px → 월간 캘린더(7열, 출석일 원 28px `accent-soft` 채움 + 숫자 `accent-ink`) → 32px → 주간 피드백 `ai-card` |
+| S7 기록 | 이번 주 달성률 `display` 숫자 + 막대(높이 8px, `primary`, 배경 `surface-sunken`) → 32px → 월간 캘린더(7열, 출석일 원 28px `accent-soft` 채움 + 숫자 `accent-ink`) → 32px → 이번 주 편지(F13, 아래 통합 예정 표) |
 | S8 내 방 | 방 영역(5.4) → 16px → "가진 가구" `title-md` → 가구 그리드 4열(칸 72px, `card-base`, 가구 아이콘 32px + 이름 `caption`) |
-| S9 설정 | 목록 행 높이 56px, 구분선 `hairline`. 마지막 그룹 "도움받을 수 있는 곳": 외로움안녕120(`phone` 아이콘), 서울마음편의점 |
+| S9 설정 | `list-row` 목록. 닉네임 → 관심 카테고리 → 생활권 → 하루 가능 시간(오른쪽 `chevron-right`) → 하단 출처 `caption`. 도움 안내는 S10으로 옮긴다 |
+
+통합 예정 화면·요소 (PRD F10~F16)
+
+| 화면·위치 | 구조 |
+| --- | --- |
+| S3 성장 화분 (F11) | 연속 출석 줄 → 12px → `growth-card`: 왼쪽 단계 아이콘 48px, 오른쪽 문구 `title-md` → 8px → 진행 막대(높이 6px, `success`, 배경 `surface-sunken`) → 4px → 단계 이름 4개 `caption`(현재 단계만 `success` SemiBold). 그 아래 32px 뒤 "오늘의 미션" |
+| S3 타임캡슐 도착 (F16) | 미션 목록 위 `card-base` 한 장: `mail` 아이콘 20px `accent` + 문구 `body-md` + `chevron-right` |
+| S3 마음 우체통 (F14) | `bottom-sheet`: 상단 `email-open-outline`(MCI) 32px `accent` → 12px → 제목 `title-md` → 12px → 본문 `relay-item` → 8px → 미션 제목 `caption` `steel` → 24px → `button-secondary` "닫기" |
+| S4 먼저 해낸 사람의 한 줄 (F10) | 같이 할래요 행 아래 32px → 제목 `title-md` → 8px → `relay-item` 최대 3개(간격 8px, 따옴표·닉네임 없음). 없으면 `caption` `steel` 한 줄 |
+| S5 다음 사람에게 한 줄 (F10) | 판정 결과 `ai-card` 아래 24px → 제목 `title-md` → 8px → `text-input` 1줄(우하단 "0/60") → 하단 고정 버튼이 "남기기"로 바뀌고 그 위에 `button-ghost` "건너뛰기". 남긴 뒤 `comment-pending` 형태로 "약 {N}시간 뒤 다음 사람에게 보여요" |
+| S7 이번 주 편지 (F13) | 달성률 막대 아래 32px → `letter-card`: "이번 주 편지" `label` `steel`(AI면 `ai-card` 형태와 "AI" 라벨) → 8px → 첫 문장 `body-md` 2줄 말줄임 → 12px → `button-ghost` "읽어 보기" |
+| S7 오늘 한 줄 (F15) | 캘린더 아래 32px → "오늘 한 줄" `title-md` → 8px → 기분 칩 3개(`chip-category` 모양, 아이콘 + 이름) → 8px → `text-input` 1줄. 하단 `button-ghost` "타임캡슐" → S12 |
+| S10 마음 휴게소 (F12) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 칩 3개(25·50·80%) |
+| S11 주간 편지 (F13) | `BackHeader` "이번 주 편지" → 날짜 범위 `caption` → 12px → 본문(`ai-card` 또는 `letter-card`, `body-md`, 문단 간격 12px) → 32px → "지난 편지" `title-md` → `list-row`(주 범위 + 첫 문장 1줄) |
+| S12 타임캡슐 (F16) | `BackHeader` "타임캡슐" → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
 
 ### 5.3 컴포넌트 구조
 
@@ -348,6 +391,9 @@ components:
 | `comment-pending` | `clock` 아이콘 14px + "약 {N}시간 뒤 공개돼요" |
 | 판정 `retry` | `ai-card` 동일 형태, 아이콘 `rotate-ccw` `slate`. 빨간색 없음 |
 | 판정 `pass` | `check-circle` 32px `success` + 응원 문구 |
+| `growth-card` 단계 아이콘 (F11) | MaterialCommunityIcons 48px `success`. 0개 `pot-outline`(`muted`) → 1개 `sprout-outline` → 2개 `sprout` → 3개 `flower-tulip`(`accent`). 가구와 같은 아이콘 세트를 쓰되 내 방 슬롯에는 놓지 않는다 |
+| 기분 칩 (F15) | Feather 18px + 이름: 가벼움 `sun`, 보통 `cloud`, 무거움 `cloud-rain`. 선택 시 `chip-category-selected`. 표정 아이콘·이모지는 쓰지 않는다 |
+| `relay-item` | 본문만 `body-sm`. 작성자·시각을 표시하지 않는다 |
 
 ### 5.4 내 방
 
@@ -391,6 +437,9 @@ components:
 | 인증 통과 | 아이콘 등장 | `check-circle` scale 0.6 → 1, spring(damping 15, stiffness 200) |
 | 보상 획득 | 뱃지 등장 | opacity 0 → 1, translateY 8px → 0, 200ms ease-out, 통과 아이콘 후 150ms 지연 |
 | 가구 배치 | 아이콘 등장 | scale 0.8 → 1, spring(damping 12) |
+| 성장 화분 단계 상승 (F11) | 아이콘 교체 | 이전 아이콘 opacity 1 → 0(120ms) 후 새 아이콘 scale 0.6 → 1, spring(damping 12, stiffness 180). 진행 막대 너비 250ms ease-out. 홈 진입 시 한 번만 |
+| 마음 우체통 (F14) | 바텀 시트 | 위 '바텀 시트 열림'과 같다 |
+| 릴레이 남기기 완료 (F10) | 문구 교체 | 입력 영역 opacity 1 → 0, 대기 문구 opacity 0 → 1, 각 150ms |
 | 햅틱 (네이티브만) | 인증 통과, 보상 획득 | `expo-haptics` `notificationAsync(Success)` |
 | 동작 줄이기 설정 | 대체 | `AccessibilityInfo.isReduceMotionEnabled()` 참이면 모든 모션을 opacity 150ms로 대체 |
 
@@ -401,7 +450,8 @@ components:
 | 출처 | 가져온 특성 | 가져오지 않은 특성 |
 | --- | --- | --- |
 | Notion ([awesome-design-md](https://github.com/VoltAgent/awesome-design-md) DESIGN.md) | 웜 뉴트럴 배경, 파스텔 틴트 카드, 헤어라인 우선, 사각 버튼(pill 미사용), frontmatter 토큰 구조 | 네이비 히어로 밴드, 보라 primary, 장식 일러스트 |
-| 싸이월드 미니홈피 | '방 꾸미기'로 보상을 모으는 구조, 고정 슬롯 배치 | 픽셀 아트, 배경음악, 일촌·방명록 |
+| 싸이월드 미니홈피 | '방 꾸미기'로 보상을 모으는 구조, 고정 슬롯 배치 | 픽셀 아트, 자동 재생 배경음악, 일촌·방명록 |
+| 동료 프로토타입 ([sesac-hackathon-seoul-challenge](https://github.com/lilill16171df/sesac-hackathon-seoul-challenge)) | 응원 릴레이·성장 화분·마음 휴게소·주간 편지·우체통·한 줄 기록·타임캡슐의 경험 구성, 사용자가 켜는 빗소리 | 세이지 그린 팔레트, 이모지 아이콘, 포인트 구매, 화면 가운데 팝업 |
 | Pretendard | 한글·영문 균형, 웹·앱 공통 서체 | — |
 
 ## 8. 금지사항
@@ -420,3 +470,5 @@ components:
 | 화면당 주요 버튼 2개 이상 | 하나의 행동만 강조 |
 | 6절에 없는 애니메이션(바운스, 파티클, 컨페티) | 차분함 유지 |
 | 순백 #ffffff 화면 배경, 순흑 #000000 텍스트 | `canvas`, `ink` 사용 |
+| 소리 자동 재생, 앱 시작 시 소리 | 사용자가 휴게소에서 켤 때만 재생(F12) |
+| 화면 가운데 모달 팝업 | 확인·안내는 화면 안 문구 또는 `bottom-sheet`. 웹에서 `Alert.alert`는 표시되지 않는다 |
