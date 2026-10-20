@@ -13,6 +13,9 @@ const Models = {
   anthropic: { main: 'claude-sonnet-5-5', light: 'claude-haiku-5-5' },
 } as const;
 
+/** Gemini 기본 추론 수준은 응답이 길어져 시간 초과가 잦다. 짧은 판단 작업이라 낮게 둔다. */
+const GeminiThinking = { main: 'low', light: 'minimal' } as const;
+
 const geminiKey = Deno.env.get('GEMINI_API_KEY')?.trim();
 const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')?.trim();
 const anthropicWorkspace = Deno.env.get('ANTHROPIC_WORKSPACE_ID')?.trim();
@@ -57,22 +60,72 @@ function withTimeout<T>(promise: Promise<T>, ms: number) {
   ]);
 }
 
+/** main 모델이 이 시간 안에 답하지 않으면 경량 모델을 함께 호출해 먼저 온 결과를 쓴다 (혼잡 시 main이 응답 없이 멈춘다) */
+const GeminiHedgeMs = 6_000;
+
 async function viaGemini<S extends z.ZodType>(req: Request<S>): Promise<unknown> {
+  if (req.tier === 'light') return geminiOnce(req, Models.gemini.light, GeminiThinking.light, req.timeoutMs);
+  const startedAt = Date.now();
+  let done = false;
+  const primary = geminiOnce(req, Models.gemini.main, GeminiThinking.main, req.timeoutMs);
+  const hedge = new Promise<unknown>((resolve, reject) => {
+    let launched = false;
+    const launch = () => {
+      if (launched) return;
+      launched = true;
+      if (done) return reject(new Error('primary answered'));
+      const left = req.timeoutMs - (Date.now() - startedAt);
+      geminiOnce(req, Models.gemini.light, GeminiThinking.light, left).then(resolve, reject);
+    };
+    const timer = setTimeout(launch, GeminiHedgeMs);
+    // main이 빨리 실패하면 기다리지 않고 바로 경량 모델로
+    primary.then(
+      () => {
+        clearTimeout(timer);
+        launched = true;
+        reject(new Error('primary answered'));
+      },
+      () => {
+        clearTimeout(timer);
+        launch();
+      },
+    );
+  });
+  try {
+    return await Promise.any([primary, hedge]);
+  } catch (e) {
+    throw e instanceof AggregateError ? e.errors[0] : e;
+  } finally {
+    done = true;
+  }
+}
+
+async function geminiOnce<S extends z.ZodType>(
+  req: Request<S>,
+  model: string,
+  thinking: 'low' | 'minimal',
+  timeoutMs: number,
+): Promise<unknown> {
   if (!gemini) throw new Error('GEMINI_API_KEY is not set');
   const { $schema: _, ...schema } = z.toJSONSchema(req.schema) as Record<string, unknown>;
   const interaction = await withTimeout(
     gemini.interactions.create({
-      model: Models.gemini[req.tier],
+      model,
       system_instruction: req.system,
       input: [
         { type: 'text', text: req.text },
         ...(req.image ? [{ type: 'image' as const, data: req.image, mime_type: 'image/jpeg' }] : []),
       ],
       response_format: { type: 'text', mime_type: 'application/json', schema },
+      generation_config: { thinking_level: thinking },
       // 요청·응답을 Google 쪽에 보관하지 않는다
       store: false,
+    }, {
+      // SDK 기본값은 429·5xx를 지수 백오프로 재시도해 시간 제한 안에 원인이 드러나지 않는다
+      timeout_ms: timeoutMs,
+      retries: { strategy: 'none' },
     }),
-    req.timeoutMs,
+    timeoutMs,
   );
   return JSON.parse(interaction.output_text ?? '');
 }
