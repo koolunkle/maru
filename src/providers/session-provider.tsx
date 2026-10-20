@@ -29,6 +29,13 @@ async function fetchProfile(userId: string) {
   return data;
 }
 
+/** 인증 서버 기준으로 현재 토큰의 사용자가 없는지 (네트워크 오류는 '있음'으로 본다) */
+async function isAccountGone() {
+  const { data, error } = await supabase.auth.getUser();
+  if (error) return typeof error.status === 'number' && error.status >= 400 && error.status < 500;
+  return !data.user;
+}
+
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [isReady, setIsReady] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
@@ -38,7 +45,20 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     let active = true;
 
     async function apply(next: Session | null) {
-      const nextProfile = next ? await fetchProfile(next.user.id).catch(() => null) : null;
+      let nextProfile: Profile | null = null;
+      if (next) {
+        let lookupFailed = false;
+        nextProfile = await fetchProfile(next.user.id).catch(() => {
+          lookupFailed = true;
+          return null;
+        });
+        // 저장된 세션의 계정이 삭제된 경우: 프로필이 없고 인증 서버도 사용자를 모른다.
+        // 남은 토큰으로는 아무것도 저장할 수 없으므로 로컬 세션을 지우고 시작 화면으로 보낸다.
+        if (!lookupFailed && !nextProfile && (await isAccountGone())) {
+          await supabase.auth.signOut({ scope: 'local' }); // SIGNED_OUT 이벤트가 apply(null)을 다시 호출한다
+          return;
+        }
+      }
       if (!active) return;
       setSession(next);
       setProfile(nextProfile);
