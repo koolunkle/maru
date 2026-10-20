@@ -279,6 +279,7 @@ export type Database = {
           created_at: string
           daily_minutes: number | null
           difficulty: number
+          difficulty_changed_at: string | null
           district: string | null
           id: string
           last_attended: string | null
@@ -293,6 +294,7 @@ export type Database = {
           created_at?: string
           daily_minutes?: number | null
           difficulty?: number
+          difficulty_changed_at?: string | null
           district?: string | null
           id: string
           last_attended?: string | null
@@ -307,6 +309,7 @@ export type Database = {
           created_at?: string
           daily_minutes?: number | null
           difficulty?: number
+          difficulty_changed_at?: string | null
           district?: string | null
           id?: string
           last_attended?: string | null
@@ -396,6 +399,7 @@ export type Database = {
           due_at: string
           id: string
           mission_id: string
+          resolved_at: string | null
           started_at: string
           status: Database["public"]["Enums"]["user_mission_status"]
           type: Database["public"]["Enums"]["mission_type"]
@@ -406,6 +410,7 @@ export type Database = {
           due_at: string
           id?: string
           mission_id: string
+          resolved_at?: string | null
           started_at?: string
           status?: Database["public"]["Enums"]["user_mission_status"]
           type: Database["public"]["Enums"]["mission_type"]
@@ -416,6 +421,7 @@ export type Database = {
           due_at?: string
           id?: string
           mission_id?: string
+          resolved_at?: string | null
           started_at?: string
           status?: Database["public"]["Enums"]["user_mission_status"]
           type?: Database["public"]["Enums"]["mission_type"]
