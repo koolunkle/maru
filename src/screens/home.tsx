@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
+import { GrowthCard } from '@/components/growth-card';
 import { MissionCard } from '@/components/mission-card';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
@@ -53,6 +54,12 @@ export function Home() {
   }
 
   const anyStarted = data ? data.daily.some((m) => data.progress[m.id]) : false;
+  const completedDailyCount = data
+    ? Math.min(
+        Object.values(data.progress).filter((mission) => mission.type === 'daily' && mission.status === 'completed').length,
+        3,
+      )
+    : 0;
 
   return (
     <Screen edges={['top']}>
@@ -73,6 +80,12 @@ export function Home() {
           {profile?.streak ?? 0}일째
         </AppText>
       </View>
+
+      {data && (
+        <View style={styles.growth}>
+          <GrowthCard completedCount={completedDailyCount} />
+        </View>
+      )}
 
       <View style={styles.section}>
         <AppText variant="titleMd">오늘의 미션</AppText>
@@ -138,6 +151,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
+  },
+  growth: {
+    marginTop: Spacing.sm,
   },
   section: {
     marginTop: Spacing.xxl,

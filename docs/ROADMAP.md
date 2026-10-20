@@ -26,7 +26,7 @@
 | T1 | 릴레이 테이블·공개 cron·RPC | F10 | DB | — | 0.5일 | `feat/t1-relay-db` | | 대기 |
 | T2 | `moderate-comment`에 relay_id 처리 추가 | F10 | 함수 | T1 | 0.5일 | `feat/t2-relay-moderation` | | 대기 |
 | T3 | S4 릴레이 표시, S5 한 줄 남기기 | F10 | 앱 | T1, T2 | 1일 | `feat/t3-relay-ui` | | 대기 |
-| T4 | 성장 화분 | F11 | 앱 | — | 0.5일 | `feat/t4-growth-plant` | | 대기 |
+| T4 | 성장 화분 | F11 | 앱 | — | 0.5일 | `feat/t4-growth-plant` | Codex | 진행 |
 | T5 | 휴게소 탭, 설정 도움 안내 이동 | F12 | 앱 | — | 0.5일 | `feat/t5-rest-tab` | | 대기 |
 | T6 | 빗소리 배경음 | F12 | 앱 | T5, 음원 확보 | 0.5일 | `feat/t6-rain-sound` | | 대기 |
 | T7 | 주간 편지 테이블·`write-weekly-letter` | F13 | DB·함수 | — | 1일 | `feat/t7-weekly-letter-api` | | 대기 |
