@@ -3,17 +3,13 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
-import { Chip } from '@/components/chip';
+import { CategoryPicker, DistrictPicker, MinutePicker, type Category } from '@/components/profile-fields';
 import { Screen } from '@/components/screen';
-import { Categories, DailyMinuteOptions, Districts, MaxCategories } from '@/constants/domain';
+import { MaxCategories } from '@/constants/domain';
 import { Spacing } from '@/constants/theme';
 import { useSession } from '@/providers/session-provider';
-import type { Enums } from '@/types/database';
 
-import { MinuteOption } from './minute-option';
 import { ProgressBar } from './progress-bar';
-
-type Category = Enums<'mission_category'>;
 
 const Steps = [
   { question: '요즘 해보고 싶은 건 뭐예요?', hint: `최대 ${MaxCategories}개까지 골라요` },
@@ -33,10 +29,6 @@ export function Onboarding() {
 
   const canNext = [categories.length > 0, district !== null, minutes !== null][step];
   const isLast = step === Steps.length - 1;
-
-  function toggleCategory(id: Category) {
-    setCategories((prev) => (prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]));
-  }
 
   async function next() {
     if (!isLast) {
@@ -81,50 +73,9 @@ export function Onboarding() {
         </AppText>
       </View>
 
-      {step === 0 && (
-        <View style={styles.wrap}>
-          {Categories.map((c) => {
-            const selected = categories.includes(c.id);
-            return (
-              <Chip
-                key={c.id}
-                label={c.label}
-                selected={selected}
-                disabled={!selected && categories.length >= MaxCategories}
-                onPress={() => toggleCategory(c.id)}
-              />
-            );
-          })}
-        </View>
-      )}
-
-      {step === 1 && (
-        <View style={styles.grid}>
-          {Districts.map((d) => (
-            <Chip
-              key={d}
-              label={d}
-              selected={district === d}
-              onPress={() => setDistrict(d)}
-              style={styles.gridItem}
-            />
-          ))}
-        </View>
-      )}
-
-      {step === 2 && (
-        <View style={styles.list}>
-          {DailyMinuteOptions.map((o) => (
-            <MinuteOption
-              key={o.value}
-              label={o.label}
-              description={o.description}
-              selected={minutes === o.value}
-              onPress={() => setMinutes(o.value)}
-            />
-          ))}
-        </View>
-      )}
+      {step === 0 && <CategoryPicker value={categories} onChange={setCategories} />}
+      {step === 1 && <DistrictPicker value={district} onChange={setDistrict} />}
+      {step === 2 && <MinutePicker value={minutes} onChange={setMinutes} />}
     </Screen>
   );
 }
@@ -134,22 +85,6 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
     marginTop: Spacing.xl,
     marginBottom: Spacing.xl,
-  },
-  wrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.xs,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-  },
-  gridItem: {
-    width: '48.5%',
-  },
-  list: {
-    gap: Spacing.sm,
   },
   footer: {
     gap: Spacing.xs,

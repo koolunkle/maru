@@ -44,7 +44,7 @@ Docs: https://docs.expo.dev/eas/index.md
 
 - 기능·문구 명세: `PRD.md`, 시각 명세·토큰: `DESIGN.md` — 구현은 이 두 문서를 단일 출처로 따른다. 토큰은 `src/constants/theme.ts`에 DESIGN.md와 같은 값으로 둔다.
 - 언어: TypeScript (strict). 앱 코드는 `src/`, 라우트는 `src/app/`, 화면 본문은 `src/screens/`.
-- SDK 58 import 경로: `Stack` ← `expo-router/stack`, `Tabs` ← `expo-router/js-tabs`, `Link`·`Redirect` ← `expo-router/link`.
+- SDK 58 import 경로: `Stack` ← `expo-router/stack`, `Tabs` ← `expo-router/js-tabs`, `Link` ← `expo-router/link`, `Redirect` ← `expo-router`.
 - 백엔드: Supabase 프로젝트 `jpipzrmspryzvjykxefm`. 스키마는 `supabase/migrations/`, 시드는 `npm run seed:build`로 `data/seoul-challenge-2026-2.json` → `supabase/seed.sql` 생성.
 - DB 타입: `src/types/database.ts` (생성 파일, 직접 수정 금지). 스키마 변경 후 재생성.
 - 환경 변수: `.env.example`을 `.env.local`로 복사해 publishable 키를 넣는다. service_role/secret 키는 앱에 넣지 않는다.

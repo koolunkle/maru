@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import { router } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { Linking, StyleSheet, View } from 'react-native';
 
@@ -15,10 +16,12 @@ type RowProps = {
   label: string;
   value?: string;
   icon?: ComponentProps<typeof Feather>['name'];
+  /** 앱 안 화면으로 이동하는 행이면 오른쪽에 chevron 표시 */
+  chevron?: boolean;
   onPress?: () => void;
 };
 
-function Row({ label, value, icon, onPress }: RowProps) {
+function Row({ label, value, icon, chevron, onPress }: RowProps) {
   const theme = useTheme();
   return (
     <PressableScale
@@ -33,6 +36,7 @@ function Row({ label, value, icon, onPress }: RowProps) {
           {value}
         </AppText>
       )}
+      {chevron && <Feather name="chevron-right" size={20} color={theme.steel} />}
     </PressableScale>
   );
 }
@@ -48,9 +52,19 @@ export function Settings() {
 
       <View style={styles.group}>
         <Row label="닉네임" value={profile?.nickname} />
-        <Row label="관심 카테고리" value={profile?.categories.map((c) => CategoryLabel[c]).join(', ')} />
-        <Row label="생활권" value={profile?.district ?? undefined} />
-        <Row label="하루 가능 시간" value={minutes} />
+        <Row
+          label="관심 카테고리"
+          value={profile?.categories.map((c) => CategoryLabel[c]).join(', ')}
+          chevron
+          onPress={() => router.push('/settings/categories')}
+        />
+        <Row
+          label="생활권"
+          value={profile?.district ?? undefined}
+          chevron
+          onPress={() => router.push('/settings/district')}
+        />
+        <Row label="하루 가능 시간" value={minutes} chevron onPress={() => router.push('/settings/minutes')} />
       </View>
 
       <AppText variant="label" color="steel" style={styles.groupTitle}>
