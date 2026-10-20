@@ -1,12 +1,21 @@
 # 맞춤형 서울챌린지
 
-미션을 할수록 AI가 다음 미션과 보상을 맞춰 주는, 외로운 청년을 위한 초소형 일상 챌린지. 명세는 [PRD.md](./PRD.md), 디자인은 [DESIGN.md](./DESIGN.md).
+미션을 할수록 AI가 다음 미션과 보상을 맞춰 주는, 외로운 청년을 위한 초소형 일상 챌린지.
+
+지금은 10/20 제출본에 동료 프로토타입의 기능을 합치는 통합 단계다(10/23~11/8).
+
+| 문서 | 내용 |
+| --- | --- |
+| [PRD.md](./PRD.md) | 기능·데이터·문구 명세 |
+| [DESIGN.md](./DESIGN.md) | 디자인 토큰과 화면 구조 |
+| [docs/ROADMAP.md](./docs/ROADMAP.md) | 통합 작업 목록과 담당 |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | 권한 요청, 실행, 브랜치·커밋·PR, DB 변경 방법 |
 
 ## 실행
 
 ```bash
 npm install
-cp .env.example .env.local   # EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY 입력
+cp .env.example .env.local   # publishable 키가 들어 있다
 npm run web                  # 웹
 npm start                    # Expo Go (폰)
 ```
