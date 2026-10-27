@@ -17,7 +17,7 @@
 
 | 대상 | 필요한 이유 | 요청 내용 |
 | --- | --- | --- |
-| GitHub `koolunkle/seoul-challenge` | 브랜치 push, PR | Collaborator 초대 (Write) |
+| GitHub `koolunkle/maru` | 브랜치 push, PR | Collaborator 초대 (Write) |
 | Supabase 프로젝트 `seoul-challenge` | 마이그레이션 적용, 함수 배포, 로그 확인 | 조직 멤버 초대 (Developer) |
 | Expo 프로젝트 `@koolunkle/seoul-challenge` | 미리보기 배포 | 프로젝트 멤버 추가 |
 
@@ -28,8 +28,8 @@ AI API 키(Gemini, Anthropic)는 Supabase 함수 환경 변수에만 있다. 개
 필요: Node.js 22, Git, (휴대폰 확인 시) Expo Go 앱.
 
 ```bash
-git clone https://github.com/koolunkle/seoul-challenge.git
-cd seoul-challenge
+git clone https://github.com/koolunkle/maru.git
+cd maru
 npm install
 cp .env.example .env.local
 npm run web        # 브라우저에서 확인

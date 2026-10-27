@@ -126,7 +126,7 @@ update public.app_config set value = '"retry_later"' where key = 'verify_fallbac
 
 | 항목 | 방법 | 필요한 작업 |
 | --- | --- | --- |
-| GitHub `koolunkle/seoul-challenge` Collaborator(Write) | GitHub 초대 | 모든 작업 |
+| GitHub `koolunkle/maru` Collaborator(Write) | GitHub 초대 | 모든 작업 |
 | Supabase 조직 멤버(Developer) | 대시보드 초대 | DB·함수 작업, 로그 확인 |
 | Expo 프로젝트 `@koolunkle/seoul-challenge` 멤버 | expo.dev 초대 | 미리보기 배포 |
 | Supabase DB 비밀번호 | 비밀번호 관리자 공유 또는 1회성 비밀 링크 | `supabase link`·`db push`를 할 사람만 |
