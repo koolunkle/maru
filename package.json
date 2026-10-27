@@ -46,6 +46,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
+    "test:mailbox": "node --experimental-test-module-mocks --test tests/mailbox.test.mjs",
     "seed:build": "python scripts/build-seed.py"
   },
   "private": true

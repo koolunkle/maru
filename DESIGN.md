@@ -371,7 +371,8 @@ components:
 | --- | --- |
 | S3 성장 화분 (F11) | 연속 출석 줄 → 12px → `growth-card`: 왼쪽 단계 아이콘 48px, 오른쪽 문구 `title-md` → 8px → 진행 막대(높이 6px, `success`, 배경 `surface-sunken`) → 4px → 단계 이름 4개 `caption`(현재 단계만 `success` SemiBold). 그 아래 32px 뒤 "오늘의 미션" |
 | S3 타임캡슐 도착 (F16) | 미션 목록 위 `card-base` 한 장: `mail` 아이콘 20px `accent` + 문구 `body-md` + `chevron-right` |
-| S3 마음 우체통 (F14) | `bottom-sheet`: 상단 `email-open-outline`(MCI) 32px `accent` → 12px → 제목 `title-md` → 12px → 본문 `relay-item` → 8px → 미션 제목 `caption` `steel` → 24px → `button-secondary` "닫기" |
+| S3 마음 우체통 카드 (F14) | 성장 화분 아래 12px → `card-base`: Feather `mail` 24px `accent` + "마음 우체통" `title-md` + "누군가에게 작은 응원을 보내볼까요?" `caption` `steel` + `chevron-right`. 카드 전체가 터치 영역. 미션·릴레이와 독립 |
+| S3 마음 우체통 작성 (F14) | `bottom-sheet`: Feather `mail` 32px `accent` → 12px → 제목 "누군가에게 한 줄 보내볼까요?" `title-md` → 안내 `body-sm` → `text-input` 여러 줄(0/60) → 로컬 보관 안내 `comment-pending` → `button-primary` "보내기" → `button-ghost` "닫기". 저장 후 `check-circle` 32px `success` + "한 줄을 이 기기에 보관했어요" + 본문 `relay-item` + 로컬 보관 안내 + `button-secondary` "닫기". 키보드 회피·스크롤·safe area 적용, 최대 폭 480px |
 | S4 먼저 해낸 사람의 한 줄 (F10) | 같이 할래요 행 아래 32px → 제목 `title-md` → 8px → `relay-item` 최대 3개(간격 8px, 따옴표·닉네임 없음). 없으면 `caption` `steel` 한 줄 |
 | S5 다음 사람에게 한 줄 (F10) | 판정 결과 `ai-card` 아래 24px → 제목 `title-md` → 8px → `text-input` 1줄(우하단 "0/60") → 하단 고정 버튼이 "남기기"로 바뀌고 그 위에 `button-ghost` "건너뛰기". 남긴 뒤 `comment-pending` 형태로 "약 {N}시간 뒤 다음 사람에게 보여요" |
 | S7 이번 주 편지 (F13) | 달성률 막대 아래 32px → `letter-card`: "이번 주 편지" `label` `steel`(AI면 `ai-card` 형태와 "AI" 라벨) → 8px → 첫 문장 `body-md` 2줄 말줄임 → 12px → `button-ghost` "읽어 보기" |

@@ -6,6 +6,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { GrowthCard } from '@/components/growth-card';
+import { MailboxCard } from '@/components/mailbox-card';
 import { MissionCard } from '@/components/mission-card';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
@@ -86,6 +87,8 @@ export function Home() {
           <GrowthCard completedCount={completedDailyCount} />
         </View>
       )}
+
+      {profile && <MailboxCard key={profile.id} userId={profile.id} />}
 
       <View style={styles.section}>
         <AppText variant="titleMd">오늘의 미션</AppText>
