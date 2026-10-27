@@ -8,6 +8,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Colors, MaxContentWidth } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { BackgroundAudioProvider } from '@/providers/background-audio';
 import { SessionProvider, useSession } from '@/providers/session-provider';
 
 SplashScreen.preventAutoHideAsync();
@@ -64,7 +65,9 @@ export default function RootLayout() {
       <View style={[styles.outer, { backgroundColor: colors.canvas }]}>
         <View style={styles.column}>
           <SessionProvider>
-            <RootStack />
+            <BackgroundAudioProvider>
+              <RootStack />
+            </BackgroundAudioProvider>
           </SessionProvider>
         </View>
       </View>

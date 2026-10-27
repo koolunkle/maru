@@ -74,7 +74,7 @@
 | F8 | 미션·보상 개인화 | P2 | 구현됨(규칙) | 규칙 기반 난이도 조정만(AI 요약 생략) |
 | F10 | 응원 릴레이 | P0 | 구현됨 | 완료 후 한 줄 남기기 + 미션 상세 표시 |
 | F11 | 성장 화분 | P0 | 구현됨 | 단계 아이콘 + 진행 막대(애니메이션 생략) |
-| F12 | 빗소리 배경음 | P0 | 통합 예정 | 빗소리 배경음은 P1 |
+| F12 | 배경음 | P0 | 통합 예정 | 배경음은 P1 |
 | F13 | 주간 편지·마음 리포트 | P1 | 후속 구현 중 | 기록 화면에서 실제 기분·한 줄·미션과 개인화 편지를 보여준다. |
 | F14 | 마음 우체통 | P2 | 구현됨 | 익명 사용자에게 한 줄 작성·보내기 |
 | F15 | 한 줄 기록·기분 | P2 | 기록 구현, 주간 리포트 후속 | 오늘 화면에서 기분 선택·한 줄 저장 |
@@ -91,7 +91,7 @@
 | 언어 | TypeScript (strict) | 앱, Edge Functions(Deno) 공통. DB 타입은 `supabase gen types`로 생성 |
 | 앱 | Expo (React Native) + Expo Router | 웹 export 주력 |
 | 사진 | expo-image-picker, expo-image-manipulator | 웹 동작 확인 필수 |
-| 소리 | expo-audio | F12 빗소리 배경음. 설치는 `npx expo install expo-audio` |
+| 소리 | expo-audio | F12 배경음. 설치는 `npx expo install expo-audio` |
 | Supabase 프로젝트 | `seoul-challenge` (ref `jpipzrmspryzvjykxefm`, 서울 리전 ap-northeast-2, Free) | |
 | 인증 | Supabase Auth 익명 로그인 | |
 | DB | Supabase Postgres + RLS | |
@@ -143,7 +143,7 @@ flowchart LR
 | S6 | 피드 | `/(tabs)/feed` | 공개 인증 목록(최신순, 20개 페이지), 공개된 댓글, 빠른 반응 | 댓글 작성 |
 | S7 | 기록 | `/(tabs)/record` | 이번 주 달성률, 월간 출석 캘린더, **이번 주 마음 리포트 보기(F13)** | 리포트 보기 → S11 |
 | S8 | 내 방 | `/(tabs)/room` | 방, 슬롯 6개, 보유 가구 목록 | 슬롯 탭 → 가구 선택 → 배치 |
-| S9 | 설정 | `/settings` | 닉네임, 카테고리·구·시간 재설정, 출처 표기, 빗소리 배경음 | 항목 → `/settings/[field]` |
+| S9 | 설정 | `/settings` | 닉네임, 카테고리·구·시간 재설정, 출처 표기,  배경음 | 항목 → `/settings/[field]` |
 | S10 | 설정으로 이관 |
 | S11 | 주간 마음 리포트 | `/letter/[week]` | 실제 기분·한 줄·미션과 편지, 마음이 무거운 경우 도움 안내 | — |
 | S12 | 타임캡슐 | `/capsule` | 보낸 캡슐 목록(열리는 날짜), 새 캡슐 작성 | 작성 → 저장 |
@@ -293,7 +293,7 @@ flowchart LR
 - 안내 항목(행 탭 시 동작)
 
 
-- 빗소리 배경음(P1): '빗소리 틀어 두기' 토글 + 볼륨 조절. 기본 꺼짐, 사용자가 켤 때만 재생, 반복 재생. 설정은 저장 `expo-audio` 사용. 음원은 출처·라이선스가 확인된 파일만 쓴다(§8.4).
+-  배경음(P1): 토글 + 볼륨 조절. 기본 꺼짐, 사용자가 켤 때만 재생, 반복 재생. 설정은 저장 `expo-audio` 사용. 음원은 출처·라이선스가 확인된 파일만 쓴다(§8.4).
 
 ### F13. 주간 편지 (한 줄 기록 + 미션)
 

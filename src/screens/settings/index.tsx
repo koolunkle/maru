@@ -1,7 +1,8 @@
 import { Feather } from '@expo/vector-icons';
+import { Slider } from '@expo/ui/community/slider';
 import { router } from 'expo-router';
 import type { ComponentProps } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, Switch, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { BackHeader } from '@/components/back-header';
@@ -11,6 +12,7 @@ import { CategoryLabel, DailyMinuteOptions } from '@/constants/domain';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/providers/session-provider';
+import { useBackgroundAudio } from '@/providers/background-audio';
 
 type RowProps = {
   label: string;
@@ -44,6 +46,8 @@ function Row({ label, value, icon, chevron, onPress }: RowProps) {
 /** S9 설정 (DESIGN.md §5.2) */
 export function Settings() {
   const { profile } = useSession();
+  const theme = useTheme();
+  const { playing, volume, toggle, setVolume } = useBackgroundAudio();
   const minutes = DailyMinuteOptions.find((o) => o.value === profile?.daily_minutes)?.label;
 
   return (
@@ -79,8 +83,30 @@ export function Settings() {
         />
       </View>
 
+      <AppText variant="label" color="steel" style={styles.groupTitle}>배경음</AppText>
+      <View style={[styles.row, { borderBottomColor: theme.hairline }]}>
+        <Feather name="cloud-rain" size={20} color={theme.ink} />
+        <AppText style={styles.rowLabel}>배경음 틀어 두기</AppText>
+        <Switch accessibilityLabel="배경음 틀어 두기" value={playing} onValueChange={toggle} />
+      </View>
+      {playing && (
+        <View style={styles.volumes}>
+          <Slider
+            style={styles.slider}
+            accessibilityLabel="배경음 볼륨"
+            minimumValue={0}
+            maximumValue={1}
+            step={0.01}
+            minimumTrackTintColor={theme.primary}
+            value={volume}
+            onValueChange={setVolume}
+          />
+          <AppText variant="bodySm" color="slate">{Math.round(volume * 100)}%</AppText>
+        </View>
+      )}
+
       <AppText variant="caption" color="steel" style={styles.credits}>
-        미션 출처: 365 서울챌린지(서울특별시), 서울 열린데이터광장{'\n'}글꼴: Pretendard (SIL Open Font License)
+        미션 출처: 365 서울챌린지(서울특별시), 서울 열린데이터광장{'\n'}글꼴: Pretendard (SIL Open Font License){'\n'}배경음: DesiFreeMusic, Pixabay Content License
       </AppText>
     </Screen>
   );
@@ -105,5 +131,14 @@ const styles = StyleSheet.create({
   },
   credits: {
     marginTop: Spacing.xxl,
+  },
+  volumes: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+    marginTop: Spacing.md,
+  },
+  slider: {
+    flex: 1,
   },
 });
