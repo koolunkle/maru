@@ -408,6 +408,54 @@ export type Database = {
           },
         ]
       }
+      relay_messages: {
+        Row: {
+          body: string
+          category: Database["public"]["Enums"]["mission_category"]
+          created_at: string
+          id: string
+          mission_id: string
+          publish_at: string
+          status: Database["public"]["Enums"]["comment_status"]
+          user_id: string
+        }
+        Insert: {
+          body: string
+          category?: Database["public"]["Enums"]["mission_category"]
+          created_at?: string
+          id?: string
+          mission_id: string
+          publish_at?: string
+          status?: Database["public"]["Enums"]["comment_status"]
+          user_id?: string
+        }
+        Update: {
+          body?: string
+          category?: Database["public"]["Enums"]["mission_category"]
+          created_at?: string
+          id?: string
+          mission_id?: string
+          publish_at?: string
+          status?: Database["public"]["Enums"]["comment_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "relay_messages_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "relay_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_furniture: {
         Row: {
           acquired_at: string
@@ -584,6 +632,12 @@ export type Database = {
         Args: { mission: string }
         Returns: {
           nickname: string
+        }[]
+      }
+      get_relay_messages: {
+        Args: { mission: string }
+        Returns: {
+          body: string
         }[]
       }
       publish_due_comments: { Args: never; Returns: number }

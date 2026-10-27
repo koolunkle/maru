@@ -1,15 +1,17 @@
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { AiCard } from '@/components/ai-card';
 import { AppText } from '@/components/app-text';
 import { BackHeader } from '@/components/back-header';
 import { Button } from '@/components/button';
+import { HelpCard } from '@/components/help-card';
 import { Screen } from '@/components/screen';
 import { CategoryLabel } from '@/constants/domain';
 import { CategoryTint, Radius, Spacing } from '@/constants/theme';
 import { useIsDark, useTheme } from '@/hooks/use-theme';
+import { Functions } from '@/lib/functions';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
@@ -26,10 +28,12 @@ type Detail = {
   joined: boolean;
   participants: number;
   nicknames: string[];
+  relays: string[] | null;
+  ownRelay: Pick<Tables<'relay_messages'>, 'id' | 'status'> | null;
 };
 
 async function fetchDetail(missionId: string, userId: string): Promise<Detail> {
-  const [mission, mine, joined, counts, recent] = await Promise.all([
+  const [mission, mine, joined, counts, recent, relays, ownRelay] = await Promise.all([
     supabase.from('missions').select('*').eq('id', missionId).single(),
     supabase
       .from('user_missions')
@@ -40,9 +44,21 @@ async function fetchDetail(missionId: string, userId: string): Promise<Detail> {
       .order('started_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
-    supabase.from('mission_participants').select('mission_id').eq('mission_id', missionId).eq('user_id', userId).maybeSingle(),
+    supabase
+      .from('mission_participants')
+      .select('mission_id')
+      .eq('mission_id', missionId)
+      .eq('user_id', userId)
+      .maybeSingle(),
     supabase.rpc('get_participant_counts', { mission_ids: [missionId] }),
     supabase.rpc('get_participant_nicknames', { mission: missionId }),
+    supabase.rpc('get_relay_messages', { mission: missionId }),
+    supabase
+      .from('relay_messages')
+      .select('id, status')
+      .eq('mission_id', missionId)
+      .eq('user_id', userId)
+      .maybeSingle(),
   ]);
   if (mission.error) throw mission.error;
   return {
@@ -51,6 +67,8 @@ async function fetchDetail(missionId: string, userId: string): Promise<Detail> {
     joined: Boolean(joined.data),
     participants: counts.data?.[0]?.count ?? 0,
     nicknames: (recent.data ?? []).map((r) => r.nickname),
+    relays: relays.error ? null : (relays.data ?? []).map((r) => r.body),
+    ownRelay: ownRelay.data,
   };
 }
 
@@ -64,6 +82,9 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [relayNotice, setRelayNotice] = useState<string | null>(null);
+  const [relayCrisis, setRelayCrisis] = useState(false);
+  const retryingRelay = useRef(false);
 
   const load = useCallback(() => {
     let active = true;
@@ -116,12 +137,40 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
     if (!error) load();
   }
 
+  async function retryRelay() {
+    if (!detail?.ownRelay || busy || retryingRelay.current) return;
+    retryingRelay.current = true;
+    setBusy(true);
+    setRelayNotice(null);
+    try {
+      const result = await Functions.moderateRelay(detail.ownRelay.id);
+      setDetail({ ...detail, ownRelay: { ...detail.ownRelay, status: result.status } });
+      setRelayCrisis(result.status === 'crisis');
+      setRelayNotice(
+        result.status === 'pending'
+          ? '아직 검수를 기다리고 있어요.'
+          : result.status === 'rejected' || result.status === 'crisis'
+            ? '이 한 줄은 공개되지 않았어요.'
+            : '한 줄이 검수를 마쳤어요.',
+      );
+    } catch {
+      setRelayNotice('검수를 요청하지 못했어요. 다시 눌러 볼까요?');
+    } finally {
+      retryingRelay.current = false;
+      setBusy(false);
+    }
+  }
+
   if (!detail) {
     return (
       <Screen>
         <BackHeader />
         <View style={styles.center}>
-          {failed ? <AppText color="slate">미션을 불러오지 못했어요.</AppText> : <ActivityIndicator color={theme.primary} />}
+          {failed ? (
+            <AppText color="slate">미션을 불러오지 못했어요.</AppText>
+          ) : (
+            <ActivityIndicator color={theme.primary} />
+          )}
         </View>
       </Screen>
     );
@@ -137,7 +186,9 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
     ) : status === 'in_progress' || status === 'judging' ? (
       <Button
         label="인증하기"
-        onPress={() => mine && router.push({ pathname: '/mission/[id]/verify', params: { id: missionId, um: mine.id } })}
+        onPress={() =>
+          mine && router.push({ pathname: '/mission/[id]/verify', params: { id: missionId, um: mine.id } })
+        }
       />
     ) : (
       <Button label="시작하기" onPress={start} loading={busy} />
@@ -160,7 +211,9 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
       <View
         style={[
           styles.hero,
-          isDark ? { backgroundColor: theme.surface, borderLeftWidth: 4, borderLeftColor: tint } : { backgroundColor: tint },
+          isDark
+            ? { backgroundColor: theme.surface, borderLeftWidth: 4, borderLeftColor: tint }
+            : { backgroundColor: tint },
         ]}>
         <AppText variant="label" color="slate">
           {CategoryLabel[mission.category]} · {mission.minutes}분 · {type === 'daily' ? '오늘의 미션' : '이번 주 미션'}
@@ -196,6 +249,40 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
             onPress={toggleJoin}
             disabled={busy}
           />
+        </View>
+        <View style={styles.relays}>
+          <AppText variant="titleMd" accessibilityRole="header">
+            먼저 해낸 사람의 한 줄
+          </AppText>
+          {detail.relays === null ? (
+            <AppText variant="caption" color="steel">
+              한 줄을 불러오지 못했어요. 다시 열어 볼까요?
+            </AppText>
+          ) : detail.relays.length === 0 ? (
+            <AppText variant="caption" color="steel">
+              이 미션을 처음 해 보는 사람이에요
+            </AppText>
+          ) : (
+            detail.relays.map((body, index) => (
+              <View key={index} style={[styles.relayItem, { backgroundColor: theme.surfaceSunken }]}>
+                <AppText variant="bodySm">{body}</AppText>
+              </View>
+            ))
+          )}
+          {detail.ownRelay?.status === 'pending' && (
+            <>
+              <AppText variant="caption" color="steel">
+                내가 남긴 한 줄은 검수를 기다리고 있어요.
+              </AppText>
+              <Button label="검수 다시 요청" variant="secondary" size="sm" onPress={retryRelay} loading={busy} />
+            </>
+          )}
+          {relayNotice && (
+            <AppText variant="caption" color="steel" accessibilityRole="alert">
+              {relayNotice}
+            </AppText>
+          )}
+          {relayCrisis && <HelpCard subject="이 한 줄" />}
         </View>
       </View>
     </Screen>
@@ -238,6 +325,8 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  relays: { marginTop: Spacing.lg, gap: Spacing.xs },
+  relayItem: { borderRadius: Radius.md, padding: Spacing.sm },
   footer: {
     gap: Spacing.xs,
   },

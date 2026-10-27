@@ -47,6 +47,7 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
     "test:mailbox": "node --test tests/mailbox.test.mjs",
+    "test:relay": "node --test tests/relay.test.mjs",
     "seed:build": "python scripts/build-seed.py"
   },
   "private": true

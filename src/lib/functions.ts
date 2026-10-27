@@ -39,6 +39,10 @@ export type JudgeResult = {
   rewards: Furniture[];
   judged_by: JudgedBy;
 };
+type ModerationResult = {
+  status: 'approved' | 'rejected' | 'crisis' | 'pending' | 'published';
+  judged_by: JudgedBy | null;
+};
 
 export const Functions = {
   /** F2 오늘의 추천. refresh = '다른 미션 보기' (하루 1회) */
@@ -47,7 +51,8 @@ export const Functions = {
   verifyMission: (verificationId: string) => invoke<JudgeResult>('verify-mission', { verification_id: verificationId }),
   /** F6 댓글 검수 */
   moderateComment: (commentId: string) =>
-    invoke<{ status: 'approved' | 'rejected' | 'crisis' | 'pending'; judged_by: JudgedBy | null }>('moderate-comment', {
+    invoke<ModerationResult>('moderate-comment', {
       comment_id: commentId,
     }),
+  moderateRelay: (relayId: string) => invoke<ModerationResult>('moderate-comment', { relay_id: relayId }),
 };

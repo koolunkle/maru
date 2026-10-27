@@ -23,9 +23,9 @@
 
 | ID | 작업 | 기능 | 영역 | 선행 | 예상 | 브랜치 | 담당 | 상태 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T1 | 릴레이 테이블·공개 cron·RPC | F10 | DB | — | 0.5일 | `feat/t1-relay-db` | | 대기 |
-| T2 | `moderate-comment`에 relay_id 처리 추가 | F10 | 함수 | T1 | 0.5일 | `feat/t2-relay-moderation` | | 대기 |
-| T3 | S4 릴레이 표시, S5 한 줄 남기기 | F10 | 앱 | T1, T2 | 1일 | `feat/t3-relay-ui` | | 대기 |
+| T1 | 릴레이 테이블·공개 cron·RPC | F10 | DB | — | 0.5일 | `feat/t1-relay-db` | Codex | 리뷰 |
+| T2 | `moderate-comment`에 relay_id 처리 추가 | F10 | 함수 | T1 | 0.5일 | `feat/t2-relay-moderation` | Codex | 리뷰 |
+| T3 | S4 릴레이 표시, S5 한 줄 남기기 | F10 | 앱 | T1, T2 | 1일 | `feat/t3-relay-ui` | Codex | 리뷰 |
 | T4 | 성장 화분 | F11 | 앱 | — | 0.5일 | `feat/t4-growth-plant` | Codex | 진행 |
 | T5 | 휴게소 탭, 설정 도움 안내 이동 | F12 | 앱 | — | 0.5일 | `feat/t5-rest-tab` | | 대기 |
 | T6 | 빗소리 배경음 | F12 | 앱 | T5, 음원 확보 | 0.5일 | `feat/t6-rain-sound` | | 대기 |
@@ -47,17 +47,22 @@
 - `publish_due_comments()`가 `relay_messages`도 공개하도록 수정.
 - RPC `get_relay_messages(mission uuid)`: published, 본인 제외, 같은 미션 최신 3개, 부족하면 같은 category 최근 7일로 채움. 본문만 반환.
 - 완료: Supabase 보안 점검(advisors)에 새 경고 없음, 타입 재생성(`src/types/database.ts`), SQL로 두 계정 시나리오 확인.
+- 구현·검증: `20261027110000_relay_messages.sql`, `supabase/tests/relay.sql`. pass·privacy 완료 인증만 작성, 본인 읽기·필드 단위 insert 권한, 작성자 제외, 같은 미션 우선·같은 카테고리 7일 이내, 공개 시각과 기존 댓글 cron 검증. 사용자 승인으로 운영 DB에 적용 후 운영 스키마에서 DB 타입 재생성.
+- 운영 보안 Advisors에 릴레이 관련 경고 2개: 인증 사용자에게 `SECURITY DEFINER` 조회 RPC가 실행 가능하고 익명 로그인 계정에도 본인 행 읽기 정책이 허용된다는 내용. 두 권한 모두 익명 사용자 기능에 필요하며 RPC는 접근 가능한 미션의 공개 본문만, 직접 조회는 `auth.uid()` 본인 행만 반환한다. 다른 사용자 조회·수정 차단은 테스트했다.
+- 롤백 시 릴레이 테이블은 보존하고 앱 노출과 릴레이 검수를 중단한 뒤 기존 댓글 전용 cron 함수로 복원한다. 저장된 글을 삭제하지 않는다.
 
 ### T2 `moderate-comment`에 relay_id 처리 추가
 
 - 입력 `{ comment_id }` 또는 `{ relay_id }`. 분류 기준과 실패 시 pending 유지는 댓글과 같다.
 - 완료: 연락처가 든 한 줄은 `rejected`, 위기 표현은 `crisis`, 일반 응원은 `approved`.
+- `npm run test:relay`로 댓글과 릴레이 각각의 검수, 본인 확인, 재호출, 검수 오류 및 상태 변경 오류 확인. 운영 함수 배포 후 실제 AI가 일반 응원을 `approved`, 전화번호 포함 글을 `rejected`로 판정하고 저장한 것을 확인했다.
 
 ### T3 S4 릴레이 표시, S5 한 줄 남기기
 
 - DESIGN.md §5.2 S4·S5 통합 예정 행대로 구현. 고정 문구는 PRD §7.3.
 - 저장 후 `moderate-comment` 호출, `crisis`면 `help-card` 표시.
 - 완료: 두 계정으로 A가 남긴 한 줄이 공개 후 B의 S4에 보임(시연 모드 1분). 웹·Expo Go 모두 확인.
+- 로컬 브라우저의 격리된 테스트 API로 상세의 한 줄 표시, 인증 후 작성·검수 결과·공개 대기 문구와 390px 화면 확인. 미검수 글은 상세에서 재검수를 요청할 수 있다. 운영 두 익명 계정의 작성·권한과 롤백 트랜잭션 안에서의 공개 글 수신을 확인한 뒤 테스트 데이터를 정리했다. 앱 배포와 Expo Go 실기기 확인은 남아 있다.
 
 ### T4 성장 화분
 
