@@ -75,6 +75,38 @@ export type Database = {
           },
         ]
       }
+      daily_notes: {
+        Row: {
+          created_at: string
+          mood: number
+          note_date: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          mood: number
+          note_date?: string
+          text?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          mood?: number
+          note_date?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_notes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       daily_recommendations: {
         Row: {
           created_at: string
@@ -644,6 +676,27 @@ export type Database = {
       receive_mailbox_message: {
         Args: { recipient: string }
         Returns: undefined
+      }
+      save_daily_note: {
+        Args: {
+          p_mood: number
+          p_note_date: string
+          p_text: string
+          p_user_id: string
+        }
+        Returns: {
+          created_at: string
+          mood: number
+          note_date: string
+          text: string
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "daily_notes"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       set_demo_mode: { Args: { enabled: boolean }; Returns: undefined }
     }

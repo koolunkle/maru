@@ -48,6 +48,7 @@
     "typecheck": "tsc --noEmit",
     "test:mailbox": "node --test tests/mailbox.test.mjs",
     "test:relay": "node --test tests/relay.test.mjs",
+    "test:daily-note": "node --test tests/daily-note.test.mjs",
     "seed:build": "python scripts/build-seed.py"
   },
   "private": true

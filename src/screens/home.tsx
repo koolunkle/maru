@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
+import { DailyNoteCard } from '@/components/daily-note-card';
 import { GrowthCard } from '@/components/growth-card';
 import { MailboxCard } from '@/components/mailbox-card';
 import { MissionCard } from '@/components/mission-card';
@@ -89,6 +90,7 @@ export function Home() {
       )}
 
       {profile && <MailboxCard key={profile.id} userId={profile.id} />}
+      {profile && <DailyNoteCard key={`daily-note:${profile.id}`} userId={profile.id} />}
 
       <View style={styles.section}>
         <AppText variant="titleMd">오늘의 미션</AppText>

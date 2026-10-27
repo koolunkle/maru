@@ -377,7 +377,7 @@ components:
 | S4 먼저 해낸 사람의 한 줄 (F10) | 같이 할래요 행 아래 32px → 제목 `title-md` → 8px → `relay-item` 최대 3개(간격 8px, 따옴표·닉네임 없음). 없으면 `caption` `steel` 한 줄 |
 | S5 다음 사람에게 한 줄 (F10) | 판정 결과 `ai-card` 아래 24px → 제목 `title-md` → 8px → `text-input` 1줄(우하단 "0/60") → 하단 고정 버튼이 "남기기"로 바뀌고 그 위에 `button-ghost` "건너뛰기". 남긴 뒤 `comment-pending` 형태로 "약 {N}시간 뒤 다음 사람에게 보여요" |
 | S7 이번 주 편지 (F13) | 달성률 막대 아래 32px → `letter-card`: "이번 주 편지" `label` `steel`(AI면 `ai-card` 형태와 "AI" 라벨) → 8px → 첫 문장 `body-md` 2줄 말줄임 → 12px → `button-ghost` "읽어 보기" |
-| S7 오늘 한 줄 (F15) | 캘린더 아래 32px → "오늘 한 줄" `title-md` → 8px → 기분 칩 3개(`chip-category` 모양, 아이콘 + 이름) → 8px → `text-input` 1줄. 하단 `button-ghost` "타임캡슐" → S12 |
+| S3 오늘 한 줄 (F15) | 마음 우체통 아래 24px → "오늘 한 줄" `title-md` → 안내 `body-sm` → 기분 칩 5개(`chip-category` 모양, 아이콘 + 이름, 줄바꿈) → 선택 입력 `text-input`(0/60) → `button-primary` "저장하기". 기존 기록은 불러와 수정하고, 삭제는 화면 안 확인 후 실행. 로딩·저장 오류·재시도 표시 |
 | S10 마음 휴게소 (F12) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 칩 3개(25·50·80%) |
 | S11 주간 편지 (F13) | `BackHeader` "이번 주 편지" → 날짜 범위 `caption` → 12px → 본문(`ai-card` 또는 `letter-card`, `body-md`, 문단 간격 12px) → 32px → "지난 편지" `title-md` → `list-row`(주 범위 + 첫 문장 1줄) |
 | S12 타임캡슐 (F16) | `BackHeader` "타임캡슐" → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
@@ -394,7 +394,7 @@ components:
 | 판정 `retry` | `ai-card` 동일 형태, 아이콘 `rotate-ccw` `slate`. 빨간색 없음 |
 | 판정 `pass` | `check-circle` 32px `success` + 응원 문구 |
 | `growth-card` 단계 아이콘 (F11) | MaterialCommunityIcons 48px `success`. 0개 `pot-outline`(`muted`) → 1개 `sprout-outline` → 2개 `sprout` → 3개 `flower-tulip`(`accent`). 가구와 같은 아이콘 세트를 쓰되 내 방 슬롯에는 놓지 않는다 |
-| 기분 칩 (F15) | Feather 18px + 이름: 가벼움 `sun`, 보통 `cloud`, 무거움 `cloud-rain`. 선택 시 `chip-category-selected`. 표정 아이콘·이모지는 쓰지 않는다 |
+| 기분 칩 (F15) | Feather 18px + 이름: 마음이 가벼워요 `sun`, 조금 가벼워요 `sunrise`, 보통이에요 `cloud`, 조금 무거워요 `cloud-drizzle`, 마음이 무거워요 `cloud-rain`. 선택 시 `chip-category-selected`. 표정 아이콘·이모지는 쓰지 않는다 |
 | `relay-item` | 본문만 `body-sm`. 작성자·시각을 표시하지 않는다 |
 
 ### 5.4 내 방
