@@ -10,7 +10,6 @@ import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import { kstDate, kstWeekStart } from '@/utils/date';
-import { DemoLetter } from '@/utils/weekly-letter';
 
 const Weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -58,7 +57,7 @@ function monthCells(today: string) {
   ];
 }
 
-/** S7 기록과 F13 시연용 마음 리포트 진입. */
+/** S7 기록과 F13 마음 리포트 진입. */
 export function Record() {
   const theme = useTheme();
   const { session, profile } = useSession();
@@ -137,8 +136,7 @@ export function Record() {
       )}
       <View style={[styles.letter, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
         <AppText variant="label" color="steel">이번 주 편지</AppText>
-        <AppText numberOfLines={2}>{DemoLetter.paragraphs[0]}</AppText>
-        <AppText variant="caption" color="steel">{DemoLetter.notice}</AppText>
+        <AppText>기분과 한 줄, 완료한 미션을 돌아봐요.</AppText>
         <Button
           label="이번 주 마음 리포트 보기"
           variant="ghost"

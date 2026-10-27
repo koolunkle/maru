@@ -16,6 +16,27 @@ const letter = await loadModule('../src/utils/weekly-letter.ts', (name) => {
   assert.equal(name, './date', '시연용 리포트는 날짜 외에 API·개인 기록 의존성이 없다');
   return date;
 });
+const kst = await loadModule('../supabase/functions/_shared/kst.ts');
+const server = await loadModule('../supabase/functions/_shared/weekly-letter.ts', (name) => {
+  assert.equal(name, './kst.ts');
+  return kst;
+});
+
+test('서버는 과거 또는 이번 주의 실제 월요일만 받는다', () => {
+  assert.equal(server.validLetterWeek('2026-10-26', '2026-10-27'), true);
+  for (const week of ['2026-10-27', '2026-11-02', '2026-02-30', '', null]) {
+    assert.equal(server.validLetterWeek(week, '2026-10-27'), false);
+  }
+});
+
+test('이번 주 변경과 지난 주 확정 및 AI 실패 재시도를 구분한다', () => {
+  const current = { source: 'ai', finalized: false, input_hash: 'old' };
+  assert.equal(server.reuseLetter(current, 'old', false), true);
+  assert.equal(server.reuseLetter(current, 'new', false), false);
+  assert.equal(server.reuseLetter(current, 'old', true), false);
+  assert.equal(server.reuseLetter({ ...current, finalized: true }, 'new', true), true);
+  assert.equal(server.reuseLetter({ ...current, source: 'rule' }, 'old', false), false);
+});
 
 test('KST 일요일에서 월요일로 넘어갈 때 주차가 바뀐다', () => {
   const sunday = date.kstDate(new Date('2026-10-25T14:59:59.999Z'));

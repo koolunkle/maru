@@ -664,6 +664,44 @@ export type Database = {
           },
         ]
       }
+      weekly_letters: {
+        Row: {
+          body: string
+          finalized: boolean
+          input_hash: string
+          source: string
+          updated_at: string
+          user_id: string
+          week_start: string
+        }
+        Insert: {
+          body: string
+          finalized?: boolean
+          input_hash: string
+          source: string
+          updated_at?: string
+          user_id: string
+          week_start: string
+        }
+        Update: {
+          body?: string
+          finalized?: boolean
+          input_hash?: string
+          source?: string
+          updated_at?: string
+          user_id?: string
+          week_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_letters_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
