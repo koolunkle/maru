@@ -488,6 +488,44 @@ export type Database = {
           },
         ]
       }
+      time_capsules: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          open_on: string
+          opened_at: string | null
+          request_id: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          open_on: string
+          opened_at?: string | null
+          request_id: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          open_on?: string
+          opened_at?: string | null
+          request_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_capsules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_furniture: {
         Row: {
           acquired_at: string
@@ -672,6 +710,19 @@ export type Database = {
           body: string
         }[]
       }
+      list_time_capsules: {
+        Args: never
+        Returns: {
+          body: string
+          created_at: string
+          days_ago: number
+          id: string
+          open_on: string
+          opened_at: string
+          ready: boolean
+        }[]
+      }
+      open_time_capsule: { Args: { p_id: string }; Returns: string }
       publish_due_comments: { Args: never; Returns: number }
       receive_mailbox_message: {
         Args: { recipient: string }
@@ -697,6 +748,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      send_time_capsule: {
+        Args: { p_body: string; p_days: number; p_request_id: string }
+        Returns: undefined
       }
       set_demo_mode: { Args: { enabled: boolean }; Returns: undefined }
     }
