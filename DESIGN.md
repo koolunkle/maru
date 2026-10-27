@@ -228,7 +228,7 @@ components:
 
 # DESIGN — 맞춤형 서울챌린지
 
-> 모든 값은 위 frontmatter 토큰이 단일 출처다. 기능·문구는 [PRD.md](./PRD.md).
+> 모든 값은 위 frontmatter 토큰이 단일 출처다. 기능·문구는 [docs/PRD.md](./docs/PRD.md).
 
 ## 1. 컨셉 한 줄
 

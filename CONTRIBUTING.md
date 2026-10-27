@@ -4,10 +4,12 @@
 
 | 문서 | 내용 |
 | --- | --- |
-| [PRD.md](./PRD.md) | 기능·데이터·문구 명세. 무엇을 만들지의 기준 |
+| [docs/PRD.md](./docs/PRD.md) | 기능·데이터·문구 명세. 무엇을 만들지의 기준 |
 | [DESIGN.md](./DESIGN.md) | 색·글꼴·화면 구조·애니메이션. 어떻게 보일지의 기준 |
 | [docs/ROADMAP.md](./docs/ROADMAP.md) | 통합 작업 목록, 담당, 완료 기준 |
 | [AGENTS.md](./AGENTS.md) | AI 코딩 도구에 주는 규칙(사람에게도 같은 규칙) |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | 폴더 지도, 주요 흐름, 화면별 구현 상태 |
+| [docs/ENV.md](./docs/ENV.md) | 환경 변수·시크릿·운영 설정값, 전달할 권한과 점검표 |
 
 ## 1. 접근 권한 받기
 
@@ -19,7 +21,7 @@
 | Supabase 프로젝트 `seoul-challenge` | 마이그레이션 적용, 함수 배포, 로그 확인 | 조직 멤버 초대 (Developer) |
 | Expo 프로젝트 `@koolunkle/seoul-challenge` | 미리보기 배포 | 프로젝트 멤버 추가 |
 
-AI API 키(Gemini, Anthropic)는 Supabase 함수 환경 변수에만 있다. 개인 PC나 저장소, 메신저로 받지 않는다.
+AI API 키(Gemini, Anthropic)는 Supabase 함수 환경 변수에만 있다. 개인 PC나 저장소, 메신저로 받지 않는다. DB 작업을 맡으면 DB 비밀번호를 추가로 받는다. 무엇을 받고 무엇을 받지 않는지는 [docs/ENV.md](./docs/ENV.md) D절.
 
 ## 2. 내 PC에서 실행하기
 
@@ -42,7 +44,7 @@ npm start          # QR 코드를 Expo Go로 찍어 휴대폰에서 확인
 
 1. [docs/ROADMAP.md](./docs/ROADMAP.md)에서 `대기` 작업을 골라 담당에 이름을, 상태에 `진행`을 적고 main에 바로 커밋한다(`docs: T4 담당 지정`).
 2. main에서 작업 브랜치를 만든다. 이름은 ROADMAP의 브랜치 칸 그대로(`feat/t4-growth-plant`).
-3. 명세와 다르게 만들어야 하면 **코드보다 PRD.md·DESIGN.md를 먼저 고친다**. 같은 PR에 넣는다.
+3. 명세와 다르게 만들어야 하면 **코드보다 docs/PRD.md·DESIGN.md를 먼저 고친다**. 같은 PR에 넣는다.
 4. 구현 → 검사 → 미리보기 배포 → PR.
 5. 리뷰어 1명 승인 후 작성자가 합친다(Squash and merge). ROADMAP 상태를 `완료`로 바꾼다.
 6. 운영 배포(`--prod`)는 관리자가 합친 뒤에 한다.
@@ -83,7 +85,7 @@ feat(app): 홈에 성장 화분 추가
 PR 본문 체크리스트:
 
 - [ ] ROADMAP 작업 ID와 완료 기준을 적고, 기준을 어떻게 확인했는지 적었다
-- [ ] 명세가 바뀌었다면 PRD.md·DESIGN.md를 같이 고쳤다
+- [ ] 명세가 바뀌었다면 docs/PRD.md·DESIGN.md를 같이 고쳤다
 - [ ] `npm run typecheck`, `npm run lint` 통과
 - [ ] 미리보기 URL에서 웹 동작 확인, 가능하면 Expo Go에서도 확인
 - [ ] DB 변경이 있으면 마이그레이션 파일과 `src/types/database.ts`를 함께 올렸다

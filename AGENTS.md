@@ -42,7 +42,7 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## 이 프로젝트 (맞춤형 서울챌린지)
 
-- 기능·문구 명세: `PRD.md`, 시각 명세·토큰: `DESIGN.md` — 구현은 이 두 문서를 단일 출처로 따른다. 토큰은 `src/constants/theme.ts`에 DESIGN.md와 같은 값으로 둔다.
+- 기능·문구 명세: `docs/PRD.md`, 시각 명세·토큰: `DESIGN.md` — 구현은 이 두 문서를 단일 출처로 따른다. 토큰은 `src/constants/theme.ts`에 DESIGN.md와 같은 값으로 둔다.
 - 통합 작업 목록과 완료 기준: `docs/ROADMAP.md`. 브랜치·커밋·PR·DB 변경 절차: `CONTRIBUTING.md`.
 - 커밋: Conventional 헤더(한국어), 본문은 `-` 불릿. `Co-Authored-By`·`Session` 줄을 넣지 않는다.
 - 언어: TypeScript (strict). 앱 코드는 `src/`, 라우트는 `src/app/`, 화면 본문은 `src/screens/`.

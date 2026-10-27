@@ -6,10 +6,12 @@
 
 | 문서 | 내용 |
 | --- | --- |
-| [PRD.md](./PRD.md) | 기능·데이터·문구 명세 |
+| [docs/PRD.md](./docs/PRD.md) | 기능·데이터·문구 명세 |
 | [DESIGN.md](./DESIGN.md) | 디자인 토큰과 화면 구조 |
 | [docs/ROADMAP.md](./docs/ROADMAP.md) | 통합 작업 목록과 담당 |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | 권한 요청, 실행, 브랜치·커밋·PR, DB 변경 방법 |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | 폴더 지도, 주요 흐름, 화면별 구현 상태, 알아 둘 점 |
+| [docs/ENV.md](./docs/ENV.md) | 환경 변수·함수 시크릿·운영 설정값, 신규 팀원에게 줄 권한 |
 
 ## 실행
 
@@ -40,7 +42,7 @@ npx eas-cli@latest deploy --prod
 | `ANTHROPIC_API_KEY`, `ANTHROPIC_WORKSPACE_ID` | Claude 사용 |
 | `AI_PROVIDER` | `gemini` 또는 `anthropic`으로 강제 선택 (선택 사항) |
 
-시크릿을 바꾼 뒤에는 함수를 다시 배포해야 반영된다. Gemini 무료 등급은 입력이 Google의 제품 개선과 사람 검토에 쓰일 수 있으므로 시연 기간에만 쓰고, 운영 시에는 유료 등급 또는 Claude로 전환한다.
+선택 규칙과 확인·변경 명령은 [docs/ENV.md](./docs/ENV.md) B절. 시크릿을 바꾼 뒤에는 함수를 다시 배포해야 반영된다. Gemini 무료 등급은 입력이 Google의 제품 개선과 사람 검토에 쓰일 수 있으므로 시연 기간에만 쓰고, 운영 시에는 유료 등급 또는 Claude로 전환한다.
 
 ## 시연 모드
 
