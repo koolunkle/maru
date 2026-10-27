@@ -1,4 +1,4 @@
-// 생성: Supabase generate_typescript_types (직접 수정하지 말 것). 스키마 변경 후 재생성.
+// 생성: Supabase CLI, 운영 스키마 (직접 수정하지 말 것).
 export type Json =
   | string
   | number
@@ -173,6 +173,57 @@ export type Database = {
           unlock_rule?: Json
         }
         Relationships: []
+      }
+      mailbox_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          read_at: string | null
+          received_at: string | null
+          recipient_id: string | null
+          request_id: string
+          status: Database["public"]["Enums"]["comment_status"]
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          received_at?: string | null
+          recipient_id?: string | null
+          request_id: string
+          status?: Database["public"]["Enums"]["comment_status"]
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          received_at?: string | null
+          recipient_id?: string | null
+          request_id?: string
+          status?: Database["public"]["Enums"]["comment_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mailbox_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mailbox_messages_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mission_participants: {
         Row: {
@@ -511,7 +562,7 @@ export type Database = {
           mission_title: string
           nickname: string
           photo_path: string
-          text: string | null
+          text: string
           user_id: string
         }[]
       }
@@ -536,6 +587,10 @@ export type Database = {
         }[]
       }
       publish_due_comments: { Args: never; Returns: number }
+      receive_mailbox_message: {
+        Args: { recipient: string }
+        Returns: undefined
+      }
       set_demo_mode: { Args: { enabled: boolean }; Returns: undefined }
     }
     Enums: {

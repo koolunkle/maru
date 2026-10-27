@@ -304,14 +304,16 @@ flowchart LR
 - 표시: S7 상단 "이번 주 편지" 카드(첫 문장 + '읽어 보기') → S11 전체 본문 + 지난 편지 목록.
 - 완료 기준: 지난주 완료 기록이 있는 계정으로 월요일에 S7을 열면 편지 카드가 보이고, 두 번째 진입에서는 다시 생성되지 않는다.
 
-### F14. 마음 우체통 (프론트 우선)
+### F14. 마음 우체통
 
 - F10 릴레이와 독립된 기능. 미션 완료 여부와 관계없이 S3의 "마음 우체통" 카드를 눌러 익명 사용자에게 한 줄을 작성하고 보낸다. 미션·카테고리·받는 사람 선택은 없다.
 - 작성 시트: 제목 "누군가에게 한 줄 보내볼까요?", 본문 1~60자(공백만 입력 불가), 글자 수, '보내기'·'닫기'. 연락처·만남 제안을 적지 않도록 안내한다.
-- 이번 범위는 프론트만 구현한다. '보내기'는 사용자별로 기기에 보관하고, 실제 전달되지 않았음을 작성 전과 결과 화면에 표시한다. 저장 중 중복 제출을 막고, 저장 오류 시 입력을 유지해 재시도할 수 있게 한다. 시트를 닫았다 열어도 작성 중인 입력은 유지한다.
-- 후속 백엔드: 독립된 우체통 저장·검수·익명 배정 API를 연결한다. AI 검수 이전에는 다른 사용자에게 공개하지 않는다. 로컬 보관분을 자동 발송하지 않는다.
-- 수신·그날 첫 홈 진입 시 하루 한 번 도착 시트 표시는 후속 백엔드 연결 범위다. 받은 글이 없으면 도착 시트를 띄우지 않는다.
-- 완료 기준(프론트): 미션을 시작하지 않아도 홈에서 작성·보관 가능, 빈 입력·60자 제한·저장 오류·재시도·계정별 저장 분리 확인. 실제 전달·검수·수신은 별도 검증한다.
+- 홈 카드 → 우체통 시트. 기본 화면은 '받은 한 줄' 목록(최신순, 안 읽은 표시)이며, 항목을 누르면 익명 본문을 읽고 읽음으로 저장한다. '한 줄 쓰기'로 작성 화면에 들어간다. 빈 수신함·불러오기 오류·재시도·목록 돌아가기를 제공한다.
+- '보내기'는 `mailbox` 서버 함수에 저장한 뒤 F6과 같은 AI 검수를 거친다. `pending`은 검수 대기, `approved`는 배정 대기, `published`는 전달 완료, `rejected`·`crisis`는 비공개다. 위기 표현에는 도움 카드를 표시한다. 검수 오류는 대기 상태로 유지하고 '보낸 한 줄'에서 다시 검수를 요청할 수 있다.
+- 수신함 조회 시 안 읽은 글이 없으면 검수 승인된 다른 사용자의 가장 오래된 글 한 개를 호출자에게 배정한다. 한 글은 한 사람만 받고, 본인 글은 받지 않는다. 배정과 읽음은 서버만 변경하며 작성자·수신자 식별자는 응답에 포함하지 않는다.
+- 저장 중 중복 제출을 막고, 요청 식별자로 네트워크 오류 후 재시도도 중복 저장하지 않는다. 저장 오류 시 입력과 식별자를 유지하며, 시트를 닫았다 열어도 작성 중인 입력은 유지한다. 기존 기기 보관분은 자동 발송하지 않는다.
+- 홈 진입 시 수신함을 다시 확인한다. 안 읽은 글이 있으면 하루 한 번(KST·계정별) 수신함 시트를 자동으로 열며, 받은 글이 없으면 띄우지 않는다. 우체통 카드에는 안 읽은 개수를 표시한다.
+- 완료 기준: 두 계정 간 저장 → 검수 → 배정 → 목록 → 본문 → 읽음 저장, 본인·미검수 글 제외, 제3자 접근 차단, 동시 배정 중복 방지, 오류·재시도·빈 상태 확인.
 
 ### F15. 한 줄 기록·기분 (검토 후 반영, §8.4 결정 후 착수)
 
@@ -349,6 +351,7 @@ flowchart LR
 | 테이블·컬럼 | 컬럼 | 기능 |
 | --- | --- | --- |
 | `relay_messages` | id, mission_id, category, user_id, body(1~60자), status(`comment_status` 재사용), publish_at, created_at. (mission_id, user_id) 유일 | F10 |
+| `mailbox_messages` | id, user_id, request_id, body(1~60자), status(`comment_status`), recipient_id, received_at, read_at, created_at. (user_id, request_id) 유일. 모든 접근은 서버 함수 | F14 |
 | `weekly_letters` | (user_id, week_start) PK, body, source(`ai`/`rule`), created_at | F13 |
 | `daily_notes` | (user_id, note_date) PK, mood(`light`/`normal`/`heavy`), text(0~60자), created_at | F15 |
 | `time_capsules` | id, user_id, body(1~100자), open_on, opened_at, created_at | F16 |
@@ -367,6 +370,7 @@ flowchart LR
 | 타인 닉네임, 같이 할래요 인원 | RPC `get_nicknames`, `get_participant_counts` | — |
 | relay_messages | 본인 읽기, mission_id·body만 작성(category·status·publish_at은 트리거) | status, publish_at |
 | 타인 릴레이 글 | RPC `get_relay_messages`(본문만) | — |
+| mailbox_messages | 클라이언트 직접 접근 불가. `mailbox` 함수가 JWT 본인 확인 후 발신·수신 목록과 본문만 반환 | 검수·수신자 배정·읽음은 서버만 변경 |
 | 마음 우체통 | 프론트는 본인 기기에만 보관. 후속 API에서 본인 작성·배정된 글 읽기 권한 정의 | 검수·익명 배정·공개 |
 | weekly_letters | 본인 읽기 | 생성 |
 | daily_notes, time_capsules | 본인 읽기·작성·수정·삭제 | 90일 지난 `daily_notes` 삭제(cron) |
@@ -382,6 +386,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 | `recommend-missions` | user_id | 미션 4개 | F2 |
 | `verify-mission` | user_mission_id, photo_path, text | ai_result, message | F4 |
 | `moderate-comment` | comment_id 또는 relay_id | status | 댓글·릴레이 insert 직후 (F10에서 relay_id 추가) |
+| `mailbox` | action(`send`·`inbox`·`sent`·`read`), body·requestId 또는 id | 본인 발신·수신 글, 검수 상태·읽음 | F14 작성·수신함 진입·본문 열기 |
 | `write-weekly-letter` | — (호출자 기준 지난주) | body, source | F13, 월요일 첫 S3·S7 진입 |
 | `sync-events` | — | upsert 건수 | pg_cron 매일 05:00 KST (미구현) |
 
