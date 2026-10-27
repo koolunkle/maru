@@ -1,6 +1,6 @@
 # PRD — 맞춤형 서울챌린지
 
-> 최종 수정: 2026-10-20 · 통합 프로토타입 단계(10/23~11/8) · 시각 명세는 [DESIGN.md](../DESIGN.md) · 작업 순서는 [ROADMAP.md](./ROADMAP.md) · 작업 방법은 [CONTRIBUTING.md](../CONTRIBUTING.md)
+> 최종 수정: 2026-10-20 · 통합 프로토타입 단계(10/23~11/8) · 시각 명세는 [DESIGN.md](./DESIGN.md) · 작업 순서는 [docs/ROADMAP.md](./docs/ROADMAP.md) · 작업 방법은 [CONTRIBUTING.md](./CONTRIBUTING.md)
 >
 > 10/20 제출본(F1~F9)에 동료 프로토타입([lilill16171df/sesac-hackathon-seoul-challenge](https://github.com/lilill16171df/sesac-hackathon-seoul-challenge))의 기능 7개(F10~F16)를 이 저장소 구조로 다시 구현해 합친다.
 
@@ -80,7 +80,7 @@
 | F15 | 한 줄 기록·기분 | P2 | 검토 후 반영(§8.4 결정 필요) | — |
 | F16 | 타임캡슐 | P2 | 검토 후 반영 | — |
 
-시간 부족 시 P2 → P1 순으로 축소한다. 통합 예정 기능의 작업 단위·담당·완료 기준은 [ROADMAP.md](./ROADMAP.md). 이후 과제: 다른 사용자의 방 구경, 서울마음편의점 위치 미션, 벽지·바닥 보상, 푸시 알림, 운영자 대시보드.
+시간 부족 시 P2 → P1 순으로 축소한다. 통합 예정 기능의 작업 단위·담당·완료 기준은 [docs/ROADMAP.md](./docs/ROADMAP.md). 이후 과제: 다른 사용자의 방 구경, 서울마음편의점 위치 미션, 벽지·바닥 보상, 푸시 알림, 운영자 대시보드.
 
 ---
 
@@ -444,7 +444,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 | 11/3 ~ 11/6 | F14~F16 반영 여부 결정 후 구현, 통합 테스트 | ROADMAP의 완료 기준 전부 통과 |
 | 11/7 ~ 11/8 | 시연 영상, 리허설 | 운영 URL에서 전체 흐름 시연 |
 
-작업 단위와 담당은 [ROADMAP.md](./ROADMAP.md). 시연 준비: 시연 설정(댓글 1분) 적용, 7일치 기록이 있는 데모 계정 1개, AI 실패 시 대체 동작 확인.
+작업 단위와 담당은 [docs/ROADMAP.md](./docs/ROADMAP.md). 시연 준비: 시연 설정(댓글 1분) 적용, 7일치 기록이 있는 데모 계정 1개, AI 실패 시 대체 동작 확인.
 
 ### 8.2 기술
 

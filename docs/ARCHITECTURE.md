@@ -1,6 +1,6 @@
 # 구조와 현재 상태
 
-> 기준 2026-10-27, main `96d5ee7`. 코드를 처음 여는 사람이 "어디에 무엇이 있고, 무엇이 끝났고, 무엇이 남았는지"를 빠르게 잡기 위한 지도다. 기능 정의는 [PRD.md](./PRD.md), 화면 모양은 [DESIGN.md](../DESIGN.md), 작업 배정은 [ROADMAP.md](./ROADMAP.md), 설정값은 [ENV.md](./ENV.md).
+> 기준 2026-10-27, main `96d5ee7`. 코드를 처음 여는 사람이 "어디에 무엇이 있고, 무엇이 끝났고, 무엇이 남았는지"를 빠르게 잡기 위한 지도다. 기능 정의는 [PRD.md](../PRD.md), 화면 모양은 [DESIGN.md](../DESIGN.md), 작업 배정은 [ROADMAP.md](./ROADMAP.md), 설정값은 [ENV.md](./ENV.md).
 
 ## 1. 시스템 구성
 

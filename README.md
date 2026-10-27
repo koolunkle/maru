@@ -6,7 +6,7 @@
 
 | 문서 | 내용 |
 | --- | --- |
-| [docs/PRD.md](./docs/PRD.md) | 기능·데이터·문구 명세 |
+| [PRD.md](./PRD.md) | 기능·데이터·문구 명세 |
 | [DESIGN.md](./DESIGN.md) | 디자인 토큰과 화면 구조 |
 | [docs/ROADMAP.md](./docs/ROADMAP.md) | 통합 작업 목록과 담당 |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | 권한 요청, 실행, 브랜치·커밋·PR, DB 변경 방법 |
