@@ -1,0 +1,59 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { test } from 'node:test';
+import ts from 'typescript';
+
+async function loadModule(path, require = () => { throw new Error('Unexpected dependency'); }) {
+  const source = await readFile(new URL(path, import.meta.url), 'utf8');
+  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
+  const exports = {};
+  new Function('require', 'exports', outputText)(require, exports);
+  return exports;
+}
+
+const date = await loadModule('../src/utils/date.ts');
+const letter = await loadModule('../src/utils/weekly-letter.ts', (name) => {
+  assert.equal(name, './date', '시연용 리포트는 날짜 외에 API·개인 기록 의존성이 없다');
+  return date;
+});
+
+test('KST 일요일에서 월요일로 넘어갈 때 주차가 바뀐다', () => {
+  const sunday = date.kstDate(new Date('2026-10-25T14:59:59.999Z'));
+  const monday = date.kstDate(new Date('2026-10-25T15:00:00.000Z'));
+  assert.equal(date.kstWeekStart(sunday), '2026-10-19');
+  assert.equal(date.kstWeekStart(monday), '2026-10-26');
+  assert.equal(date.kstWeekStart('2026-11-01'), '2026-10-26');
+});
+
+test('시연용 주차는 이번 주와 지난 3주이며 연도 경계를 넘을 수 있다', () => {
+  assert.deepEqual(letter.demoLetterWeeks('2027-01-01'), [
+    '2026-12-28', '2026-12-21', '2026-12-14', '2026-12-07',
+  ]);
+  assert.deepEqual(letter.demoLetterWeeks('2026-10-27'), [
+    '2026-10-26', '2026-10-19', '2026-10-12', '2026-10-05',
+  ]);
+});
+
+test('잘못된 날짜·월요일 아닌 날짜·미래·범위 밖 주차는 시연 목록에 없다', () => {
+  const weeks = letter.demoLetterWeeks('2026-10-27');
+  for (const invalid of ['', 'bad', '2026-02-30', '2026-10-27', '2026-11-02', '2026-09-28', '2026-10-26/extra']) {
+    assert.equal(weeks.includes(invalid), false, invalid);
+  }
+});
+
+test('편지 날짜 범위는 월요일부터 일요일까지이며 윤년과 연말도 처리한다', () => {
+  assert.equal(letter.formatLetterWeek('2026-10-26'), '2026.10.26 – 2026.11.01');
+  assert.equal(letter.formatLetterWeek('2026-12-28'), '2026.12.28 – 2027.01.03');
+  assert.equal(letter.formatLetterWeek('2024-02-26'), '2024.02.26 – 2024.03.03');
+});
+
+test('예시에는 7일의 기분과 한 줄·미션·편지가 있고 시연용임을 명시한다', () => {
+  const demo = letter.DemoLetter;
+  assert.match(demo.notice, /시연용/);
+  assert.match(demo.notice, /예시/);
+  assert.deepEqual(demo.flow.map((day) => day.day), ['월', '화', '수', '목', '금', '토', '일']);
+  assert.ok(demo.flow.every((day) => Number.isInteger(day.level) && day.level >= 1 && day.level <= 5));
+  assert.ok(demo.note && demo.mission && demo.paragraphs.length > 0);
+  const copy = JSON.stringify(demo);
+  assert.doesNotMatch(copy, /외로움|고립|우울|상담|실패/);
+});

@@ -29,15 +29,15 @@
 | T4 | 성장 화분 | F11 | 앱 | — | 0.5일 | `feat/t4-growth-plant` | Codex | 진행 |
 | T5 | 휴게소 탭, 설정 도움 안내 이동 | F12 | 앱 | — | 0.5일 | `feat/t5-rest-tab` | | 대기 |
 | T6 | 빗소리 배경음 | F12 | 앱 | T5, 음원 확보 | 0.5일 | `feat/t6-rain-sound` | | 대기 |
-| T7 | 주간 편지 테이블·`write-weekly-letter` | F13 | DB·함수 | — | 1일 | `feat/t7-weekly-letter-api` | | 대기 |
-| T8 | S7 편지 카드, S11 편지 화면 | F13 | 앱 | T7 | 1일 | `feat/t8-weekly-letter-ui` | | 대기 |
+| T7 | 주간 편지 개인화·저장 (MVP 제외) | F13 후속 | DB·함수 | 정책 결정 | 1일 | `feat/t7-weekly-letter-api` | | 보류 |
+| T8 | S7 편지 카드, S11 시연 리포트 | F13 | 앱 | — | 1일 | `feat/t8-weekly-letter-ui` | Codex | 리뷰 |
 | T9 | 다음 보상까지 남은 조건 표시 | F8 | 앱 | — | 0.5일 | `feat/t9-next-reward` | | 대기 |
 | T10 | 마음 우체통 송수신 | F14 | 앱·DB·함수 | — (F10과 독립) | 1일 | `feat/t10-mailbox` | Codex | 리뷰 |
 | T11 | 한 줄 기록·기분 | F15 | DB·앱 | 저장 정책 결정 | 1일 | `feat/t11-daily-note` | Codex | 리뷰 |
 | T12 | 타임캡슐 | F16 | DB·앱 | 반영 결정 | 1일 | `feat/t12-time-capsule` | | 대기 |
 | T13 | 통합 테스트, 데모 계정, 시연 리허설 | 전체 | — | T1~T9 | 1일 | `chore/t13-rehearsal` | | 대기 |
 
-병렬로 시작할 수 있는 작업: T1, T4, T5, T7, T9. 앱 화면 작업(T4·T5)은 DB 없이 바로 시작할 수 있어 처음 합류한 팀원에게 권한다.
+병렬로 시작할 수 있는 작업: T1, T4, T5, T8, T9. 앱 화면 작업(T4·T5·T8)은 DB 없이 바로 시작할 수 있어 처음 합류한 팀원에게 권한다.
 
 ## 3. 작업별 범위와 완료 기준
 
@@ -82,16 +82,17 @@
 - 기본 꺼짐, 켤 때만 재생, 반복, 볼륨 3단계, 탭을 옮겨도 계속 재생, 앱 재시작 시 꺼짐.
 - 완료: 웹에서 토글을 눌러 재생되고, Expo Go에서도 재생됨. 무음 모드 동작 확인.
 
-### T7 주간 편지 테이블·`write-weekly-letter`
+### T7 주간 편지 개인화·저장 (후속)
 
-- 새 마이그레이션 `weekly_letters`(본인 읽기만). 함수 `supabase/functions/write-weekly-letter/index.ts`, `_shared/ai.ts`의 `generateJson` 사용, `tier: 'main'`.
-- 이미 있는 주에는 다시 만들지 않고 기존 편지를 반환. AI 실패 시 규칙 문구(PRD F13).
-- 완료: 지난주 완료 기록을 SQL로 만든 계정에서 함수 호출 시 편지 생성, 두 번째 호출은 같은 편지 반환, 금칙어 없음.
+- 현재 PRD F13의 MVP는 고정 시연용 내용이며 테이블·서버 함수·AI 호출을 만들지 않는다.
+- 실제 기록의 AI 전송과 보관 정책에 팀이 동의한 뒤 `weekly_letters`·`write-weekly-letter`의 입력·출력·권한·재호출·대체 문구를 별도로 확정한다.
 
 ### T8 S7 편지 카드, S11 편지 화면
 
-- `src/app/letter/[week].tsx` + `src/screens/letter.tsx`, `_layout.tsx` Stack 등록. 월요일 첫 진입 시 T7 함수 호출.
-- 완료: S7 카드 → S11 이동, AI 편지는 `ai-card`, 규칙 편지는 `letter-card`로 보임.
+- `src/app/letter/[week].tsx` + `src/screens/letter.tsx`, `_layout.tsx`의 로그인·온보딩 보호 Stack에 등록. S7 카드는 통계 조회와 독립적으로 표시한다.
+- 완료: 기분·한 줄 저장 후 S7 카드 → S11 이동, `letter-card`에 시연용 기분 흐름·한 줄·미션·편지 표시, 시연용 명시, 기존 설정 도움 안내 연결, 지난 3주 시연용 목록·이번 주 복귀·잘못된 주차 안내. 개인 기록 조회·AI 호출·DB 변경 없음.
+- 검증(2026-10-27): `npm run test:weekly-letter` 5개(KST 주 경계·연말·윤년·주차 제한·시연용 문구), 기존 `npm run test:daily-note` 6개, lint·typecheck·웹 export 통과. 격리된 로컬 테스트 API를 사용하는 실제 앱에서 기분·한 줄 저장 → 기록 카드 → 리포트, 지난 주와 이번 주 이동, 도움 안내 → 설정, 잘못된 주차 안내와 복귀를 확인했다. 390px 다크 화면과 요일별 기분 접근성 이름 확인.
+- 미검증: Expo Go 실기기·스크린리더 실사용·라이트 화면. 미리보기 배포·PR·리뷰·병합은 남아 있다. T7의 AI 개인화와 F15의 실제 기분에 따른 조건부·3일 연속 도움 안내는 이번 MVP에 포함하지 않는다.
 
 ### T9 다음 보상까지 남은 조건 표시
 
