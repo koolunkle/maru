@@ -45,6 +45,7 @@ function RootStack() {
         <Stack.Screen name="settings/[field]" />
         <Stack.Screen name="letter/[week]" />
         <Stack.Screen name="capsule" />
+        <Stack.Screen name="daily-note" />
         <Stack.Screen name="mission/[id]/index" />
         <Stack.Screen name="mission/[id]/verify" />
       </Stack.Protected>
