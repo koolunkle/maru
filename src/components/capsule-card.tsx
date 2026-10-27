@@ -21,7 +21,12 @@ export function CapsuleCard() {
     <PressableScale accessibilityRole="button" onPress={() => router.push({ pathname: '/capsule', params: arrival ? { id: arrival.id } : {} })}
       style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
       <Feather name="mail" size={20} color={theme.accent} />
-      <View style={styles.text}><AppText>{arrival ? `${arrival.days_ago}일 전의 내가 보낸 한 줄이 도착했어요` : '미래의 나에게 타임캡슐 보내기'}</AppText></View>
+      <View style={styles.text}>
+        <AppText variant="titleMd">타임캡슐</AppText>
+        <AppText variant="caption" color="steel">
+          {arrival ? `${arrival.days_ago}일 전의 내가 보낸 한 줄이 도착했어요` : '미래의 나에게 한 줄을 보내요'}
+        </AppText>
+      </View>
       <Feather name="chevron-right" size={20} color={theme.steel} />
     </PressableScale>
   );
