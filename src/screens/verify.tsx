@@ -309,7 +309,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
 
       <PressableScale
         accessibilityRole="button"
-        accessibilityLabel="사진 추가"
+        accessibilityLabel={photo ? '사진 바꾸기' : '사진 추가'}
         onPress={() => pick('library')}
         disabled={busy}
         style={[styles.photo, { backgroundColor: theme.surfaceSunken }]}>
@@ -336,6 +336,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
 
       <View style={styles.block}>
         <TextInput
+          accessibilityLabel="한 줄 소감"
+          accessibilityHint={`${MaxNote}자까지 적을 수 있어요`}
           value={note}
           onChangeText={(t) => setNote(t.slice(0, MaxNote))}
           placeholder="한 줄 소감 (선택)"
@@ -368,6 +370,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           </AppText>
         </View>
         <Switch
+          accessibilityLabel="피드에 공개하기"
           value={isPublic}
           onValueChange={setIsPublic}
           trackColor={{ true: theme.primary, false: theme.hairlineStrong }}
