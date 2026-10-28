@@ -23,3 +23,7 @@ export function filterModerationText(body: string) {
     .replace(/(?<![가-힣])(?!오늘도(?:[\s,.!?]|$))(?:남궁|황보|제갈|선우|서문|독고|사공|김|이|박|최|정|강|조|윤|장|임|한|오|서|신|권|황|안|송|전|홍|고|문|양|손|배|백|허|남|심|노|하|곽|성|차|주|우|구|민|진|지|엄|채|원|천|방|공|현|함|변|염|여|추|도|소|석|선|설|마|길|연|위|표|명|기|반|왕|금|옥|육|인|맹|제|모|탁|국|어|은|편|용|예|봉|사|부|가|복|태|목|형|계|피|두|감|동|온|빈)[가-힣]{2}(?=(?:은|는|이|가|을|를|의|와|과|에게|한테|이라고|입니다|이에요|예요)?(?:[\s,.!?]|$))/g, '[이름]');
   return { text, hasContact };
 }
+
+export function filterNoteTexts<T extends { text: string | null }>(notes: T[]) {
+  return notes.map((note) => ({ ...note, text: note.text === null ? null : filterModerationText(note.text).text }));
+}

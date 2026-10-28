@@ -17,9 +17,16 @@ const letter = await loadModule('../src/utils/weekly-letter.ts', (name) => {
   return date;
 });
 const kst = await loadModule('../supabase/functions/_shared/kst.ts');
+const privacy = await loadModule('../supabase/functions/_shared/moderation-privacy.ts');
 const server = await loadModule('../supabase/functions/_shared/weekly-letter.ts', (name) => {
   assert.equal(name, './kst.ts');
   return kst;
+});
+
+test('리포트에 보내는 기록만 가리고 원문과 기분은 유지한다', () => {
+  const notes = [{ text: '010-1234-5678', mood: 3 }, { text: null, mood: 2 }];
+  assert.deepEqual(privacy.filterNoteTexts(notes), [{ text: '[연락처]', mood: 3 }, { text: null, mood: 2 }]);
+  assert.equal(notes[0].text, '010-1234-5678');
 });
 
 test('서버는 과거 또는 이번 주의 실제 월요일만 받는다', () => {
