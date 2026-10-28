@@ -227,7 +227,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
         <BackHeader />
         <View style={styles.result}>
           <Animated.View entering={ZoomIn.springify().damping(15).stiffness(200)}>
-            <Feather name="check-circle" size={32} color={theme.success} />
+            <Feather aria-hidden name="check-circle" size={32} color={theme.success} />
           </Animated.View>
           <ResultMessage text={result.message} judgedBy={result.judged_by} />
           {result.rewards.map((f, i) => (
@@ -235,7 +235,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
               key={f.id}
               entering={FadeInDown.duration(200).delay(150 + i * 100)}
               style={[styles.badge, { backgroundColor: theme.accentSoft }]}>
-              <Feather name="award" size={14} color={theme.accent} />
+              <Feather aria-hidden name="award" size={14} color={theme.accent} />
               <AppText variant="label" color="accentInk">
                 {f.name} 획득
               </AppText>
@@ -318,7 +318,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           <Image source={{ uri: photo.uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : (
           <View style={styles.photoEmpty}>
-            <Feather name="camera" size={24} color={theme.slate} />
+            <Feather aria-hidden name="camera" size={24} color={theme.slate} />
             <AppText variant="bodySm" color="slate">
               사진 추가
             </AppText>

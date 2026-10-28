@@ -50,9 +50,9 @@ export function MissionCard({ mission, status, onPress }: MissionCardProps) {
         </AppText>
       </View>
       {done ? (
-        <Feather name="check-circle" size={20} color={theme.success} />
+        <Feather aria-hidden name="check-circle" size={20} color={theme.success} />
       ) : (
-        onPress && <Feather name="chevron-right" size={20} color={theme.slate} />
+        onPress && <Feather aria-hidden name="chevron-right" size={20} color={theme.slate} />
       )}
     </PressableScale>
   );

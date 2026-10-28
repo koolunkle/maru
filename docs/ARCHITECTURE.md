@@ -74,8 +74,8 @@ flowchart LR
 | S9 | `/settings`, `/settings/[field]` | `screens/settings/` | 완료. 배경음 설정 포함. "도움받을 수 있는 곳"은 T5에서 S10으로 이동 예정 |
 | S10 | `/rest` | — | 미구현(T5). 빗소리 배경음(T6)은 설정에 먼저 구현됨 |
 | S11 | `/letter/[week]` | `screens/letter.tsx` | 완료(T8). AI 개인화는 T7 진행 중 |
-| S12 | `/capsule` | `screens/capsule.tsx` | 완료 |
-| — | `/daily-note` | `screens/daily-note.tsx` | 한 줄 기록·기분(F15) |
+| S12 | `/capsule`, 홈 시트 | `screens/capsule.tsx` | 완료. 앱에서는 홈 카드 → 시트로 연다 |
+| S13 | 홈 시트 | `components/daily-note-card.tsx` | 한 줄 기록·기분(F15). 별도 경로 없음 |
 
 새 Stack 화면은 `src/app/_layout.tsx`의 로그인·온보딩 완료 `Stack.Protected` 블록에 `Stack.Screen`을 추가해야 접근된다.
 

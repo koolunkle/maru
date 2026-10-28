@@ -32,14 +32,14 @@ function Row({ label, value, icon, chevron, onPress }: RowProps) {
       onPress={onPress}
       accessibilityRole={onPress ? 'link' : undefined}
       style={[styles.row, { borderBottomColor: theme.hairline }]}>
-      {icon && <Feather name={icon} size={20} color={theme.ink} />}
+      {icon && <Feather aria-hidden name={icon} size={20} color={theme.ink} />}
       <AppText style={styles.rowLabel}>{label}</AppText>
       {value && (
         <AppText variant="bodySm" color="slate">
           {value}
         </AppText>
       )}
-      {chevron && <Feather name="chevron-right" size={20} color={theme.steel} />}
+      {chevron && <Feather aria-hidden name="chevron-right" size={20} color={theme.steel} />}
     </PressableScale>
   );
 }
@@ -86,7 +86,7 @@ export function Settings() {
 
       <AppText variant="label" color="steel" style={styles.groupTitle}>배경음</AppText>
       <View style={[styles.row, { borderBottomColor: theme.hairline }]}>
-        <Feather name="cloud-rain" size={20} color={theme.ink} />
+        <Feather aria-hidden name="cloud-rain" size={20} color={theme.ink} />
         <AppText style={styles.rowLabel}>배경음 틀어 두기</AppText>
         <AppSwitch accessibilityLabel="배경음 틀어 두기" value={playing} onValueChange={toggle} />
       </View>

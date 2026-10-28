@@ -155,7 +155,7 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
               {c.body}
             </AppText>
             <View style={styles.pendingMeta}>
-              <Feather name="clock" size={14} color={theme.steel} />
+              <Feather aria-hidden name="clock" size={14} color={theme.steel} />
               <AppText variant="caption" color="steel">
                 {publishIn(c.publish_at)}
               </AppText>
@@ -189,7 +189,7 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
             onPress={send}
             disabled={sending || !draft.trim()}
             style={styles.sendButton}>
-            <Feather name="send" size={20} color={draft.trim() ? theme.primary : theme.muted} />
+            <Feather aria-hidden name="send" size={20} color={draft.trim() ? theme.primary : theme.muted} />
           </PressableScale>
         </View>
       )}

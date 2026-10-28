@@ -12,7 +12,7 @@ export function HelpCard({ subject = '이 댓글' }: { subject?: string }) {
   return (
     <View style={[styles.card, { backgroundColor: theme.helpSoft }]} accessibilityRole="summary">
       <View style={styles.title}>
-        <Feather name="phone" size={18} color={theme.ink} />
+        <Feather aria-hidden name="phone" size={18} color={theme.ink} />
         <AppText variant="titleMd">이야기를 들어줄 곳이 있어요</AppText>
       </View>
       <AppText variant="bodySm" color="slate">

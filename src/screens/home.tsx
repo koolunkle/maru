@@ -97,7 +97,7 @@ export function Home() {
           onPress={() => router.push("/settings")}
           style={styles.iconButton}
         >
-          <Feather name="settings" size={24} color={theme.ink} />
+          <Feather aria-hidden name="settings" size={24} color={theme.ink} />
         </PressableScale>
       </View>
 
@@ -106,7 +106,7 @@ export function Home() {
         accessible
         accessibilityLabel={streak > 0 ? `연속 출석 ${streak}일째` : "연속 출석 없음. 오늘 미션 하나로 출석해 볼까요?"}
       >
-        <Feather name="zap" size={20} color={theme.accent} />
+        <Feather aria-hidden name="zap" size={20} color={theme.accent} />
         {streak > 0 ? (
           <AppText variant="titleMd" tabular>
             {streak}일째
@@ -191,7 +191,7 @@ export function Home() {
             { backgroundColor: theme.surface, borderColor: theme.hairline },
           ]}
         >
-          <Feather name="edit-3" size={20} color={theme.accent} />
+          <Feather aria-hidden name="edit-3" size={20} color={theme.accent} />
           <View style={styles.noteText}>
             <AppText variant="titleMd">한 줄 기록</AppText>
             <AppText variant="caption" color="steel">
@@ -200,7 +200,7 @@ export function Home() {
                 : "오늘의 기분과 한 줄을 남겨요"}
             </AppText>
           </View>
-          <Feather name="chevron-right" size={20} color={theme.steel} />
+          <Feather aria-hidden name="chevron-right" size={20} color={theme.steel} />
         </PressableScale>
       )}
       {profile && noteOpen && <HomeSheet title="한 줄 기록" onClose={() => { setNoteOpen(false); loadTodayNote(); }}><DailyNoteCard userId={profile.id} /></HomeSheet>}

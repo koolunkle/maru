@@ -193,20 +193,20 @@ export function MailboxCard({ userId }: { userId: string }) {
         show('inbox');
         opened.current = true; setVisible(true); void reload();
       }} style={({ hovered }) => [styles.card, { backgroundColor: theme.surface, borderColor: hovered ? theme.hairlineStrong : theme.hairline }]}>
-        <Feather name="mail" size={24} color={theme.accent} />
+        <Feather aria-hidden name="mail" size={24} color={theme.accent} />
         <View style={styles.cardText}>
           <AppText variant="titleMd">마음 우체통</AppText>
           <AppText variant="caption" color="steel">{unread ? `아직 읽지 않은 한 줄 ${unread}개가 있어요` : '한 줄을 주고받아 볼까요?'}</AppText>
         </View>
-        <Feather name="chevron-right" size={20} color={theme.slate} />
+        <Feather aria-hidden name="chevron-right" size={20} color={theme.slate} />
       </PressableScale>
       <Modal visible={visible} transparent animationType="none" onRequestClose={close}>
         {visible && <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.overlay}>
           <Pressable accessibilityRole="button" accessibilityLabel="우체통 닫기" disabled={busy} onPress={close} style={[StyleSheet.absoluteFill, { backgroundColor: SheetScrim }]} />
           <Animated.View accessibilityViewIsModal entering={reduceMotion ? FadeIn.duration(150).reduceMotion(ReduceMotion.Never) : SlideInDown.duration(250).easing(Easing.bezier(0, 0, 0.58, 1))} style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Spacing.xl + insets.bottom }]}>
             <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-              <Pressable accessibilityRole="button" accessibilityLabel="우체통 닫기" onPress={close} disabled={busy} style={[styles.close, { backgroundColor: theme.surfaceSunken }]}><Feather name="x" size={24} color={theme.slate} /></Pressable>
-              <View style={styles.envelope}><Feather name={submitted && accepted ? 'check-circle' : 'mail'} size={40} color={submitted && accepted ? theme.success : theme.accent} /></View>
+              <Pressable accessibilityRole="button" accessibilityLabel="우체통 닫기" onPress={close} disabled={busy} style={[styles.close, { backgroundColor: theme.surfaceSunken }]}><Feather aria-hidden name="x" size={24} color={theme.slate} /></Pressable>
+              <View style={styles.envelope}><Feather aria-hidden name={submitted && accepted ? 'check-circle' : 'mail'} size={40} color={submitted && accepted ? theme.success : theme.accent} /></View>
               <AppText color="accentInk" style={styles.label}>마음 우체통</AppText>
               <AppText variant="display" accessibilityRole="header" accessibilityLiveRegion="polite" style={styles.title}>{title}</AppText>
               {notice && <AppText variant="bodySm" accessibilityRole="alert">{notice}</AppText>}

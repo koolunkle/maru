@@ -108,10 +108,10 @@ export function Room() {
                 ]}>
                 {icon ? (
                   <Animated.View key={item.furniture_id} entering={ZoomIn.springify().damping(12)}>
-                    <MaterialCommunityIcons name={icon.name} size={40} color={theme[icon.color]} />
+                    <MaterialCommunityIcons aria-hidden name={icon.name} size={40} color={theme[icon.color]} />
                   </Animated.View>
                 ) : (
-                  <Feather name="plus" size={16} color={theme.muted} />
+                  <Feather aria-hidden name="plus" size={16} color={theme.muted} />
                 )}
               </PressableScale>
             );
@@ -148,9 +148,9 @@ export function Room() {
                 accessibilityLabel={have ? `${f.name}, 가짐` : `${f.name}, 잠김, ${unlockText(f.unlock_rule)}`}
                 style={[styles.item, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
                 {have && icon ? (
-                  <MaterialCommunityIcons name={icon.name} size={32} color={theme[icon.color]} />
+                  <MaterialCommunityIcons aria-hidden name={icon.name} size={32} color={theme[icon.color]} />
                 ) : (
-                  <MaterialCommunityIcons name="lock-outline" size={24} color={theme.muted} />
+                  <MaterialCommunityIcons aria-hidden name="lock-outline" size={24} color={theme.muted} />
                 )}
                 <AppText variant="caption" color={have ? 'ink' : 'steel'} numberOfLines={1}>
                   {f.name}
@@ -188,7 +188,7 @@ export function Room() {
                     disabled={busy}
                     onPress={() => editing && place(editing, f.id)}
                     style={[styles.item, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
-                    {icon && <MaterialCommunityIcons name={icon.name} size={32} color={theme[icon.color]} />}
+                    {icon && <MaterialCommunityIcons aria-hidden name={icon.name} size={32} color={theme[icon.color]} />}
                     <AppText variant="caption">{f.name}</AppText>
                   </PressableScale>
                 );

@@ -101,7 +101,7 @@ export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; a
           <PressableScale key={item.id} accessibilityRole="button" disabled={!item.ready || busy} onPress={() => open(item)}
             accessibilityLabel={item.ready ? `${rowText(item)}, 캡슐 열기` : rowText(item)}
             style={[styles.row, { borderColor: theme.hairline }]}>
-            <Feather name={item.opened_at ? 'unlock' : 'lock'} size={20} color={theme.accent} />
+            <Feather aria-hidden name={item.opened_at ? 'unlock' : 'lock'} size={20} color={theme.accent} />
             <View style={styles.rowText}><AppText>{rowText(item)}</AppText>{item.opened_at && <AppText numberOfLines={1} color="slate">{item.body}</AppText>}</View>
           </PressableScale>
         ))}

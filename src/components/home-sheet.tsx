@@ -17,7 +17,7 @@ export function HomeSheet({ title, onClose, children }: { title: string; onClose
       <Pressable accessibilityRole="button" accessibilityLabel={title + ' 닫기'} onPress={close} style={[StyleSheet.absoluteFill, { backgroundColor: SheetScrim }]} />
       <Animated.View accessibilityViewIsModal entering={reduceMotion ? FadeIn.duration(150).reduceMotion(ReduceMotion.Never) : SlideInDown.duration(250).easing(Easing.bezier(0, 0, 0.58, 1))} style={[styles.sheet, { backgroundColor: theme.surface, paddingBottom: Spacing.xl + insets.bottom }]}>
         <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.content}>
-          <Pressable accessibilityRole="button" accessibilityLabel={title + ' 닫기'} onPress={close} style={[styles.close, { backgroundColor: theme.surfaceSunken }]}><Feather name="x" size={24} color={theme.slate} /></Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel={title + ' 닫기'} onPress={close} style={[styles.close, { backgroundColor: theme.surfaceSunken }]}><Feather aria-hidden name="x" size={24} color={theme.slate} /></Pressable>
           <AppText variant="display" accessibilityRole="header" style={styles.title}>{title}</AppText>
           {children}
         </ScrollView>
