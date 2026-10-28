@@ -9,7 +9,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
-import { kstDate, kstWeekStart } from '@/utils/date';
+import { formatDateRange, kstDate, kstWeekStart } from '@/utils/date';
 import { currentStreak } from '@/utils/streak';
 
 const Weekdays = ['월', '화', '수', '목', '금', '토', '일'];
@@ -63,21 +63,28 @@ export function Record() {
   const theme = useTheme();
   const { session, profile } = useSession();
   const [stats, setStats] = useState<Stats | null>(null);
+  const [failed, setFailed] = useState(false);
   const today = kstDate();
+  const streak = profile ? currentStreak(profile, today) : 0;
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!session) return;
-      let active = true;
-      fetchStats(session.user.id, today).then(
-        (s) => active && setStats(s),
-        () => active && setStats({ weekRate: null, weekDone: 0, weekStarted: 0, attended: new Set() }),
-      );
-      return () => {
-        active = false;
-      };
-    }, [session, today]),
-  );
+  const load = useCallback(() => {
+    if (!session) return;
+    let active = true;
+    // 실패하면 보이던 기록을 지우지 않는다
+    fetchStats(session.user.id, today).then(
+      (s) => {
+        if (!active) return;
+        setFailed(false);
+        setStats(s);
+      },
+      () => active && setFailed(true),
+    );
+    return () => {
+      active = false;
+    };
+  }, [session, today]);
+
+  useFocusEffect(load);
 
   return (
     <Screen edges={['top']}>
@@ -85,8 +92,22 @@ export function Record() {
         <AppText variant="titleLg">기록</AppText>
       </View>
 
+      {failed && (
+        <View style={styles.failed}>
+          <AppText color="slate" accessibilityRole="alert">기록을 불러오지 못했어요.</AppText>
+          <Button
+            label="다시 불러오기"
+            variant="secondary"
+            size="sm"
+            onPress={() => {
+              setFailed(false);
+              load();
+            }}
+          />
+        </View>
+      )}
       {!stats ? (
-        <ActivityIndicator color={theme.primary} style={styles.loading} />
+        !failed && <ActivityIndicator color={theme.primary} style={styles.loading} />
       ) : (
         <>
           <View style={styles.section}>
@@ -100,7 +121,10 @@ export function Record() {
               <View style={[styles.fill, { backgroundColor: theme.primary, width: `${stats.weekRate ?? 0}%` }]} />
             </View>
             <AppText variant="caption" color="steel" tabular>
-              시작한 오늘의 미션 {stats.weekStarted}개 중 {stats.weekDone}개 완료 · 연속 {profile ? currentStreak(profile, kstDate()) : 0}일째
+              {stats.weekStarted
+                ? `시작한 오늘의 미션 ${stats.weekStarted}개 중 ${stats.weekDone}개 완료`
+                : '이번 주에 시작한 오늘의 미션이 아직 없어요'}
+              {streak > 0 && ` · 연속 ${streak}일째`}
             </AppText>
           </View>
 
@@ -118,6 +142,8 @@ export function Record() {
                   <View key={day ?? `pad-${i}`} style={styles.cell}>
                     {day && (
                       <View
+                        accessible
+                        accessibilityLabel={`${formatDateRange(day, day)}${on ? ', 출석' : ''}${day === today ? ', 오늘' : ''}`}
                         style={[
                           styles.dot,
                           on && { backgroundColor: theme.accentSoft },
@@ -155,6 +181,11 @@ const styles = StyleSheet.create({
   },
   loading: {
     marginTop: Spacing.section,
+  },
+  failed: {
+    marginTop: Spacing.xl,
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
   },
   section: {
     marginTop: Spacing.xl,
