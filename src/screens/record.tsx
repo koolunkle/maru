@@ -10,6 +10,7 @@ import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import { kstDate, kstWeekStart } from '@/utils/date';
+import { currentStreak } from '@/utils/streak';
 
 const Weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -99,7 +100,7 @@ export function Record() {
               <View style={[styles.fill, { backgroundColor: theme.primary, width: `${stats.weekRate ?? 0}%` }]} />
             </View>
             <AppText variant="caption" color="steel" tabular>
-              시작한 오늘의 미션 {stats.weekStarted}개 중 {stats.weekDone}개 완료 · 연속 {profile?.streak ?? 0}일째
+              시작한 오늘의 미션 {stats.weekStarted}개 중 {stats.weekDone}개 완료 · 연속 {profile ? currentStreak(profile, kstDate()) : 0}일째
             </AppText>
           </View>
 

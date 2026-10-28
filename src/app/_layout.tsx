@@ -1,3 +1,4 @@
+import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import { Stack } from 'expo-router/stack';
@@ -15,12 +16,16 @@ SplashScreen.preventAutoHideAsync();
 
 function RootStack() {
   const { isReady, session, profile } = useSession();
-  const [fontsLoaded] = useFonts({
+  // 아이콘 글꼴도 함께 불러와야 웹에서 아이콘이 잠시 네모로 보이지 않는다(#19)
+  const [fontsLoaded, fontError] = useFonts({
+    ...Feather.font,
+    ...MaterialCommunityIcons.font,
     'Pretendard-Regular': require('@/assets/fonts/Pretendard-Regular.otf'),
     'Pretendard-SemiBold': require('@/assets/fonts/Pretendard-SemiBold.otf'),
     'Pretendard-Bold': require('@/assets/fonts/Pretendard-Bold.otf'),
   });
-  const ready = isReady && fontsLoaded;
+  // 글꼴을 불러오지 못해도 기본 글꼴로 계속 진행한다(빈 화면에서 멈추지 않게)
+  const ready = isReady && (fontsLoaded || fontError !== null);
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
