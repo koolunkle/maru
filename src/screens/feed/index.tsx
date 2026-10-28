@@ -17,7 +17,7 @@ export function Feed() {
   const theme = useTheme();
   const { session } = useSession();
   const userId = session?.user.id;
-  const { posts, error, reload, setPosts } = useFeed(userId);
+  const { posts, error, reload, setPosts, hasMore, loadingMore, moreError, loadMore } = useFeed(userId);
 
   const firstFocus = useRef(true);
   useFocusEffect(
@@ -62,6 +62,12 @@ export function Feed() {
           {posts.map((p) => (
             <PostCard key={p.id} post={p} userId={userId ?? ''} onChange={update} />
           ))}
+          {moreError && (
+            <AppText variant="caption" color="slate" accessibilityRole="alert" style={styles.center}>
+              이전 인증을 불러오지 못했어요. 다시 눌러 볼까요?
+            </AppText>
+          )}
+          {hasMore && <Button label="이전 인증 더 보기" variant="ghost" onPress={loadMore} loading={loadingMore} />}
         </View>
       )}
     </Screen>
@@ -75,6 +81,9 @@ const styles = StyleSheet.create({
   },
   list: {
     gap: Spacing.sm,
+  },
+  center: {
+    textAlign: 'center',
   },
   state: {
     alignItems: 'center',
