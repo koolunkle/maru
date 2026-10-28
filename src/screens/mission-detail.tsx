@@ -16,7 +16,7 @@ import { Functions } from '@/lib/functions';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
-import { formatDateRange, kstEndOfDay, kstEndOfWeek } from '@/utils/date';
+import { endingNotice, formatDateRange, kstEndOfDay, kstEndOfWeek } from '@/utils/date';
 
 type MissionType = Enums<'mission_type'>;
 
@@ -121,11 +121,13 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
   async function toggleJoin() {
     if (!detail) return;
     setBusy(true);
+    setNotice(null);
     const { error } = detail.joined
       ? await supabase.from('mission_participants').delete().eq('mission_id', missionId).eq('user_id', userId)
       : await supabase.from('mission_participants').upsert({ mission_id: missionId }, { onConflict: 'mission_id,user_id', ignoreDuplicates: true });
     setBusy(false);
-    if (!error) load();
+    if (error) setNotice('지금은 바꾸지 못했어요. 다시 눌러 볼까요?');
+    else load();
   }
 
   async function retryRelay() {
@@ -158,7 +160,18 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
         <BackHeader />
         <View style={styles.center}>
           {failed ? (
-            <AppText color="slate">미션을 불러오지 못했어요.</AppText>
+            <>
+              <AppText color="slate" accessibilityRole="alert">미션을 불러오지 못했어요.</AppText>
+              <Button
+                label="다시 불러오기"
+                variant="secondary"
+                size="sm"
+                onPress={() => {
+                  setFailed(false);
+                  load();
+                }}
+              />
+            </>
           ) : (
             <ActivityIndicator color={theme.primary} />
           )}
@@ -230,6 +243,11 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
               {formatDateRange(mission.event.start_date, mission.event.end_date)}
               {mission.event.place ? ` · ${mission.event.place}` : ''}
             </AppText>
+            {endingNotice(mission.event.end_date) && (
+              <AppText variant="bodySm" color="accentInk">
+                {endingNotice(mission.event.end_date)}
+              </AppText>
+            )}
             {/* 외부 데이터의 주소라 https만 연다 */}
             {mission.event.url?.startsWith('https://') && (
               <Button
@@ -307,6 +325,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: Spacing.sm,
   },
   centerText: {
     textAlign: 'center',

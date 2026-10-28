@@ -1,5 +1,5 @@
 // 서울 열린데이터광장 문화행사 정보(culturalEventInfo) 해석. Deno·Node 테스트 양쪽에서 쓰도록 외부 의존성을 두지 않는다.
-import { addDays } from './kst.ts';
+import { addDays, weekStart } from './kst.ts';
 
 // 서울 열린데이터광장은 https를 지원하지 않는다. 인증키가 경로에 들어가므로 주소를 로그에 남기지 않는다.
 export const SeoulOpenApi = 'http://openapi.seoul.go.kr:8088';
@@ -81,6 +81,16 @@ export function toEvent(row: SeoulEventRow, today: string): EventRecord | null {
     start_date: start,
     end_date: end,
   };
+}
+
+/**
+ * 주간 행사 미션으로 넘길 행사의 기간 조건(#21).
+ * 이번 주(일요일까지) 안에 시작하고, 오늘 기준 이틀 이상 남은 행사. 일요일이 먼저 오면 일요일까지 열려 있으면 된다.
+ */
+export function weeklyEventWindow(today: string) {
+  const weekEnd = addDays(weekStart(today), 6);
+  const twoDaysLater = addDays(today, 2);
+  return { minEnd: twoDaysLater < weekEnd ? twoDaysLater : weekEnd, maxStart: weekEnd };
 }
 
 /** 행사 미션 제목. AI가 행사 이름을 그대로 쓰면 앞의 [주최] 표기를 떼고 "보러 가기"를 붙인다(40자 이하) */

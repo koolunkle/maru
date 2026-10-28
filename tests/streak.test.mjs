@@ -42,3 +42,11 @@ test('월초·연초 날짜 계산', () => {
   assert.equal(currentStreak(p('2026-12-31'), '2027-01-01'), 5);
   assert.equal(date.addKstDays('2026-03-01', -1), '2026-02-28');
 });
+
+test('행사 마감 안내', () => {
+  assert.equal(date.endingNotice('2026-10-28', '2026-10-28'), '오늘 끝나요');
+  assert.equal(date.endingNotice('2026-10-30', '2026-10-28'), '2일 뒤 끝나요');
+  assert.equal(date.endingNotice('2026-11-03', '2026-10-28'), '6일 뒤 끝나요');
+  assert.equal(date.endingNotice('2026-11-04', '2026-10-28'), null);
+  assert.equal(date.endingNotice('2026-10-27', '2026-10-28'), null);
+});

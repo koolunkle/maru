@@ -87,6 +87,14 @@ test('행사 이름을 그대로 쓴 미션 제목은 행동형으로 바꾼다'
   assert.ok(long.length <= 40 && long.endsWith('… 보러 가기'), long);
 });
 
+test('주간 행사 미션은 이틀 이상 남은 행사만, 일요일에는 그날 끝나는 행사도', () => {
+  // 2026-10-28 수요일, 그 주 일요일 11-01
+  assert.deepEqual(events.weeklyEventWindow('2026-10-28'), { minEnd: '2026-10-30', maxStart: '2026-11-01' });
+  // 토요일: 이틀 뒤(월)보다 일요일이 먼저
+  assert.deepEqual(events.weeklyEventWindow('2026-10-31'), { minEnd: '2026-11-01', maxStart: '2026-11-01' });
+  assert.deepEqual(events.weeklyEventWindow('2026-11-01'), { minEnd: '2026-11-01', maxStart: '2026-11-01' });
+});
+
 test('구 목록은 앱의 Districts와 같다', async () => {
   const source = await readFile(new URL('../src/constants/domain.ts', import.meta.url), 'utf8');
   const app = source.match(/Districts = \[([\s\S]*?)\]/)[1].match(/'([^']+)'/g).map((s) => s.slice(1, -1));
