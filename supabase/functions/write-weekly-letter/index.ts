@@ -27,7 +27,7 @@ Deno.serve(handler(async (req) => {
     admin.from('daily_notes').select('note_date, mood, text').eq('user_id', userId).gte('note_date', week).lt('note_date', end).order('note_date'),
     admin.from('user_missions').select('completed_at, missions(title)').eq('user_id', userId).eq('status', 'completed')
       .gte('completed_at', `${week}T00:00:00+09:00`).lt('completed_at', `${end}T00:00:00+09:00`).order('completed_at'),
-    admin.from('weekly_letters').select('body, source, input_hash, finalized').eq('user_id', userId).eq('week_start', week).maybeSingle(),
+    admin.from('weekly_letters').select('body, source, input_hash, finalized, updated_at').eq('user_id', userId).eq('week_start', week).maybeSingle(),
   ]);
   if (notesResult.error || missionsResult.error || existingResult.error) throw new Error('weekly letter lookup failed');
   const notes = notesResult.data ?? [];
@@ -50,7 +50,15 @@ Deno.serve(handler(async (req) => {
   const body = result?.body.trim();
   const source = body && !hasBannedWord(body) ? 'ai' : 'rule';
   const letter = { user_id: userId, week_start: week, body: source === 'ai' ? body : fallback, source, input_hash: hash, finalized: past, updated_at: new Date().toISOString() };
-  const { error } = await admin.from('weekly_letters').upsert(letter);
+  const write = existing
+    ? await admin.from('weekly_letters').update(letter).eq('user_id', userId).eq('week_start', week)
+      .eq('updated_at', existing.updated_at).select('body, source').maybeSingle()
+    : await admin.from('weekly_letters').upsert(letter, { onConflict: 'user_id,week_start', ignoreDuplicates: true })
+      .select('body, source').maybeSingle();
+  if (write.error) throw write.error;
+  if (write.data) return json({ ...write.data, notes, missions });
+  const { data: saved, error } = await admin.from('weekly_letters').select('body, source')
+    .eq('user_id', userId).eq('week_start', week).single();
   if (error) throw error;
-  return json({ body: letter.body, source, notes, missions });
+  return json({ ...saved, notes, missions });
 }));

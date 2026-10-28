@@ -68,6 +68,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
   const [relayBusy, setRelayBusy] = useState(false);
   const [relayNotice, setRelayNotice] = useState<string | null>(null);
   const relaySending = useRef(false);
+  const submitting = useRef(false);
+  const uploadRequest = useRef<{ path: string; note: string; isPublic: boolean } | null>(null);
 
   async function sendRelay() {
     const body = relayBody.trim();
@@ -128,6 +130,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
     const asset = picked.assets[0];
     try {
       setPhoto(await preparePhoto(asset.uri, asset.width, asset.height));
+      uploadRequest.current = null;
       setPendingId(null);
       setResult(null);
     } catch {
@@ -136,24 +139,41 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
   }
 
   async function submit() {
-    if (!photo || !session) return;
+    if (!photo || !session || submitting.current) return;
+    submitting.current = true;
     setBusy(true);
     setNotice(null);
     try {
       let verificationId = pendingId;
+      if (uploadRequest.current && (uploadRequest.current.note !== note.trim() || uploadRequest.current.isPublic !== isPublic)) {
+        verificationId = null;
+        uploadRequest.current = null;
+        setPendingId(null);
+      }
       if (!verificationId) {
-        const path = `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
+        const text = note.trim();
+        if (!uploadRequest.current || uploadRequest.current.note !== text || uploadRequest.current.isPublic !== isPublic) {
+          uploadRequest.current = { path: `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 12)}.jpg`, note: text, isPublic };
+        }
+        const path = uploadRequest.current.path;
         const upload = await supabase.storage
           .from('verifications')
           .upload(path, photo.bytes, { contentType: 'image/jpeg' });
-        if (upload.error) throw upload.error;
+        if (upload.error) {
+          const existing = await supabase.storage.from('verifications').download(path);
+          if (existing.error || !existing.data) throw upload.error;
+        }
         const { data, error } = await supabase
           .from('verifications')
-          .insert({ user_mission_id: userMissionId, photo_path: path, text: note.trim() || null, is_public: isPublic })
+          .insert({ user_mission_id: userMissionId, photo_path: path, text: text || null, is_public: isPublic })
           .select('id')
           .single();
-        if (error) throw error;
-        verificationId = data.id;
+        if (error) {
+          const existing = await supabase.from('verifications').select('id, user_mission_id, text')
+            .eq('user_id', session.user.id).eq('photo_path', path).maybeSingle();
+          if (existing.error || !existing.data || existing.data.user_mission_id !== userMissionId || existing.data.text !== (text || null)) throw error;
+          verificationId = existing.data.id;
+        } else verificationId = data.id;
         setPendingId(verificationId);
       }
 
@@ -162,6 +182,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
       if (judged.result === 'retry') {
         // 다시 찍으면 새 인증으로 올린다
         setPendingId(null);
+        uploadRequest.current = null;
       } else if (Platform.OS !== 'web') {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
@@ -172,6 +193,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           : '올리지 못했어요. 다시 시도해 주세요.',
       );
     } finally {
+      submitting.current = false;
       setBusy(false);
     }
   }

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { FunctionError, Functions, type JudgedBy } from '@/lib/functions';
+import { createMailboxRequestId } from '@/lib/mailbox';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Tables } from '@/types/database';
@@ -38,12 +39,12 @@ async function fetchProgress(profileId: string) {
   return data;
 }
 
-async function fetchToday(profile: Profile, refresh: boolean): Promise<TodayMissions> {
+async function fetchToday(profile: Profile, refresh: boolean, requestId?: string): Promise<TodayMissions> {
   const progressRows = await fetchProgress(profile.id);
   let picked: { daily: Mission[]; weekly: Mission | null };
   let source: JudgedBy;
   try {
-    ({ source, ...picked } = await Functions.recommendMissions(refresh));
+    ({ source, ...picked } = await Functions.recommendMissions(refresh, requestId));
   } catch (e) {
     if (refresh) throw e;
     picked = await fetchSeedMissions(profile);
@@ -67,12 +68,16 @@ export function useTodayMissions() {
   const [error, setError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
+  const refreshRequest = useRef<string | null>(null);
+  const refreshWorking = useRef(false);
   // 프로필 객체는 출석 갱신 등으로 자주 바뀌므로, 재조회는 사용자(id)가 바뀔 때와 reload 때만 한다.
   const profileRef = useRef(profile);
   useEffect(() => {
     profileRef.current = profile;
   });
   const profileId = profile?.id;
+
+  useEffect(() => { refreshRequest.current = null; }, [profileId]);
 
   useEffect(() => {
     const current = profileRef.current;
@@ -94,15 +99,20 @@ export function useTodayMissions() {
 
   /** '다른 미션 보기' — 하루 1회. 이미 썼으면 'refresh_limit' */
   const refresh = useCallback(async (): Promise<'ok' | 'limit' | 'failed'> => {
-    if (!profile) return 'failed';
+    if (!profile || refreshWorking.current) return 'failed';
+    refreshWorking.current = true;
+    refreshRequest.current ??= createMailboxRequestId();
     setRefreshing(true);
     try {
-      setData(await fetchToday(profile, true));
+      setData(await fetchToday(profile, true, refreshRequest.current));
+      refreshRequest.current = null;
       return 'ok';
     } catch (e) {
-      return e instanceof FunctionError && e.code === 'refresh_limit' ? 'limit' : 'failed';
+      if (e instanceof FunctionError && e.code === 'refresh_limit') { refreshRequest.current = null; return 'limit'; }
+      return 'failed';
     } finally {
       setRefreshing(false);
+      refreshWorking.current = false;
     }
   }, [profile]);
 

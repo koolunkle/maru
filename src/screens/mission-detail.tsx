@@ -1,4 +1,5 @@
 import { router, useFocusEffect } from 'expo-router';
+import { FunctionsHttpError } from '@supabase/supabase-js';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
@@ -18,9 +19,6 @@ import type { Enums, Tables } from '@/types/database';
 import { kstEndOfDay, kstEndOfWeek } from '@/utils/date';
 
 type MissionType = Enums<'mission_type'>;
-
-/** PRD F3 동시 진행 상한 */
-const MaxActive: Record<MissionType, number> = { daily: 3, weekly: 1 };
 
 type Detail = {
   mission: Tables<'missions'>;
@@ -103,27 +101,18 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
   async function start() {
     setBusy(true);
     setNotice(null);
-    const { count } = await supabase
-      .from('user_missions')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('type', type)
-      .in('status', ['in_progress', 'judging']);
-    if ((count ?? 0) >= MaxActive[type]) {
-      setNotice(type === 'daily' ? '오늘 미션은 3개까지 함께 할 수 있어요' : '이번 주 미션은 하나씩 해요');
-      setBusy(false);
-      return;
-    }
-    const { error } = await supabase.from('user_missions').insert({
-      mission_id: missionId,
-      type,
-      due_at: (type === 'daily' ? kstEndOfDay() : kstEndOfWeek()).toISOString(),
-    });
+    const { data, error } = await supabase.functions.invoke('start-mission', { body: {
+      missionId, type, dueAt: (type === 'daily' ? kstEndOfDay() : kstEndOfWeek()).toISOString(),
+    } });
     setBusy(false);
     if (error) {
-      setNotice('시작하지 못했어요. 다시 시도해 주세요.');
+      const payload = error instanceof FunctionsHttpError ? await error.context.json().catch(() => null) : null;
+      setNotice(payload?.error === 'mission_limit'
+        ? (type === 'daily' ? '오늘 미션은 3개까지 함께 할 수 있어요' : '이번 주 미션은 하나씩 해요')
+        : '시작하지 못했어요. 다시 시도해 주세요.');
       return;
     }
+    if (!data?.id) { setNotice('시작하지 못했어요. 다시 시도해 주세요.'); return; }
     load();
   }
 
@@ -132,7 +121,7 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
     setBusy(true);
     const { error } = detail.joined
       ? await supabase.from('mission_participants').delete().eq('mission_id', missionId).eq('user_id', userId)
-      : await supabase.from('mission_participants').insert({ mission_id: missionId });
+      : await supabase.from('mission_participants').upsert({ mission_id: missionId }, { onConflict: 'mission_id,user_id', ignoreDuplicates: true });
     setBusy(false);
     if (!error) load();
   }

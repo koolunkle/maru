@@ -10,7 +10,6 @@ import { generateJson } from '../_shared/ai.ts';
 import { admin, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
-import { addDays, kstDate, weekStart } from '../_shared/kst.ts';
 
 const JudgeSchema = z.object({
   result: z.enum(['pass', 'retry', 'privacy']),
@@ -35,26 +34,6 @@ const FallbackMessage = {
   privacy: '얼굴이나 개인정보가 보여서 비공개로 저장했어요',
 } as const;
 
-type Rule =
-  | { type: 'first_mission' }
-  | { type: 'streak'; days: number }
-  | { type: 'category_count'; category: string; count: number }
-  | { type: 'first_weekly' }
-  | { type: 'event_mission' };
-
-/** 연속 출석 계산 (PRD F5): 하루 비면 주 1회 '쉼표'로 이어 준다 */
-function nextStreak(p: { streak: number; last_attended: string | null; rest_used_week: string | null }, today: string) {
-  if (p.last_attended === today) return { streak: p.streak, last_attended: today, rest_used_week: p.rest_used_week };
-  if (p.last_attended === addDays(today, -1)) {
-    return { streak: p.streak + 1, last_attended: today, rest_used_week: p.rest_used_week };
-  }
-  const week = weekStart(today);
-  if (p.last_attended === addDays(today, -2) && p.rest_used_week !== week) {
-    return { streak: p.streak + 1, last_attended: today, rest_used_week: week };
-  }
-  return { streak: 1, last_attended: today, rest_used_week: p.rest_used_week };
-}
-
 Deno.serve(
   handler(async (req) => {
     const userId = await requireUserId(req);
@@ -67,7 +46,12 @@ Deno.serve(
       .eq('id', verification_id)
       .single();
     if (!v || v.user_id !== userId) throw new HttpError(404, 'not_found');
-    if (v.ai_result) throw new HttpError(409, 'already_judged');
+    if (v.ai_result) {
+      const { data: saved, error } = await admin.from('verification_responses').select('response').eq('verification_id', v.id).maybeSingle();
+      if (error) throw error;
+      if (saved) return json(saved.response);
+      throw new HttpError(409, 'already_judged');
+    }
     const um = v.user_missions;
     if (!um || !['in_progress', 'judging'].includes(um.status)) throw new HttpError(409, 'mission_not_active');
 
@@ -75,7 +59,8 @@ Deno.serve(
     if (dlError || !file) throw new HttpError(400, 'photo_missing');
     const image = encodeBase64(new Uint8Array(await file.arrayBuffer()));
 
-    await admin.from('user_missions').update({ status: 'judging' }).eq('id', um.id);
+    const { error: judgingError } = await admin.from('user_missions').update({ status: 'judging' }).eq('id', um.id).eq('status', 'in_progress');
+    if (judgingError) throw judgingError;
 
     let judged = await generateJson({
       tier: 'main',
@@ -90,7 +75,8 @@ Deno.serve(
       const { data: config } = await admin.from('app_config').select('value').eq('key', 'verify_fallback').maybeSingle();
       if (config?.value !== 'pass') {
         // 다시 시도할 수 있도록 진행 중 상태로 되돌린다
-        await admin.from('user_missions').update({ status: 'in_progress' }).eq('id', um.id);
+        const { error } = await admin.from('user_missions').update({ status: 'in_progress' }).eq('id', um.id).eq('status', 'judging');
+        if (error) throw error;
         throw new HttpError(503, 'ai_unavailable');
       }
       // PRD F4 '관대한 판정' 원칙에 따라 통과 처리
@@ -101,60 +87,10 @@ Deno.serve(
     const message =
       judged.message.trim() && !hasBannedWord(judged.message) ? judged.message.trim().slice(0, 60) : FallbackMessage[judged.result];
 
-    await admin
-      .from('verifications')
-      .update({
-        ai_result: judged.result,
-        ai_message: message,
-        ...(judged.result === 'privacy' ? { is_public: false } : {}),
-      })
-      .eq('id', v.id);
-
-    if (judged.result === 'retry') {
-      await admin.from('user_missions').update({ status: 'in_progress' }).eq('id', um.id);
-      return json({ result: 'retry', message, streak: null, rewards: [], judged_by: judgedBy });
-    }
-
-    // 완료 처리
-    await admin.from('user_missions').update({ status: 'completed', completed_at: new Date().toISOString() }).eq('id', um.id);
-
-    const today = kstDate();
-    const { data: profile } = await admin
-      .from('profiles')
-      .select('streak, last_attended, rest_used_week')
-      .eq('id', userId)
-      .single();
-    const streak = nextStreak(profile, today);
-    await admin.from('profiles').update(streak).eq('id', userId);
-
-    // 보상 판정 (PRD F7)
-    const [{ data: furniture }, { data: owned }, { data: done }] = await Promise.all([
-      admin.from('furniture').select('*').order('sort'),
-      admin.from('user_furniture').select('furniture_id').eq('user_id', userId),
-      admin.from('user_missions').select('type, missions(category, event_id)').eq('user_id', userId).eq('status', 'completed'),
-    ]);
-    const ownedIds = new Set((owned ?? []).map((o: { furniture_id: string }) => o.furniture_id));
-    const completed = done ?? [];
-    const earned = (furniture ?? []).filter((f: { id: string; unlock_rule: Rule }) => {
-      if (ownedIds.has(f.id)) return false;
-      const r = f.unlock_rule;
-      switch (r.type) {
-        case 'first_mission':
-          return completed.length >= 1;
-        case 'streak':
-          return streak.streak >= r.days;
-        case 'category_count':
-          return completed.filter((c: { missions: { category: string } }) => c.missions?.category === r.category).length >= r.count;
-        case 'first_weekly':
-          return completed.some((c: { type: string }) => c.type === 'weekly');
-        case 'event_mission':
-          return completed.some((c: { missions: { event_id: string | null } }) => c.missions?.event_id);
-      }
+    const { data: result, error } = await admin.rpc('finish_verification', {
+      p_user_id: userId, p_verification_id: v.id, p_result: judged.result, p_message: message, p_judged_by: judgedBy,
     });
-    if (earned.length) {
-      await admin.from('user_furniture').insert(earned.map((f: { id: string }) => ({ user_id: userId, furniture_id: f.id })));
-    }
-
-    return json({ result: judged.result, message, streak: streak.streak, rewards: earned, judged_by: judgedBy });
+    if (error) throw error;
+    return json(result);
   }),
 );

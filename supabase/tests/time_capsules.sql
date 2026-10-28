@@ -11,6 +11,8 @@ do $$
 declare capsule_id uuid;
 begin
   assert (select count(*) = 1 from public.list_time_capsules()), '같은 요청은 한 번만 저장';
+  begin perform public.send_time_capsule('다른 내용', 7, 'one'); raise exception '변경된 내용 허용'; exception when raise_exception then if sqlerrm <> 'request_body_changed' then raise; end if; end;
+  begin perform public.send_time_capsule('미래의 나에게', 30, 'one'); raise exception '변경된 기간 허용'; exception when raise_exception then if sqlerrm <> 'request_body_changed' then raise; end if; end;
   assert (select body is null and not ready and open_on = (now() at time zone 'Asia/Seoul')::date + 7 from public.list_time_capsules()), '잠긴 본문 숨김과 한국 날짜';
   select id into capsule_id from public.list_time_capsules();
   begin perform public.open_time_capsule(capsule_id); raise exception '조기 열기 허용'; exception when raise_exception then if sqlerrm = '조기 열기 허용' then raise; end if; end;

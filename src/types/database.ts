@@ -36,6 +36,7 @@ export type Database = {
           created_at: string
           id: string
           publish_at: string
+          request_id: string | null
           status: Database["public"]["Enums"]["comment_status"]
           user_id: string
           verification_id: string
@@ -45,6 +46,7 @@ export type Database = {
           created_at?: string
           id?: string
           publish_at?: string
+          request_id?: string | null
           status?: Database["public"]["Enums"]["comment_status"]
           user_id?: string
           verification_id: string
@@ -54,6 +56,7 @@ export type Database = {
           created_at?: string
           id?: string
           publish_at?: string
+          request_id?: string | null
           status?: Database["public"]["Enums"]["comment_status"]
           user_id?: string
           verification_id?: string
@@ -440,6 +443,38 @@ export type Database = {
           },
         ]
       }
+      recommendation_requests: {
+        Row: {
+          rec_date: string
+          refresh: boolean
+          request_id: string
+          response: Json
+          user_id: string
+        }
+        Insert: {
+          rec_date: string
+          refresh: boolean
+          request_id: string
+          response: Json
+          user_id: string
+        }
+        Update: {
+          rec_date?: string
+          refresh?: boolean
+          request_id?: string
+          response?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendation_requests_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       relay_messages: {
         Row: {
           body: string
@@ -613,6 +648,29 @@ export type Database = {
           },
         ]
       }
+      verification_responses: {
+        Row: {
+          response: Json
+          verification_id: string
+        }
+        Insert: {
+          response: Json
+          verification_id: string
+        }
+        Update: {
+          response?: Json
+          verification_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_responses_verification_id_fkey"
+            columns: ["verification_id"]
+            isOneToOne: true
+            referencedRelation: "verifications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       verifications: {
         Row: {
           ai_message: string | null
@@ -708,6 +766,16 @@ export type Database = {
     }
     Functions: {
       expire_due_missions: { Args: never; Returns: number }
+      finish_verification: {
+        Args: {
+          p_judged_by: string
+          p_message: string
+          p_result: Database["public"]["Enums"]["verification_result"]
+          p_user_id: string
+          p_verification_id: string
+        }
+        Returns: Json
+      }
       get_feed: {
         Args: { before?: string; page_size?: number }
         Returns: {
@@ -761,6 +829,14 @@ export type Database = {
         }[]
       }
       open_time_capsule: { Args: { p_id: string }; Returns: string }
+      place_furniture: {
+        Args: {
+          p_furniture_id: string
+          p_slot: Database["public"]["Enums"]["room_slot"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       publish_due_comments: { Args: never; Returns: number }
       receive_mailbox_message: {
         Args: { recipient: string }
@@ -787,11 +863,42 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      save_recommendation: {
+        Args: {
+          p_ai_missions: Json
+          p_daily_ids: string[]
+          p_date: string
+          p_expected_count: number
+          p_refresh: boolean
+          p_request_id: string
+          p_user_id: string
+          p_weekly_id: string
+        }
+        Returns: Json
+      }
       send_time_capsule: {
         Args: { p_body: string; p_days: number; p_request_id: string }
         Returns: undefined
       }
       set_demo_mode: { Args: { enabled: boolean }; Returns: undefined }
+      start_mission: {
+        Args: {
+          p_due_at: string
+          p_mission_id: string
+          p_type: Database["public"]["Enums"]["mission_type"]
+          p_user_id: string
+        }
+        Returns: string
+      }
+      submit_comment: {
+        Args: {
+          p_body: string
+          p_request_id: string
+          p_user_id: string
+          p_verification_id: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       comment_status:

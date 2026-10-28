@@ -1,6 +1,6 @@
 import { Feather } from '@expo/vector-icons';
 import { Image } from 'expo-image';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -12,6 +12,7 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import type { FeedPost } from '@/hooks/use-feed';
 import { useTheme } from '@/hooks/use-theme';
 import { Functions } from '@/lib/functions';
+import { createMailboxRequestId } from '@/lib/mailbox';
 import { supabase } from '@/lib/supabase';
 import type { Enums } from '@/types/database';
 
@@ -51,12 +52,18 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
   const [sending, setSending] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [crisis, setCrisis] = useState(false);
+  const commentRequest = useRef<{ body: string; id: string } | null>(null);
+  const commentWorking = useRef(false);
+  const reactionWorking = useRef(false);
 
   async function toggleReaction(type: ReactionType) {
+    if (reactionWorking.current) return;
+    reactionWorking.current = true;
     const on = post.myReactions.includes(type);
     const { error } = on
       ? await supabase.from('reactions').delete().eq('verification_id', post.id).eq('user_id', userId).eq('type', type)
-      : await supabase.from('reactions').insert({ verification_id: post.id, type });
+      : await supabase.from('reactions').upsert({ verification_id: post.id, type }, { onConflict: 'verification_id,user_id,type', ignoreDuplicates: true });
+    reactionWorking.current = false;
     if (error) return;
     onChange({
       ...post,
@@ -67,22 +74,26 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
 
   async function send() {
     const body = draft.trim();
-    if (!body) return;
+    if (!body || commentWorking.current) return;
+    commentWorking.current = true;
+    if (commentRequest.current?.body !== body) commentRequest.current = { body, id: createMailboxRequestId() };
     setSending(true);
     setNotice(null);
-    const { data, error } = await supabase
-      .from('comments')
-      .insert({ verification_id: post.id, body })
-      .select('*')
-      .single();
+    const { data, error } = await supabase.functions.invoke<FeedPost['comments'][number]>('submit-comment', {
+      body: { verificationId: post.id, body, requestId: commentRequest.current.id },
+    });
     if (error) {
+      commentWorking.current = false;
       setSending(false);
       setNotice('댓글을 남기지 못했어요. 다시 시도해 주세요.');
       return;
     }
+    if (!data) { commentWorking.current = false; setSending(false); setNotice('댓글을 남기지 못했어요. 다시 시도해 주세요.'); return; }
+    commentRequest.current = null;
     setDraft('');
     const { status } = await Functions.moderateComment(data.id).catch(() => ({ status: 'pending' as const }));
     setSending(false);
+    commentWorking.current = false;
     if (status === 'crisis') {
       setCrisis(true);
       return;

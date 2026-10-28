@@ -46,7 +46,7 @@ type ModerationResult = {
 
 export const Functions = {
   /** F2 오늘의 추천. refresh = '다른 미션 보기' (하루 1회) */
-  recommendMissions: (refresh = false) => invoke<Recommendation>('recommend-missions', { refresh }),
+  recommendMissions: (refresh = false, requestId?: string) => invoke<Recommendation>('recommend-missions', { refresh, requestId }),
   /** F4 사진 판정 + 완료·출석·보상 처리 */
   verifyMission: (verificationId: string) => invoke<JudgeResult>('verify-mission', { verification_id: verificationId }),
   /** F6 댓글 검수 */
