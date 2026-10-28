@@ -16,6 +16,7 @@ import { Screen } from "@/components/screen";
 import { Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useTodayMissions } from "@/hooks/use-today-missions";
+import { getDailyNote, MoodLabels } from "@/lib/daily-note";
 import { useSession } from "@/providers/session-provider";
 import type { Tables } from "@/types/database";
 import { formatKstToday, kstDate } from "@/utils/date";
@@ -34,7 +35,19 @@ export function Home() {
   const { profile, refreshProfile } = useSession();
   const { data, error, reload, refresh, refreshing } = useTodayMissions();
   const [noteOpen, setNoteOpen] = useState(false);
+  const [todayMood, setTodayMood] = useState<number | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+
+  // 한 줄 기록 카드에 오늘 기록 여부를 보인다. 실패하면 기본 문구를 둔다
+  const userId = profile?.id;
+  const loadTodayNote = useCallback(() => {
+    if (!userId) return;
+    getDailyNote(userId, kstDate()).then(
+      (note) => setTodayMood(note?.mood ?? null),
+      () => {},
+    );
+  }, [userId]);
+  useFocusEffect(loadTodayNote);
 
   // 인증을 마치고 돌아오면 진행 상태·연속 출석을 다시 읽는다 (첫 진입은 훅이 이미 불러온다)
   const firstFocus = useRef(true);
@@ -182,13 +195,15 @@ export function Home() {
           <View style={styles.noteText}>
             <AppText variant="titleMd">한 줄 기록</AppText>
             <AppText variant="caption" color="steel">
-              오늘의 기분과 한 줄을 남겨요
+              {todayMood
+                ? `오늘 기록했어요 · ${MoodLabels[todayMood - 1]}`
+                : "오늘의 기분과 한 줄을 남겨요"}
             </AppText>
           </View>
           <Feather name="chevron-right" size={20} color={theme.steel} />
         </PressableScale>
       )}
-      {profile && noteOpen && <HomeSheet title="한 줄 기록" onClose={() => setNoteOpen(false)}><DailyNoteCard userId={profile.id} /></HomeSheet>}
+      {profile && noteOpen && <HomeSheet title="한 줄 기록" onClose={() => { setNoteOpen(false); loadTodayNote(); }}><DailyNoteCard userId={profile.id} /></HomeSheet>}
       {profile && <CapsuleCard key={`capsule:${profile.id}`} />}
     </Screen>
   );
