@@ -81,6 +81,7 @@ let endpoint;
 let user = '10000000-0000-4000-8000-000000000001';
 let aiResult = null;
 let aiCalls = 0;
+let aiText;
 const operations = [];
 let results = [];
 const admin = {
@@ -129,14 +130,16 @@ const admin = {
   },
 };
 const { handler, HttpError, json } = await loadSource('../supabase/functions/_shared/http.ts', {});
+const privacy = await loadSource('../supabase/functions/_shared/moderation-privacy.ts', {});
 await loadSource(
   '../supabase/functions/mailbox/index.ts',
   {
     'jsr:@supabase/functions-js/edge-runtime.d.ts': {},
     'npm:zod@4.6.7': { z },
     '../_shared/ai.ts': {
-      async generateJson() {
+      async generateJson(req) {
         aiCalls++;
+        aiText = req.text;
         return aiResult;
       },
     },
@@ -148,6 +151,7 @@ await loadSource(
       },
     },
     '../_shared/http.ts': { handler, HttpError, json },
+    '../_shared/moderation-privacy.ts': privacy,
   },
   {
     Deno: {
@@ -218,4 +222,14 @@ test('검수 결과를 저장하며 이미 처리된 재시도는 검수를 반�
   results = [{ error: null }, { data: { ...saved, status: 'published' } }];
   assert.equal((await request({ action: 'send', requestId: saved.request_id, body: saved.body })).status, 200);
   assert.equal(aiCalls, 0);
+});
+test('우체통 검수에서 개인정보를 가리고 위기 판정을 우선한다', async () => {
+  const saved = { id: 'saved', request_id: 'request-00000001', body: '홍길동님 test@example.com', status: 'pending' };
+  for (const [aiStatus, expected] of [['approved', 'rejected'], ['crisis', 'crisis']]) {
+    aiResult = { status: aiStatus };
+    results = [{ error: null }, { data: saved }, { data: { ...saved, status: expected } }];
+    await request({ action: 'send', requestId: saved.request_id, body: saved.body });
+    assert.doesNotMatch(aiText, /홍길동|test@example.com/);
+    assert.deepEqual(operations.at(-1).update, { status: expected });
+  }
 });

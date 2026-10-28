@@ -4,6 +4,7 @@ import { z } from 'npm:zod@4.6.7';
 import { generateJson } from '../_shared/ai.ts';
 import { admin, requireUserId } from '../_shared/clients.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
+import { filterModerationText } from '../_shared/moderation-privacy.ts';
 
 const RequestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('inbox') }),
@@ -101,17 +102,18 @@ Deno.serve(
     if (message.body !== input.body) throw new HttpError(409, 'request_body_changed');
     if (message.status !== 'pending') return json(message);
 
+    const filtered = filterModerationText(message.body);
     const result = await generateJson({
       tier: 'light',
       system: System,
-      text: message.body,
+      text: filtered.text,
       schema: ResultSchema,
       timeoutMs: 10_000,
     });
     if (!result) return json(message);
     const { data: moderated, error: updateError } = await admin
       .from('mailbox_messages')
-      .update({ status: result.status })
+      .update({ status: result.status === 'approved' && filtered.hasContact ? 'rejected' : result.status })
       .eq('id', message.id)
       .eq('status', 'pending')
       .select(SentColumns)

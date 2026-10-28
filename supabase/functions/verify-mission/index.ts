@@ -10,6 +10,7 @@ import { generateJson } from '../_shared/ai.ts';
 import { admin, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
+import { filterModerationText } from '../_shared/moderation-privacy.ts';
 
 const JudgeSchema = z.object({
   result: z.enum(['pass', 'retry', 'privacy']),
@@ -66,7 +67,7 @@ Deno.serve(
     let judged = await generateJson({
       tier: 'main',
       system: System,
-      text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, user_note: v.text ?? '' }),
+      text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, user_note: filterModerationText(v.text ?? '').text }),
       image,
       schema: JudgeSchema,
       timeoutMs: 20_000,

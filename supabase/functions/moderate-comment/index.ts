@@ -8,6 +8,7 @@ import { z } from 'npm:zod@4.6.7';
 import { generateJson } from '../_shared/ai.ts';
 import { admin, requireUserId } from '../_shared/clients.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
+import { filterModerationText } from '../_shared/moderation-privacy.ts';
 
 const ResultSchema = z.object({ status: z.enum(['approved', 'rejected', 'crisis']) });
 const RequestSchema = z.object({ comment_id: z.uuid().optional(), relay_id: z.uuid().optional() });
@@ -35,14 +36,15 @@ Deno.serve(
     if (!c || c.user_id !== userId) throw new HttpError(404, 'not_found');
     if (c.status !== 'pending') return json({ status: c.status, judged_by: null });
 
+    const filtered = filterModerationText(c.body);
     const result = await generateJson({
       tier: 'light',
       system: System,
-      text: c.body,
+      text: filtered.text,
       schema: ResultSchema,
       timeoutMs: 10_000,
     });
-    const status = result?.status ?? null;
+    const status = result?.status === 'approved' && filtered.hasContact ? 'rejected' : result?.status ?? null;
     // 검수 실패 시 pending 유지 → 공개되지 않는다
     if (!status) return json({ status: 'pending', judged_by: null });
 
