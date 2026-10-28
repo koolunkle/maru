@@ -18,7 +18,8 @@ import { useTheme } from "@/hooks/use-theme";
 import { useTodayMissions } from "@/hooks/use-today-missions";
 import { useSession } from "@/providers/session-provider";
 import type { Tables } from "@/types/database";
-import { formatKstToday } from "@/utils/date";
+import { formatKstToday, kstDate } from "@/utils/date";
+import { currentStreak } from "@/utils/streak";
 
 type Mission = Tables<"missions">;
 
@@ -61,6 +62,7 @@ export function Home() {
     if (result !== "ok") setNotice(RefreshNotice[result]);
   }
 
+  const streak = profile ? currentStreak(profile, kstDate()) : 0;
   const anyStarted = data ? data.daily.some((m) => data.progress[m.id]) : false;
   const completedDailyCount = data
     ? Math.min(
@@ -86,11 +88,19 @@ export function Home() {
         </PressableScale>
       </View>
 
-      <View style={styles.streak}>
+      <View
+        style={styles.streak}
+        accessible
+        accessibilityLabel={streak > 0 ? `연속 출석 ${streak}일째` : "연속 출석 없음. 오늘 미션 하나로 출석해 볼까요?"}
+      >
         <Feather name="zap" size={20} color={theme.accent} />
-        <AppText variant="titleMd" tabular>
-          {profile?.streak ?? 0}일째
-        </AppText>
+        {streak > 0 ? (
+          <AppText variant="titleMd" tabular>
+            {streak}일째
+          </AppText>
+        ) : (
+          <AppText color="slate">오늘 미션 하나로 출석해 볼까요?</AppText>
+        )}
       </View>
 
       {data && (
