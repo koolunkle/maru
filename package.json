@@ -1,5 +1,5 @@
 {
-  "name": "seoul-challenge",
+  "name": "maru",
   "version": "1.0.0",
   "main": "expo-router/entry",
   "dependencies": {
@@ -52,6 +52,8 @@
     "test:daily-note": "node --test tests/daily-note.test.mjs",
     "test:weekly-letter": "node --test tests/weekly-letter.test.mjs",
     "test:sync-events": "node --test tests/sync-events.test.mjs",
+    "test:drafts": "node --test tests/drafts.test.mjs",
+    "test:streak": "node --test tests/streak.test.mjs",
     "seed:build": "python scripts/build-seed.py"
   },
   "private": true

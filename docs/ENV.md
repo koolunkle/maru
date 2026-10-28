@@ -31,13 +31,6 @@
 - 재설정한 DB 비밀번호는 기존에 `supabase link` 해 둔 사람도 다시 입력해야 한다. 재설정 전에 팀에 알린다.
 - AI 키는 한 번 만든 뒤 콘솔에서도 전체 값을 다시 볼 수 없다. 잃어버리면 새로 발급하고 이전 키는 폐기한다.
 
-### 점검 기록
-
-| 날짜 | 결과 |
-| --- | --- |
-| 10/27 | `.env.example`의 URL·publishable 키가 원격 프로젝트 값과 일치(키 활성 상태). `app_config`: `comment_delay_minutes = 1`(**시연 모드 켜짐**), `verify_fallback = "pass"`. |
-| 10/27 | AI 키 동작 간접 확인: 10/18~10/20에 AI 생성 미션(`missions.source = 'ai'`) 52개, AI 판정 `retry` 8건 기록(규칙 대체로는 `retry`가 나오지 않음). 따라서 10/20 기준 AI 키는 등록·동작 중. 최근 24시간 호출 기록은 없어 현재 상태와 제공자(Gemini/Claude)는 대시보드 Edge Functions → Secrets에서 확인 필요 |
-
 ---
 
 ## A. 앱 환경 변수 (`.env.local`)

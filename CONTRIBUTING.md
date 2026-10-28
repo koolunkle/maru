@@ -10,6 +10,7 @@
 | [AGENTS.md](./AGENTS.md) | AI 코딩 도구에 주는 규칙(사람에게도 같은 규칙) |
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | 폴더 지도, 주요 흐름, 화면별 구현 상태 |
 | [docs/ENV.md](./docs/ENV.md) | 환경 변수·시크릿·운영 설정값, 전달할 권한과 점검표 |
+| [docs/USER-FLOWS.md](./docs/USER-FLOWS.md) | 페르소나별 사용자 흐름, 기능 구현 상태 |
 
 ## 1. 접근 권한 받기
 
@@ -64,7 +65,14 @@ npx expo export -p web
 npx eas-cli@latest deploy          # --prod 없이. 출력된 미리보기 URL을 PR에 붙인다
 ```
 
-- 운영 배포(`--prod`)는 관리자만 한다.
+- 운영 배포(`--prod`)는 관리자만 한다. PR을 합쳐도 운영 주소는 바뀌지 않으니, 합친 뒤 아래를 실행한다.
+
+```bash
+git switch main && git pull && npm install
+npx expo export -p web
+npx eas-cli@latest deploy --prod   # 운영 URL(seoul-challenge.expo.app)이 바로 바뀐다
+```
+
 - `app.json`의 `owner`·`extra.eas.projectId`는 바꾸지 않는다. 각자 Expo 프로젝트를 새로 만들어 연결하지 않는다. 배포 권한 오류가 나면 관리자에게 알린다.
 
 ## 4. 커밋·PR 규칙

@@ -40,7 +40,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
 
-## 이 프로젝트 (맞춤형 서울챌린지)
+## 이 프로젝트 (MY서울루틴, Maru)
 
 - 기능·문구 명세: `PRD.md`, 시각 명세·토큰: `DESIGN.md` — 구현은 이 두 문서를 단일 출처로 따른다. 토큰은 `src/constants/theme.ts`에 DESIGN.md와 같은 값으로 둔다.
 - 통합 작업 목록과 완료 기준: `docs/ROADMAP.md`. 브랜치·커밋·PR·DB 변경 절차: `CONTRIBUTING.md`.

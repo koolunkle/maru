@@ -79,7 +79,7 @@ export function Letter({ week }: { week: string }) {
               <AppText>편지를 만들 때 이 주의 기분과 한 줄 원문, 완료한 미션이 Google Gemini에 전달돼요.</AppText>
               <AppText variant="caption" color="steel">무료 서비스에서는 입력 내용이 Google의 제품 개선과 사람 검토에 사용될 수 있어요.</AppText>
               <AppText variant="caption" color="steel">기록과 편지는 자동 삭제되지 않아요. 원본을 삭제해도 이미 만든 편지에 내용이 남을 수 있어요.</AppText>
-              {error && <AppText color="error" accessibilityRole="alert">편지를 불러오지 못했어요. 다시 시도해 주세요.</AppText>}
+              {error && <AppText color="slate" accessibilityRole="alert">편지를 불러오지 못했어요. 다시 시도해 주세요.</AppText>}
               <Button label="마음 리포트 보기" loading={loading} onPress={generate} />
             </View>
           ) : (
@@ -113,7 +113,7 @@ export function Letter({ week }: { week: string }) {
           )}
           <View style={styles.section}>
             <AppText variant="titleMd">지난 편지</AppText>
-            {historyError && <AppText color="error">보관된 지난 편지를 불러오지 못했어요. 화면을 다시 열어 주세요.</AppText>}
+            {historyError && <AppText color="slate" accessibilityRole="alert">보관된 지난 편지를 불러오지 못했어요. 화면을 다시 열어 주세요.</AppText>}
             {[...new Set([...weeks.slice(1), ...storedWeeks])].filter((previous) => previous < current).sort().reverse().map((previous) => (
               <PressableScale key={previous} accessibilityRole="link" onPress={() => router.replace({ pathname: '/letter/[week]', params: { week: previous } })} style={[styles.row, { borderBottomColor: theme.hairline }]}>
                 <AppText tabular>{formatLetterWeek(previous)}</AppText>

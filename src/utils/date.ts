@@ -36,3 +36,8 @@ export function formatDateRange(start: string, end: string) {
   const label = (day: string) => `${Number(day.slice(5, 7))}월 ${Number(day.slice(8, 10))}일`;
   return start === end ? label(start) : `${label(start)} ~ ${label(end)}`;
 }
+
+/** 'YYYY-MM-DD'에서 n일 이동 */
+export function addKstDays(day: string, n: number) {
+  return new Date(Date.parse(`${day}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
+}

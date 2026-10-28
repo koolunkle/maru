@@ -31,7 +31,7 @@ export function Start() {
       footer={
         <View style={styles.footer}>
           {failed && (
-            <AppText variant="caption" color="error" style={styles.center}>
+            <AppText variant="caption" color="slate" accessibilityRole="alert" style={styles.center}>
               연결이 원활하지 않아요. 다시 시도해 주세요.
             </AppText>
           )}
@@ -40,10 +40,10 @@ export function Start() {
       }>
       <View style={styles.hero}>
         <AppText variant="display" style={styles.center}>
-          맞춤형 서울챌린지
+          MY서울루틴
         </AppText>
         <AppText color="slate" style={styles.center}>
-          하루 5분, 서울에서 해보는 작은 챌린지
+          Maru · 하루 5분, 서울에서 해보는 작은 루틴
         </AppText>
       </View>
     </Screen>

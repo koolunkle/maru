@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: seoul-challenge-design
+name: maru-design
 description: 옅은 초록빛 오프화이트 위에 카테고리별 파스텔 카드로 하루 5분 미션을 보여주는, 산책·성장을 떠올리는 초록 강조의 헤어라인 중심 미니멀 디자인 시스템.
 
 colors:
@@ -226,7 +226,7 @@ components:
     scrim: "rgba(0,0,0,0.3)"
 ---
 
-# DESIGN — 맞춤형 서울챌린지
+# DESIGN — MY서울루틴 (Maru)
 
 > 모든 값은 위 frontmatter 토큰이 단일 출처다. 기능·문구는 [PRD.md](./PRD.md).
 
@@ -361,11 +361,11 @@ components:
 | S4 미션 상세 | 상단 틴트 영역(카테고리 `tint`, 높이 160px, 미션명 `title-lg`, 라벨 줄) → 인증 힌트 `card-base` → (행사 미션만) 행사 정보 `card-base`: 라벨 "행사 정보" `label` `steel` + 행사명 `body` + "11월 2일 ~ 11월 8일 · 장소" `body-sm` `slate` + `button-ghost` 작은 높이 "행사 정보 보기"(https 링크만, 새 창) → 추천 이유 `ai-card` → 같이 할래요 행(인원 `body-sm` + `button-secondary` 작은 높이 40px) / 하단 고정: "시작하기" 또는 "인증하기" |
 | S5 인증 | 사진 영역 1:1, `rounded.lg`, 비어 있으면 `surface-sunken` + `camera` 아이콘 + "사진 추가" → 16px → `text-input` 소감(3줄, 우하단 "0/100" `caption`) → 공개 토글 행 / 하단 고정: "제출하기". 판정 중: 전체 오버레이 대신 버튼을 로딩 상태로. 결과: `ai-card`에 결과 문구 + 보상 시 `reward-badge` |
 | S6 피드 | 게시물 `card-base`: 닉네임 `label` + 시각 `caption` → 사진 1:1 → 소감 `body-md` → 빠른 반응 칩 3개 → 댓글 목록(`body-sm`, 들여쓰기 없음) → 댓글 입력 1줄 |
-| S7 기록 | 이번 주 달성률 `display` 숫자 + 막대(높이 8px, `primary`, 배경 `surface-sunken`) → 32px → 월간 캘린더(7열, 출석일 원 28px `accent-soft` 채움 + 숫자 `accent-ink`) → 32px → 이번 주 편지(F13, 아래 통합 예정 표) |
+| S7 기록 | 이번 주 달성률 `display` 숫자 + 막대(높이 8px, `primary`, 배경 `surface-sunken`) → 32px → 월간 캘린더(7열, 출석일 원 28px `accent-soft` 채움 + 숫자 `accent-ink`) → 32px → 이번 주 편지(F13, 아래 표) |
 | S8 내 방 | 방 영역(5.4) → 16px → "가진 가구" `title-md` → 가구 그리드 4열(칸 72px, `card-base`, 가구 아이콘 32px + 이름 `caption`) |
 | S9 설정 | `list-row` 목록. 닉네임 → 관심 카테고리 → 생활권 → 하루 가능 시간(오른쪽 `chevron-right`) → 하단 출처 `caption`. 도움 안내는 S10으로 옮긴다 |
 
-통합 예정 화면·요소 (PRD F10~F16)
+F10~F16 화면·요소
 
 | 화면·위치 | 구조 |
 | --- | --- |
@@ -379,7 +379,7 @@ components:
 | S7 이번 주 편지 (F13) | 월간 캘린더 아래 32px → `letter-card`: "이번 주 편지" `label` `steel`, 기분·한 줄·완료 미션 안내, `button-ghost` "이번 주 마음 리포트 보기". 통계 조회와 독립적으로 표시 |
 | S3 한 줄 기록 메뉴 (F15) | 마음 우체통 아래 24px → `card-base`: Feather `edit-3`, "한 줄 기록", 안내 문구와 `chevron-right`. 누르면 한 줄 기록 바텀 시트를 연다 |
 | S13 한 줄 기록 (F15) | 홈에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → "오늘 한 줄" `title-md` → 안내 `body-sm` → 기분 칩 5개(`chip-category` 모양, 아이콘 + 이름, 줄바꿈) → 선택 입력 `text-input`(0/60) → `button-primary` "저장하기". 기존 기록은 불러와 수정하고, 삭제는 화면 안 확인 후 실행. 로딩·저장 오류·재시도 표시 |
-| S10 마음 휴게소 (F12) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) |
+| S10 마음 휴게소 (F12, 미구현 T5) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) |
 | S11 주간 편지 (F13) | `BackHeader`와 KST 주차 → Gemini 원문 전송·보관 안내와 생성 버튼 → 실제 기분·한 줄·완료 미션 목록 → AI 편지는 `ai-card`, 기본 편지는 일반 카드 → 마음이 무거운 기록이 있으면 `help-soft`와 설정 안내 → 지난 3주 및 보관된 주차 목록과 이번 주 복귀. 현재 표시되는 원본과 과거 생성 편지의 시점 차이를 안내한다. |
 | S12 타임캡슐 (F16) | 홈에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
 

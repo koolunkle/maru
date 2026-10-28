@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "맞춤형 서울챌린지",
+    "name": "MY서울루틴",
     "slug": "seoul-challenge",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "seoulchallenge",
+    "scheme": "maru",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/expo.icon"
@@ -26,6 +26,8 @@
       ]
     },
     "web": {
+      "name": "MY서울루틴 (Maru)",
+      "shortName": "MY서울루틴",
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
