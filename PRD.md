@@ -1,4 +1,4 @@
-# PRD — 맞춤형 서울챌린지
+# PRD — MY서울루틴 (Maru)
 
 > 최종 수정: 2026-10-20 · 통합 프로토타입 단계(10/23~11/8) · 시각 명세는 [DESIGN.md](./DESIGN.md) · 작업 순서는 [docs/ROADMAP.md](./docs/ROADMAP.md) · 작업 방법은 [CONTRIBUTING.md](./CONTRIBUTING.md)
 >

@@ -1,6 +1,6 @@
 ---
 version: alpha
-name: seoul-challenge-design
+name: maru-design
 description: 옅은 초록빛 오프화이트 위에 카테고리별 파스텔 카드로 하루 5분 미션을 보여주는, 산책·성장을 떠올리는 초록 강조의 헤어라인 중심 미니멀 디자인 시스템.
 
 colors:
@@ -226,7 +226,7 @@ components:
     scrim: "rgba(0,0,0,0.3)"
 ---
 
-# DESIGN — 맞춤형 서울챌린지
+# DESIGN — MY서울루틴 (Maru)
 
 > 모든 값은 위 frontmatter 토큰이 단일 출처다. 기능·문구는 [PRD.md](./PRD.md).
 
