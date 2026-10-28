@@ -379,7 +379,7 @@ F10~F16 화면·요소
 | S7 이번 주 편지 (F13) | 월간 캘린더 아래 32px → `letter-card`: "이번 주 편지" `label` `steel`, 기분·한 줄·완료 미션 안내, `button-ghost` "이번 주 마음 리포트 보기". 통계 조회와 독립적으로 표시 |
 | S3 한 줄 기록 메뉴 (F15) | 마음 우체통 아래 24px → `card-base`: Feather `edit-3`, "한 줄 기록", 안내 문구와 `chevron-right`. 누르면 한 줄 기록 바텀 시트를 연다 |
 | S13 한 줄 기록 (F15) | 홈에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → "오늘 한 줄" `title-md` → 안내 `body-sm` → 기분 칩 5개(`chip-category` 모양, 아이콘 + 이름, 줄바꿈) → 선택 입력 `text-input`(0/60) → `button-primary` "저장하기". 기존 기록은 불러와 수정하고, 삭제는 화면 안 확인 후 실행. 로딩·저장 오류·재시도 표시 |
-| S10 마음 휴게소 (F12, 미구현 T5) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) |
+| S10 마음 휴게소 (F12) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) |
 | S11 주간 편지 (F13) | `BackHeader`와 KST 주차 → Gemini 원문 전송·보관 안내와 생성 버튼 → 실제 기분·한 줄·완료 미션 목록 → AI 편지는 `ai-card`, 기본 편지는 일반 카드 → 마음이 무거운 기록이 있으면 `help-soft`와 설정 안내 → 지난 3주 및 보관된 주차 목록과 이번 주 복귀. 현재 표시되는 원본과 과거 생성 편지의 시점 차이를 안내한다. |
 | S12 타임캡슐 (F16) | 홈에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
 
