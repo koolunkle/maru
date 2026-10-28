@@ -13,8 +13,8 @@ flowchart LR
       Auth[Auth<br/>익명 로그인]
       DB[(Postgres + RLS<br/>트리거·RPC)]
       ST[Storage<br/>verifications 버킷]
-      FN[Edge Functions<br/>추천·인증·검수·우체통·편지 등 8개]
-      CRON[pg_cron<br/>댓글 공개·미션 만료]
+      FN[Edge Functions<br/>추천·인증·검수·우체통·편지·행사 동기화 등 9개]
+      CRON[pg_cron<br/>댓글 공개·미션 만료·행사 동기화]
     end
     AI[Gemini / Claude]
 
@@ -25,6 +25,8 @@ flowchart LR
     FN -- service_role --> DB
     FN -- _shared/ai.ts --> AI
     CRON --> DB
+    CRON -- 매일 05:00 --> FN
+    FN -- sync-events --> SEOUL[서울 열린데이터광장<br/>문화행사]
 ```
 
 - 앱은 RLS가 허용하는 범위만 직접 읽고 쓴다. 상태 전환(미션 완료, 판정, 검수, 보상)은 함수나 DB 트리거만 한다(PRD §6.1 권한 표).
@@ -109,7 +111,7 @@ DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nick
 
 ## 6. 알아 둘 점
 
-- **문화행사 데이터가 비어 있다.** `sync-events` 함수가 미구현이라 `events` 테이블이 채워지지 않는다. 그래서 행사 연계 미션과 '전시 포스터' 가구(F7)는 지금 얻을 수 없다. ROADMAP에 아직 작업으로 잡혀 있지 않다.
+- **문화행사는 매일 05:00 KST에 동기화된다.** `sync-events`가 서울 열린데이터광장에서 30일 안에 진행되는 행사를 `events`에 넣고, 추천 함수가 사용자 구의 7일 안 행사를 AI에 넘긴다. 키·Vault 설정은 [ENV.md](./ENV.md) B·E절.
 - **임시 링크:** 설정의 서울마음편의점 행은 구글 검색 URL이다. 공식 URL 확정(PRD §8.4) 후 T5에서 `src/constants/help.ts`로 옮긴다.
 - **테스트는 일부만 있다.** `tests/*.test.mjs`(node)와 `supabase/tests/*.sql`(로컬 DB용, 롤백)이 있다. 그 밖은 `typecheck`·`lint`와 미리보기 배포 수동 확인이다.
 - **운영 DB를 함께 쓴다.** 로컬에서 만든 계정·사진도 운영 데이터다. 마이그레이션은 리뷰 후에만 `db push`한다.

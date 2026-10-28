@@ -1,13 +1,14 @@
 # 환경 변수·권한 가이드
 
-> 이 프로젝트에서 값을 넣는 곳은 네 군데다. 처음 합류했다면 **A만 하면 앱이 뜬다.** B~D는 담당 작업에 따라 필요할 때 본다.
+> 이 프로젝트에서 값을 넣는 곳은 다섯 군데다. 처음 합류했다면 **A만 하면 앱이 뜬다.** B~D는 담당 작업에 따라 필요할 때 본다.
 
 | 구분 | 위치 | 누가 | 언제 필요한가 |
 | --- | --- | --- | --- |
 | A. 앱 환경 변수 | `.env.local` (내 PC, git 제외) | 모든 팀원 | 앱 실행·웹 배포 |
-| B. 서버 함수 시크릿 | Supabase Edge Function Secrets | 관리자 | AI 제공자·키 변경 |
+| B. 서버 함수 시크릿 | Supabase Edge Function Secrets | 관리자 | AI·공공데이터 키 변경 |
 | C. 운영 설정값 | DB `public.app_config` 테이블 | DB 권한자 | 시연 모드, AI 장애 시 판정 방식 |
 | D. 계정·CLI 로그인 | GitHub·Supabase·Expo 계정 | 모든 팀원(작업별) | push, 마이그레이션, 함수·웹 배포 |
+| E. 예약 작업 비밀값 | Supabase Vault | 관리자 | cron이 함수를 부를 때(문화행사 동기화) |
 
 ---
 
@@ -20,6 +21,8 @@
 | `GEMINI_API_KEY` | Google AI Studio → API keys (<https://aistudio.google.com/apikey>) | 관리자 | 전달하지 않음. 관리자가 Supabase Secrets에 직접 등록 |
 | `ANTHROPIC_API_KEY` | Claude Console → Settings → API Keys (<https://console.anthropic.com/>) | 관리자 | 위와 같음 |
 | `ANTHROPIC_WORKSPACE_ID` | Claude Console → Settings → Workspaces → 해당 워크스페이스 ID | 관리자 | 위와 같음 |
+| `SEOUL_OPEN_API_KEY` | 서울 열린데이터광장 → 로그인 → 인증키 신청 (<https://data.seoul.go.kr/together/mypage/actkeyMain.do>) | 관리자 | 위와 같음 |
+| `SYNC_EVENTS_SECRET` | 직접 만든 임의 문자열(예: `openssl rand -hex 32`) | 관리자 | Secrets와 Vault 두 곳에만 넣는다. 전달하지 않음 |
 | 등록된 시크릿 이름 확인 | Supabase 대시보드 → Edge Functions → Secrets, 또는 `npx supabase secrets list` | Supabase 멤버 | 값은 다시 볼 수 없고 해시만 보인다 |
 | `app_config` 값 | Supabase 대시보드 → Table Editor → `app_config`, 또는 SQL Editor | Supabase 멤버 | 전달 불필요 |
 | DB 비밀번호 | **조회 불가.** Project Settings → Database → Reset database password로 재설정만 가능 | 관리자 | 비밀번호 관리자·1회성 비밀 링크. 메신저 금지 |
@@ -72,6 +75,8 @@ AI 호출은 앱이 아니라 Edge Function(`supabase/functions/`)이 한다. �
 | `ANTHROPIC_API_KEY` | 둘 중 하나 | Claude 사용. `sk-ant-`로 시작 | `_shared/ai.ts` |
 | `ANTHROPIC_WORKSPACE_ID` | 선택 | 워크스페이스에 묶이지 않은 Anthropic 키일 때 필요 | `_shared/ai.ts` |
 | `AI_PROVIDER` | 선택 | `gemini` 또는 `anthropic`으로 강제 선택 | `_shared/ai.ts` |
+| `SEOUL_OPEN_API_KEY` | 행사 동기화 시 | 서울 열린데이터광장 일반 인증키. 주소 경로에 들어가므로 로그에 주소를 남기지 않는다 | `sync-events` |
+| `SYNC_EVENTS_SECRET` | 행사 동기화 시 | cron만 `sync-events`를 부를 수 있게 하는 비밀값. Vault `sync_events_secret`과 같은 값 | `sync-events` |
 
 - **자동** 항목은 Supabase가 모든 함수에 넣어 준다. 직접 설정하지 않는다(`SUPABASE_` 접두사는 예약어라 설정도 안 된다).
 - 제공자 선택 규칙: `AI_PROVIDER=anthropic` → Claude / `AI_PROVIDER=gemini` → Gemini / 비어 있으면 `GEMINI_API_KEY`가 있을 때 Gemini, 없으면 Claude.
@@ -89,6 +94,8 @@ npx supabase functions deploy recommend-missions --project-ref jpipzrmspryzvjykx
 npx supabase functions deploy verify-mission --project-ref jpipzrmspryzvjykxefm
 npx supabase functions deploy moderate-comment --project-ref jpipzrmspryzvjykxefm
 ```
+
+행사 동기화 키를 바꾼 뒤에는 `npx supabase functions deploy sync-events --project-ref jpipzrmspryzvjykxefm`.
 
 AI가 동작하지 않을 때는 대시보드 Edge Functions → 함수 → Logs에서 `ai error` 줄을 본다. 로그에 키 값은 남지 않고 `provider`, `geminiKey: set|missing`, `anthropicKey: ok|malformed|missing` 같은 설정 상태만 남는다.
 
@@ -117,6 +124,29 @@ update public.app_config set value = '"retry_later"' where key = 'verify_fallbac
 ```
 
 `comment_delay_minutes`는 직접 고치지 말고 `set_demo_mode`로 바꾼다. cron 주기도 함께 바뀌어야 하기 때문이다.
+
+---
+
+## E. 예약 작업 비밀값 (Supabase Vault)
+
+cron(`sync-events`, 매일 05:00 KST)이 함수를 부를 때 쓰는 값이다. 마이그레이션 파일에는 값을 넣지 않고 이름만 쓴다.
+
+| Vault 이름 | 값 |
+| --- | --- |
+| `project_url` | `https://jpipzrmspryzvjykxefm.supabase.co` |
+| `publishable_key` | `.env.example`의 publishable 키 |
+| `sync_events_secret` | B의 `SYNC_EVENTS_SECRET`과 같은 값 |
+
+등록·확인(SQL Editor, 관리자):
+
+```sql
+select vault.create_secret('<값>', '<이름>');                  -- 처음 한 번
+select name, created_at from vault.decrypted_secrets;         -- 이름만 확인
+select * from cron.job where jobname = 'sync-events';
+select status_code, content, created from net._http_response order by created desc limit 5;  -- 최근 호출 결과(6시간 보관)
+```
+
+`SYNC_EVENTS_SECRET`을 바꾸면 Vault 값도 같이 바꾼다(`vault.update_secret`). 둘이 다르면 함수가 401을 돌려준다.
 
 ---
 

@@ -36,6 +36,7 @@
 | T11 | 한 줄 기록·기분 | F15 | DB·앱 | 저장 정책 결정 | 1일 | `feat/t11-daily-note` | Codex | 리뷰 |
 | T12 | 타임캡슐 | F16 | DB·앱 | 반영 결정 | 1일 | `feat/t12-time-capsule` | | 대기 |
 | T13 | 통합 테스트, 데모 계정, 시연 리허설 | 전체 | — | T1~T9 | 1일 | `chore/t13-rehearsal` | | 대기 |
+| T14 | 문화행사 동기화 `sync-events` | F2·F7 | 함수·DB | 서울 열린데이터 키 | 0.5일 | `feat/t14-sync-events` | Claude | 리뷰 |
 
 병렬로 시작할 수 있는 작업: T5, T9. 앱 화면 작업(T5·T9)은 DB 없이 바로 시작할 수 있어 처음 합류한 팀원에게 권한다.
 
@@ -124,6 +125,12 @@
 ### T12 검토 후 반영
 
 F16 반영 결정에 따라 홈 도착 카드, 캡슐 작성·목록·열기와 서버 마이그레이션을 구현했다. 잠긴 본문은 서버에서 숨기고 계정별 최대 5개를 제한한다. 2026-10-27 사용자 요청으로 운영 DB에 마이그레이션을 적용하고 타입을 재생성했다. 롤백하는 SQL 테스트로 날짜·개수·본문 보호·타인 접근 차단과 열기를 확인했다. 보안 Advisors는 인증 사용자가 실행 가능한 SECURITY DEFINER 함수 3개를 경고하며, 각 함수는 호출자 계정을 확인한다. 앱 배포와 실제 기기 확인은 남아 있다.
+
+### T14 문화행사 동기화 `sync-events`
+
+- `supabase/functions/sync-events`: 서울 열린데이터광장 `culturalEventInfo` 전체를 1,000건씩 받아 앞으로 30일 안에 진행되는 서울 25개 구 행사를 `events`에 upsert(`external_id` = 서울문화포털 cultcode). 응답 해석은 `_shared/seoul-events.ts`.
+- 마이그레이션: `pg_net` 활성화, cron `sync-events` 매일 05:00 KST. 호출 주소·키·비밀값은 Vault(ENV.md E절).
+- 완료: `npm run test:sync-events` 통과, 수동 호출 후 `events`에 행이 생기고 사용자 구의 행사로 AI 행사 미션(`event_id`)이 추천됨, 완료 시 '전시 포스터' 획득.
 
 ### T13 통합 테스트, 데모 계정, 시연 리허설
 

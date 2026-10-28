@@ -391,7 +391,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 | `moderate-comment` | comment_id 또는 relay_id | status | 댓글·릴레이 insert 직후 (F10에서 relay_id 추가) |
 | `mailbox` | action(`send`·`inbox`·`sent`·`read`), body·requestId 또는 id | 본인 발신·수신 글, 검수 상태·읽음 | F14 작성·수신함 진입·본문 열기 |
 | `write-weekly-letter` | 주차별 본인 기록과 완료 미션으로 편지 생성, 보관된 주차 목록 조회 | — | F13 |
-| `sync-events` | — | upsert 건수 | pg_cron 매일 05:00 KST (미구현) |
+| `sync-events` | — | upsert 건수 | pg_cron 매일 05:00 KST. 서울 열린데이터광장 문화행사 중 30일 안에 진행되는 행사를 저장 |
 
 `publish_due_comments()`는 `relay_messages`도 함께 공개하도록 확장한다(F10).
 
