@@ -54,6 +54,7 @@
     "test:sync-events": "node --test tests/sync-events.test.mjs",
     "test:drafts": "node --test tests/drafts.test.mjs",
     "test:streak": "node --test tests/streak.test.mjs",
+    "test:next-reward": "node --test tests/next-reward.test.mjs",
     "seed:build": "python scripts/build-seed.py"
   },
   "private": true

@@ -16,10 +16,12 @@ import { Screen } from "@/components/screen";
 import { Radius, Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useTodayMissions } from "@/hooks/use-today-missions";
+import { useRewardProgress } from "@/hooks/use-reward-progress";
 import { getDailyNote, MoodLabels } from "@/lib/daily-note";
 import { useSession } from "@/providers/session-provider";
 import type { Tables } from "@/types/database";
 import { formatKstToday, kstDate } from "@/utils/date";
+import { nextReward } from "@/utils/next-reward";
 import { currentStreak } from "@/utils/streak";
 
 type Mission = Tables<"missions">;
@@ -34,6 +36,7 @@ export function Home() {
   const theme = useTheme();
   const { profile, refreshProfile } = useSession();
   const { data, error, reload, refresh, refreshing } = useTodayMissions();
+  const rewardData = useRewardProgress(profile?.id);
   const [noteOpen, setNoteOpen] = useState(false);
   const [todayMood, setTodayMood] = useState<number | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -76,6 +79,14 @@ export function Home() {
   }
 
   const streak = profile ? currentStreak(profile, kstDate()) : 0;
+  const rewardFor = (mission: Mission, type: "daily" | "weekly") =>
+    rewardData && profile
+      ? nextReward(mission, type, rewardData.furniture, {
+          ...rewardData,
+          streak,
+          attendedToday: profile.last_attended === kstDate(),
+        })
+      : null;
   const anyStarted = data ? data.daily.some((m) => data.progress[m.id]) : false;
   const completedDailyCount = data
     ? Math.min(
@@ -147,6 +158,7 @@ export function Home() {
               key={m.id}
               mission={m}
               status={data.progress[m.id]?.status}
+              reward={rewardFor(m, "daily")}
               onPress={() => open(m, "daily")}
             />
           ))
@@ -159,6 +171,7 @@ export function Home() {
           <MissionCard
             mission={data.weekly}
             status={data.progress[data.weekly.id]?.status}
+            reward={rewardFor(data.weekly, "weekly")}
             onPress={() => data.weekly && open(data.weekly, "weekly")}
           />
         </View>
