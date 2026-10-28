@@ -41,3 +41,16 @@ export function formatDateRange(start: string, end: string) {
 export function addKstDays(day: string, n: number) {
   return new Date(Date.parse(`${day}T00:00:00Z`) + n * 86_400_000).toISOString().slice(0, 10);
 }
+
+/** 'YYYY-MM-DD' 두 날짜 사이 일수(to - from) */
+export function daysBetween(from: string, to: string) {
+  return Math.round((Date.parse(`${to}T00:00:00Z`) - Date.parse(`${from}T00:00:00Z`)) / 86_400_000);
+}
+
+/** 행사 마감 안내: 오늘 끝나면 "오늘 끝나요", 일주일 안이면 "N일 뒤 끝나요", 그 밖은 null (#21) */
+export function endingNotice(endDate: string, today: string = kstDate()) {
+  const left = daysBetween(today, endDate);
+  if (left === 0) return '오늘 끝나요';
+  if (left > 0 && left <= 6) return `${left}일 뒤 끝나요`;
+  return null;
+}

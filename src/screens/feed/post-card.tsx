@@ -64,7 +64,11 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
       ? await supabase.from('reactions').delete().eq('verification_id', post.id).eq('user_id', userId).eq('type', type)
       : await supabase.from('reactions').upsert({ verification_id: post.id, type }, { onConflict: 'verification_id,user_id,type', ignoreDuplicates: true });
     reactionWorking.current = false;
-    if (error) return;
+    if (error) {
+      setNotice('지금은 반응을 남기지 못했어요. 다시 눌러 볼까요?');
+      return;
+    }
+    setNotice(null);
     onChange({
       ...post,
       myReactions: on ? post.myReactions.filter((t) => t !== type) : [...post.myReactions, type],
@@ -165,6 +169,8 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
       ) : (
         <View style={styles.composer}>
           <TextInput
+            accessibilityLabel={`${post.nickname}의 인증에 댓글 남기기`}
+            accessibilityHint={`${MaxComment}자까지 적을 수 있어요`}
             value={draft}
             onChangeText={(t) => setDraft(t.slice(0, MaxComment))}
             placeholder="익명으로 댓글 남기기"
