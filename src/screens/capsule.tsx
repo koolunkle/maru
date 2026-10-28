@@ -15,6 +15,14 @@ import { listCapsules, openCapsule, sendCapsule, type Capsule } from '@/lib/caps
 import { clearDraft, readDraft, writeDraft } from '@/lib/drafts';
 import { createMailboxRequestId } from '@/lib/mailbox';
 import { useSession } from '@/providers/session-provider';
+import { addKstDays, formatDateRange, kstDate } from '@/utils/date';
+
+const dayLabel = (day: string) => formatDateRange(day, day);
+
+function rowText(item: Capsule) {
+  if (!item.ready) return `${dayLabel(item.open_on)}에 열려요`;
+  return item.opened_at ? `${dayLabel(item.open_on)} 도착 · 열어 봤어요` : `${dayLabel(item.open_on)} 도착했어요`;
+}
 
 /** 시트를 닫았다 열어도 유지할 작성 중인 캡슐. 전송 실패 후에는 같은 요청 ID로 다시 보내야 중복 저장되지 않는다 */
 type CapsuleDraft = { body: string; days: number; requestId: string; pending: boolean };
@@ -32,6 +40,7 @@ export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; a
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const [sentNotice, setSentNotice] = useState('');
   const [selected, setSelected] = useState<string | null>(null);
   const [pending, setPending] = useState(draft?.pending ?? false);
   const working = useRef(false);
@@ -59,10 +68,11 @@ export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; a
   const locked = items.filter((item) => !item.ready).length;
   async function send() {
     if (working.current || !body.trim()) return;
-    working.current = true; setBusy(true); setError('');
+    working.current = true; setBusy(true); setError(''); setSentNotice('');
     try {
       await sendCapsule(body.trim(), days, requestId.current);
       requestId.current = createMailboxRequestId(); setPending(false); setBody(''); clearDraft(key);
+      setSentNotice(`캡슐을 보냈어요. ${dayLabel(addKstDays(kstDate(), days))}에 열려요.`);
       await load();
     } catch (cause) {
       const rejected = typeof cause === 'object' && cause !== null && 'code' in cause && cause.code === 'P0001';
@@ -84,21 +94,21 @@ export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; a
       {!sheet && <BackHeader title="타임캡슐" />}
 
       <AppText color="slate">미래의 나에게 한 줄을 보내요. 나만 볼 수 있어요.</AppText>
+      {selected !== null && <View style={[styles.message, styles.section, { backgroundColor: theme.primarySoft }]}><AppText variant="titleMd">과거의 내가 보낸 한 줄</AppText><AppText>{selected}</AppText></View>}
       <View style={styles.section}>
         <AppText variant="titleMd" accessibilityRole="header">보낸 캡슐</AppText>
         {loading ? <ActivityIndicator color={theme.primary} /> : items.length === 0 ? <AppText color="slate">아직 보낸 캡슐이 없어요.</AppText> : items.map((item) => (
           <PressableScale key={item.id} accessibilityRole="button" disabled={!item.ready || busy} onPress={() => open(item)}
-            accessibilityLabel={item.ready ? `${item.open_on} 캡슐 열기` : `${item.open_on}에 열리는 캡슐`}
+            accessibilityLabel={item.ready ? `${rowText(item)}, 캡슐 열기` : rowText(item)}
             style={[styles.row, { borderColor: theme.hairline }]}>
             <Feather name={item.opened_at ? 'unlock' : 'lock'} size={20} color={theme.accent} />
-            <View style={styles.rowText}><AppText>{item.open_on} {item.ready && !item.opened_at ? '도착했어요' : '열리는 날'}</AppText>{item.opened_at && <AppText numberOfLines={1} color="slate">{item.body}</AppText>}</View>
+            <View style={styles.rowText}><AppText>{rowText(item)}</AppText>{item.opened_at && <AppText numberOfLines={1} color="slate">{item.body}</AppText>}</View>
           </PressableScale>
         ))}
-        {selected !== null && <View style={[styles.message, { backgroundColor: theme.primarySoft }]}><AppText variant="titleMd">과거의 내가 보낸 한 줄</AppText><AppText>{selected}</AppText></View>}
       </View>
       <View style={styles.section}>
         <AppText variant="titleMd" accessibilityRole="header">새 캡슐 쓰기</AppText>
-        <TextInput accessibilityLabel="미래의 나에게 보낼 한 줄" multiline maxLength={100} value={body} onChangeText={(value) => { setBody(value); keep({ body: value }); }} editable={!busy && !pending}
+        <TextInput accessibilityLabel="미래의 나에게 보낼 한 줄" multiline maxLength={100} value={body} onChangeText={(value) => { setBody(value); setSentNotice(''); keep({ body: value }); }} editable={!busy && !pending}
           placeholder="미래의 나에게 한 줄을 남겨 볼까요?" placeholderTextColor={theme.muted}
           style={[styles.input, Typography.bodyMd, { color: theme.ink, backgroundColor: theme.surface, borderColor: theme.hairlineStrong }]} />
         <AppText variant="caption" color="steel" style={styles.counter}>{body.length}/100</AppText>
@@ -106,6 +116,7 @@ export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; a
           {[7, 30, 100].map((day) => <Chip key={day} label={`${day}일 뒤`} selected={days === day} role="radio" disabled={busy || pending} onPress={() => { setDays(day); keep({ days: day }); }} />)}
         </View>
         {locked >= 5 && !pending && <AppText color="slate">잠긴 캡슐은 최대 5개까지 보낼 수 있어요.</AppText>}
+        {sentNotice !== '' && <AppText color="slate" accessibilityLiveRegion="polite">{sentNotice}</AppText>}
         {error !== '' && <><AppText accessibilityRole="alert" color="slate">{error}</AppText>{!pending && <Button label="다시 불러오기" variant="secondary" onPress={load} />}</>}
       </View>
       <Button label={pending ? '다시 보내기' : '보내기'} onPress={send} loading={busy} disabled={loading || (!pending && locked >= 5) || !body.trim()} />
