@@ -83,6 +83,15 @@ export function toEvent(row: SeoulEventRow, today: string): EventRecord | null {
   };
 }
 
+/** 행사 미션 제목. AI가 행사 이름을 그대로 쓰면 앞의 [주최] 표기를 떼고 "보러 가기"를 붙인다(40자 이하) */
+export function eventMissionTitle(title: string, eventTitle: string) {
+  const name = eventTitle.trim();
+  if (title !== name && title !== name.slice(0, 40)) return title;
+  const short = name.replace(/^\[[^\]]*\]\s*/, '') || name;
+  const suffix = ' 보러 가기';
+  return short.length + suffix.length <= 40 ? `${short}${suffix}` : `${short.slice(0, 39 - suffix.length)}…${suffix}`;
+}
+
 /** 같은 행사가 여러 번 오면 마지막 것만 남긴다(upsert 한 번에 같은 키가 두 번 있으면 실패한다) */
 export function uniqueEvents(events: EventRecord[]) {
   return [...new Map(events.map((e) => [e.external_id, e])).values()];

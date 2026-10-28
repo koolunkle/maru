@@ -30,3 +30,9 @@ export function formatKstToday(date: Date = new Date()) {
   const weekday = ['일', '월', '화', '수', '목', '금', '토'][kst.getUTCDay()];
   return `${kst.getUTCMonth() + 1}월 ${kst.getUTCDate()}일 ${weekday}요일`;
 }
+
+/** 'YYYY-MM-DD' 두 개 → "11월 2일 ~ 11월 8일", 같은 날이면 "11월 2일" */
+export function formatDateRange(start: string, end: string) {
+  const label = (day: string) => `${Number(day.slice(5, 7))}월 ${Number(day.slice(8, 10))}일`;
+  return start === end ? label(start) : `${label(start)} ~ ${label(end)}`;
+}

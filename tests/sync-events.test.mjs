@@ -77,6 +77,16 @@ test('같은 행사는 한 번만 upsert한다', () => {
   assert.deepEqual(events.uniqueEvents([a, b]), [b]);
 });
 
+test('행사 이름을 그대로 쓴 미션 제목은 행동형으로 바꾼다', () => {
+  assert.equal(events.eventMissionTitle('SAD BOOK 보러 가기', 'SAD BOOK'), 'SAD BOOK 보러 가기');
+  assert.equal(events.eventMissionTitle('SAD BOOK', 'SAD BOOK'), 'SAD BOOK 보러 가기');
+  assert.equal(events.eventMissionTitle('[서초문화재단] 어울림 콘서트', '[서초문화재단] 어울림 콘서트'), '어울림 콘서트 보러 가기');
+  // AI 제목은 40자로 잘린 뒤 비교된다
+  assert.equal(events.eventMissionTitle(exhibition.TITLE.slice(0, 40), exhibition.TITLE), '포토 디스커버리 프로젝트 《기계적 시선: 접촉하여 보기》 보러 가기');
+  const long = events.eventMissionTitle('가'.repeat(40), '가'.repeat(50));
+  assert.ok(long.length <= 40 && long.endsWith('… 보러 가기'), long);
+});
+
 test('구 목록은 앱의 Districts와 같다', async () => {
   const source = await readFile(new URL('../src/constants/domain.ts', import.meta.url), 'utf8');
   const app = source.match(/Districts = \[([\s\S]*?)\]/)[1].match(/'([^']+)'/g).map((s) => s.slice(1, -1));
