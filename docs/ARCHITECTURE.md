@@ -1,6 +1,6 @@
 # 구조와 현재 상태
 
-> 기준 2026-10-28, main `dab09ec`(PR #3 병합 후). 코드를 처음 여는 사람이 "어디에 무엇이 있고, 무엇이 끝났고, 무엇이 남았는지"를 빠르게 잡기 위한 지도다. 기능 정의는 [PRD.md](../PRD.md), 화면 모양은 [DESIGN.md](../DESIGN.md), 작업 배정은 [ROADMAP.md](./ROADMAP.md), 설정값은 [ENV.md](./ENV.md).
+> 코드를 처음 여는 사람이 "어디에 무엇이 있는지"를 빠르게 잡기 위한 지도다. 남은 작업은 [ROADMAP.md](./ROADMAP.md). 기능 정의는 [PRD.md](../PRD.md), 화면 모양은 [DESIGN.md](../DESIGN.md), 작업 배정은 [ROADMAP.md](./ROADMAP.md), 설정값은 [ENV.md](./ENV.md).
 
 ## 1. 시스템 구성
 
@@ -95,21 +95,8 @@ flowchart LR
 
 DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nicknames`, `get_feed`, `get_relay_messages`, `save_daily_note`, `list_time_capsules`, `send_time_capsule`, `open_time_capsule`, `set_demo_mode`, `publish_due_comments`, `expire_due_missions`. 서버 전용(service_role): `finish_verification`, `save_recommendation`, `start_mission`, `place_furniture`, `submit_comment`, `receive_mailbox_message`. 트리거: `handle_new_user`, `prepare_comment`, `prepare_relay_message`, `check_mission_start`, `check_furniture_slot`, `stamp_mission_resolved`, `adjust_difficulty`, `weekly_letter_version`.
 
-원격 상태(10/28 확인): 마이그레이션 19개가 로컬 파일과 일치, 함수 8개(`recommend-missions`, `verify-mission`, `moderate-comment`, `mailbox`, `write-weekly-letter`, `place-furniture`, `start-mission`, `submit-comment`) 배포됨(모두 `verify_jwt` 켜짐).
 
-## 5. 남은 작업 요약
-
-자세한 범위·완료 기준·브랜치명은 [ROADMAP.md](./ROADMAP.md) §2~3.
-
-| 묶음 | 작업 | 바로 시작 가능 |
-| --- | --- | --- |
-| 마음 휴게소(F12) | T5 탭(빗소리는 구현됨) | T5 |
-| 주간 편지(F13) | T7 AI 개인화 | 진행 중 |
-| 다음 보상 표시(F8) | T9 | T9 |
-| 실기기 확인 | T1~T3, T8, T10~T12 Expo Go 확인 | 미리보기 배포 후 |
-| 마무리 | T13 통합 테스트·데모 계정·리허설 | T1~T9 후 |
-
-## 6. 알아 둘 점
+## 5. 알아 둘 점
 
 - **문화행사는 매일 05:00 KST에 동기화된다.** `sync-events`가 서울 열린데이터광장에서 30일 안에 진행되는 행사를 `events`에 넣고, 추천 함수가 사용자 구의 7일 안 행사를 AI에 넘긴다. 키·Vault 설정은 [ENV.md](./ENV.md) B·E절.
 - **임시 링크:** 설정의 서울마음편의점 행은 구글 검색 URL이다. 공식 URL 확정(PRD §8.4) 후 T5에서 `src/constants/help.ts`로 옮긴다.
