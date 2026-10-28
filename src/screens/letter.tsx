@@ -12,7 +12,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
 import { demoLetterWeeks, formatLetterWeek } from '@/utils/weekly-letter';
-import { kstWeekStart } from '@/utils/date';
+import { formatDayWithWeekday, kstWeekStart } from '@/utils/date';
 
 type Report = {
   body: string;
@@ -89,7 +89,7 @@ export function Letter({ week }: { week: string }) {
                 <AppText variant="titleMd" accessibilityRole="header">한 주의 마음 흐름</AppText>
                 {report.notes.length === 0 ? <AppText>기록한 기분이 없어요.</AppText> : report.notes.map((note) => (
                   <View key={note.note_date}>
-                    <AppText variant="caption" color="steel">{note.note_date} · {moods[note.mood - 1]}</AppText>
+                    <AppText variant="caption" color="steel">{formatDayWithWeekday(note.note_date)} · {moods[note.mood - 1]}</AppText>
                     {!!note.text && <AppText>{note.text}</AppText>}
                   </View>
                 ))}
