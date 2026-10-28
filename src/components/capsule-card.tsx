@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -8,9 +8,12 @@ import { PressableScale } from '@/components/pressable-scale';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { listCapsules, type Capsule } from '@/lib/capsule';
+import { HomeSheet } from '@/components/home-sheet';
+import { CapsuleScreen } from '@/screens/capsule';
 
 export function CapsuleCard() {
   const theme = useTheme();
+  const [visible, setVisible] = useState(false);
   const [arrival, setArrival] = useState<Capsule | null>(null);
   useFocusEffect(useCallback(() => {
     let active = true;
@@ -18,7 +21,8 @@ export function CapsuleCard() {
     return () => { active = false; };
   }, []));
   return (
-    <PressableScale accessibilityRole="button" onPress={() => router.push({ pathname: '/capsule', params: arrival ? { id: arrival.id } : {} })}
+    <>
+    <PressableScale accessibilityRole="button" onPress={() => setVisible(true)}
       style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
       <Feather name="mail" size={20} color={theme.accent} />
       <View style={styles.text}>
@@ -29,6 +33,8 @@ export function CapsuleCard() {
       </View>
       <Feather name="chevron-right" size={20} color={theme.steel} />
     </PressableScale>
+    {visible && <HomeSheet title="타임캡슐" onClose={() => { setVisible(false); listCapsules().then((items) => setArrival(items.find((item) => item.ready && !item.opened_at) ?? null), () => {}); }}><CapsuleScreen sheet arrivalId={arrival?.id} /></HomeSheet>}
+    </>
   );
 }
 const styles = StyleSheet.create({

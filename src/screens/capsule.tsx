@@ -14,9 +14,10 @@ import { useTheme } from '@/hooks/use-theme';
 import { listCapsules, openCapsule, sendCapsule, type Capsule } from '@/lib/capsule';
 import { createMailboxRequestId } from '@/lib/mailbox';
 
-export function CapsuleScreen() {
+export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; arrivalId?: string } = {}) {
   const theme = useTheme();
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const params = useLocalSearchParams<{ id?: string }>();
+  const id = arrivalId ?? params.id;
   const [items, setItems] = useState<Capsule[]>([]);
   const [body, setBody] = useState('');
   const [days, setDays] = useState(7);
@@ -68,9 +69,9 @@ export function CapsuleScreen() {
     catch { setError('캡슐을 열지 못했어요. 다시 눌러 볼까요?'); }
     finally { working.current = false; setBusy(false); }
   }
-  return (
-    <Screen footer={<Button label={pending ? '다시 보내기' : '보내기'} onPress={send} loading={busy} disabled={loading || (!pending && locked >= 5) || !body.trim()} />}>
-      <BackHeader title="타임캡슐" />
+  const content = <>
+      {!sheet && <BackHeader title="타임캡슐" />}
+
       <AppText color="slate">미래의 나에게 한 줄을 보내요. 나만 볼 수 있어요.</AppText>
       <View style={styles.section}>
         <AppText variant="titleMd" accessibilityRole="header">보낸 캡슐</AppText>
@@ -96,8 +97,9 @@ export function CapsuleScreen() {
         {locked >= 5 && !pending && <AppText color="slate">잠긴 캡슐은 최대 5개까지 보낼 수 있어요.</AppText>}
         {error !== '' && <><AppText accessibilityRole="alert" color="slate">{error}</AppText>{!pending && <Button label="다시 불러오기" variant="secondary" onPress={load} />}</>}
       </View>
-    </Screen>
-  );
+      <Button label={pending ? '다시 보내기' : '보내기'} onPress={send} loading={busy} disabled={loading || (!pending && locked >= 5) || !body.trim()} />
+    </>;
+  return sheet ? content : <Screen>{content}</Screen>;
 }
 const styles = StyleSheet.create({
   section: { marginTop: Spacing.xl, gap: Spacing.xs },

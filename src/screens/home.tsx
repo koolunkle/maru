@@ -6,6 +6,8 @@ import { ActivityIndicator, StyleSheet, View } from "react-native";
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
 import { CapsuleCard } from "@/components/capsule-card";
+import { DailyNoteCard } from "@/components/daily-note-card";
+import { HomeSheet } from "@/components/home-sheet";
 import { GrowthCard } from "@/components/growth-card";
 import { MailboxCard } from "@/components/mailbox-card";
 import { MissionCard } from "@/components/mission-card";
@@ -30,6 +32,7 @@ export function Home() {
   const theme = useTheme();
   const { profile, refreshProfile } = useSession();
   const { data, error, reload, refresh, refreshing } = useTodayMissions();
+  const [noteOpen, setNoteOpen] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
 
   // 인증을 마치고 돌아오면 진행 상태·연속 출석을 다시 읽는다 (첫 진입은 훅이 이미 불러온다)
@@ -159,7 +162,7 @@ export function Home() {
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel="한 줄 기록 작성하기"
-          onPress={() => router.push("/daily-note")}
+          onPress={() => setNoteOpen(true)}
           style={[
             styles.noteMenu,
             { backgroundColor: theme.surface, borderColor: theme.hairline },
@@ -175,6 +178,7 @@ export function Home() {
           <Feather name="chevron-right" size={20} color={theme.steel} />
         </PressableScale>
       )}
+      {profile && noteOpen && <HomeSheet title="한 줄 기록" onClose={() => setNoteOpen(false)}><DailyNoteCard userId={profile.id} /></HomeSheet>}
       {profile && <CapsuleCard key={`capsule:${profile.id}`} />}
     </Screen>
   );
