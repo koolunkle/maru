@@ -33,7 +33,7 @@ export default function TabsLayout() {
           minHeight: 64,
         },
         // 위 tint 값(string)이 그대로 전달된다
-        tabBarIcon: ({ color }) => <Feather name={TabIcons[route.name]} size={24} color={color as string} />,
+        tabBarIcon: ({ color }) => <Feather aria-hidden name={TabIcons[route.name]} size={24} color={color as string} />,
       })}>
       <Tabs.Screen name="index" options={{ title: '홈' }} />
       <Tabs.Screen name="feed" options={{ title: '피드' }} />
