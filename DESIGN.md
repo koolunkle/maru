@@ -358,7 +358,7 @@ components:
 | S1 시작 | 세로 중앙: 서비스명 `display` → 8px → 소개 `body-md` `slate` / 하단 고정: `button-primary` "시작하기" |
 | S2 온보딩 | 상단 진행 표시(3칸 막대, 높이 4px, 활성 `primary`) → 24px → 질문 `display` → 24px → 선택지(카테고리: 칩 flex-wrap 간격 8px / 구: 2열 그리드 칩 / 시간: 세로 `card-base` 3개) / 하단 고정: "다음" |
 | S3 홈 | 헤더(날짜 `title-lg` + 설정 아이콘) → 연속 출석 줄(`zap` 아이콘 `accent` + "{N}일째" `title-md`) → 32px → "오늘의 미션" `title-md` → `mission-card` ×3 → 32px → "이번 주 미션" → `mission-card` ×1 → `button-ghost` "다른 미션 보기" |
-| S4 미션 상세 | 상단 틴트 영역(카테고리 `tint`, 높이 160px, 미션명 `title-lg`, 라벨 줄) → 인증 힌트 `card-base` → 추천 이유 `ai-card` → 같이 할래요 행(인원 `body-sm` + `button-secondary` 작은 높이 40px) / 하단 고정: "시작하기" 또는 "인증하기" |
+| S4 미션 상세 | 상단 틴트 영역(카테고리 `tint`, 높이 160px, 미션명 `title-lg`, 라벨 줄) → 인증 힌트 `card-base` → (행사 미션만) 행사 정보 `card-base`: 라벨 "행사 정보" `label` `steel` + 행사명 `body` + "11월 2일 ~ 11월 8일 · 장소" `body-sm` `slate` + `button-ghost` 작은 높이 "행사 정보 보기"(https 링크만, 새 창) → 추천 이유 `ai-card` → 같이 할래요 행(인원 `body-sm` + `button-secondary` 작은 높이 40px) / 하단 고정: "시작하기" 또는 "인증하기" |
 | S5 인증 | 사진 영역 1:1, `rounded.lg`, 비어 있으면 `surface-sunken` + `camera` 아이콘 + "사진 추가" → 16px → `text-input` 소감(3줄, 우하단 "0/100" `caption`) → 공개 토글 행 / 하단 고정: "제출하기". 판정 중: 전체 오버레이 대신 버튼을 로딩 상태로. 결과: `ai-card`에 결과 문구 + 보상 시 `reward-badge` |
 | S6 피드 | 게시물 `card-base`: 닉네임 `label` + 시각 `caption` → 사진 1:1 → 소감 `body-md` → 빠른 반응 칩 3개 → 댓글 목록(`body-sm`, 들여쓰기 없음) → 댓글 입력 1줄 |
 | S7 기록 | 이번 주 달성률 `display` 숫자 + 막대(높이 8px, `primary`, 배경 `surface-sunken`) → 32px → 월간 캘린더(7열, 출석일 원 28px `accent-soft` 채움 + 숫자 `accent-ink`) → 32px → 이번 주 편지(F13, 아래 통합 예정 표) |
