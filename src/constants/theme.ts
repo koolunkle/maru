@@ -8,7 +8,17 @@ import type { TextStyle } from 'react-native';
 
 import type { Enums } from '@/types/database';
 
-export const Colors = {
+import { ThemeVariants, type VariantName } from './theme-variants';
+
+/** UI 비교안 미리보기용. 빌드할 때 EXPO_PUBLIC_THEME_VARIANT로 고르고, 없으면 기준안(A). theme-variants.ts 참고 */
+const variant = ThemeVariants[process.env.EXPO_PUBLIC_THEME_VARIANT as VariantName] as
+  | (typeof ThemeVariants)[VariantName]
+  | undefined;
+
+/** 비교안 이름. 기준안이면 null */
+export const ThemeVariantLabel = variant?.label ?? null;
+
+const BaseColors = {
   light: {
     canvas: '#faf9f7',
     surface: '#ffffff',
@@ -57,7 +67,9 @@ export const Colors = {
   },
 } as const;
 
-export type ThemeColors = { [K in keyof typeof Colors.light]: string };
+export type ThemeColors = { [K in keyof typeof BaseColors.light]: string };
+
+export const Colors: { light: ThemeColors; dark: ThemeColors } = variant?.colors ?? BaseColors;
 
 type Category = Enums<'mission_category'>;
 
@@ -91,13 +103,15 @@ export const Typography = {
 
 export type TypographyVariant = keyof typeof Typography;
 
-export const Radius = {
+const BaseRadius = {
   sm: 6,
   md: 10,
   lg: 16,
   xl: 24,
   full: 9999,
-} as const;
+};
+
+export const Radius = variant?.radius ?? BaseRadius;
 
 export const Spacing = {
   xxs: 4,
