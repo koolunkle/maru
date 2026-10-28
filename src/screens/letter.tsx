@@ -106,7 +106,7 @@ export function Letter({ week }: { week: string }) {
               {report.notes.some((note) => note.mood === 5) && (
                 <View style={[styles.help, { backgroundColor: theme.helpSoft }]}>
                   <AppText variant="titleMd">도움을 받을 수 있는 곳을 살펴볼까요?</AppText>
-                  <Button label="도움 안내 보기" variant="secondary" onPress={() => router.push('/settings')} />
+                  <Button label="도움 안내 보기" variant="secondary" onPress={() => router.push('/rest')} />
                 </View>
               )}
             </>

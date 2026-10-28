@@ -39,7 +39,7 @@ flowchart LR
 | --- | --- |
 | `src/app/` | Expo Router 라우트. 파일 = 화면. 본문은 두지 않고 `src/screens/`를 렌더한다 |
 | `src/app/_layout.tsx` | 글꼴 로드, 세션 상태에 따른 `Stack.Protected` 분기(시작 → 온보딩 → 탭), 웹 480px 컬럼 |
-| `src/app/(tabs)/_layout.tsx` | 하단 탭(현재 4개, T5에서 휴게소 추가) |
+| `src/app/(tabs)/_layout.tsx` | 하단 탭 5개(홈·피드·기록·내 방·휴게소) |
 | `src/providers/background-audio.tsx` | 빗소리 배경음(expo-audio). 탭을 옮겨도 유지 |
 | `src/screens/` | 화면 본문. 큰 화면은 폴더(`feed/`, `onboarding/`, `settings/`) |
 | `src/components/` | 공용 UI(`mission-card`, `ai-card`, `help-card`, `growth-card`, `mailbox-card`, `daily-note-card`, `capsule-card` 등). DESIGN.md §5.3 이름과 맞춘다 |
@@ -71,8 +71,8 @@ flowchart LR
 | S6 | `/feed` | `screens/feed/` | 완료 |
 | S7 | `/record` | `screens/record.tsx` | 완료. 주간 리포트 카드(F13) 반영 |
 | S8 | `/room` | `screens/room.tsx` | 완료 |
-| S9 | `/settings`, `/settings/[field]` | `screens/settings/` | 완료. 배경음 설정 포함. "도움받을 수 있는 곳"은 T5에서 S10으로 이동 예정 |
-| S10 | `/rest` | — | 미구현(T5). 빗소리 배경음(T6)은 설정에 먼저 구현됨 |
+| S9 | `/settings`, `/settings/[field]` | `screens/settings/` | 완료. 도움 안내·빗소리는 S10으로 옮김 |
+| S10 | `/rest` | `screens/rest.tsx` | 완료(T5). 도움 안내 주소는 `constants/help.ts` |
 | S11 | `/letter/[week]` | `screens/letter.tsx` | 완료(T8). AI 개인화는 T7 진행 중 |
 | S12 | `/capsule`, 홈 시트 | `screens/capsule.tsx` | 완료. 앱에서는 홈 카드 → 시트로 연다 |
 | S13 | 홈 시트 | `components/daily-note-card.tsx` | 한 줄 기록·기분(F15). 별도 경로 없음 |
@@ -99,7 +99,7 @@ DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nick
 ## 5. 알아 둘 점
 
 - **문화행사는 매일 05:00 KST에 동기화된다.** `sync-events`가 서울 열린데이터광장에서 30일 안에 진행되는 행사를 `events`에 넣고, 추천 함수가 사용자 구의 7일 안 행사를 AI에 넘긴다. 키·Vault 설정은 [ENV.md](./ENV.md) B·E절.
-- **임시 링크:** 설정의 서울마음편의점 행은 구글 검색 URL이다. 공식 URL 확정(PRD §8.4) 후 T5에서 `src/constants/help.ts`로 옮긴다.
+- **임시 링크:** 휴게소의 서울마음편의점 행은 구글 검색 URL이다(`src/constants/help.ts`). 공식 URL이 확정되면(PRD §8.4) 이 파일만 바꾼다.
 - **테스트는 일부만 있다.** `tests/*.test.mjs`(node)와 `supabase/tests/*.sql`(로컬 DB용, 롤백)이 있다. 그 밖은 `typecheck`·`lint`와 미리보기 배포 수동 확인이다.
 - **운영 DB를 함께 쓴다.** 로컬에서 만든 계정·사진도 운영 데이터다. 마이그레이션은 리뷰 후에만 `db push`한다.
 - `supabase/config.toml`이 없다. 함수 배포는 매번 `--project-ref jpipzrmspryzvjykxefm`을 붙인다.

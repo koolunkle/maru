@@ -1,10 +1,7 @@
 import { Feather } from '@expo/vector-icons';
-import { Slider } from '@expo/ui/community/slider';
 import { router } from 'expo-router';
-import type { ComponentProps } from 'react';
-import { Linking, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { AppSwitch } from '@/components/app-switch';
 import { AppText } from '@/components/app-text';
 import { BackHeader } from '@/components/back-header';
 import { PressableScale } from '@/components/pressable-scale';
@@ -13,18 +10,16 @@ import { CategoryLabel, DailyMinuteOptions } from '@/constants/domain';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/providers/session-provider';
-import { useBackgroundAudio } from '@/providers/background-audio';
 
 type RowProps = {
   label: string;
   value?: string;
-  icon?: ComponentProps<typeof Feather>['name'];
   /** 앱 안 화면으로 이동하는 행이면 오른쪽에 chevron 표시 */
   chevron?: boolean;
   onPress?: () => void;
 };
 
-function Row({ label, value, icon, chevron, onPress }: RowProps) {
+function Row({ label, value, chevron, onPress }: RowProps) {
   const theme = useTheme();
   return (
     <PressableScale
@@ -32,7 +27,6 @@ function Row({ label, value, icon, chevron, onPress }: RowProps) {
       onPress={onPress}
       accessibilityRole={onPress ? 'link' : undefined}
       style={[styles.row, { borderBottomColor: theme.hairline }]}>
-      {icon && <Feather aria-hidden name={icon} size={20} color={theme.ink} />}
       <AppText style={styles.rowLabel}>{label}</AppText>
       {value && (
         <AppText variant="bodySm" color="slate">
@@ -47,8 +41,6 @@ function Row({ label, value, icon, chevron, onPress }: RowProps) {
 /** S9 설정 (DESIGN.md §5.2) */
 export function Settings() {
   const { profile } = useSession();
-  const theme = useTheme();
-  const { playing, volume, toggle, setVolume } = useBackgroundAudio();
   const minutes = DailyMinuteOptions.find((o) => o.value === profile?.daily_minutes)?.label;
 
   return (
@@ -72,40 +64,6 @@ export function Settings() {
         <Row label="하루 가능 시간" value={minutes} chevron onPress={() => router.push('/settings/minutes')} />
       </View>
 
-      <AppText variant="label" color="steel" style={styles.groupTitle}>
-        도움받을 수 있는 곳
-      </AppText>
-      <View style={styles.group}>
-        <Row label="외로움안녕120" value="전화 120" icon="phone" onPress={() => Linking.openURL('tel:120')} />
-        <Row
-          label="서울마음편의점"
-          icon="map-pin"
-          onPress={() => Linking.openURL('https://www.google.com/search?q=서울마음편의점')}
-        />
-      </View>
-
-      <AppText variant="label" color="steel" style={styles.groupTitle}>배경음</AppText>
-      <View style={[styles.row, { borderBottomColor: theme.hairline }]}>
-        <Feather aria-hidden name="cloud-rain" size={20} color={theme.ink} />
-        <AppText style={styles.rowLabel}>배경음 틀어 두기</AppText>
-        <AppSwitch accessibilityLabel="배경음 틀어 두기" value={playing} onValueChange={toggle} />
-      </View>
-      {playing && (
-        <View style={styles.volumes}>
-          <Slider
-            style={styles.slider}
-            accessibilityLabel="배경음 볼륨"
-            minimumValue={0}
-            maximumValue={1}
-            step={0.01}
-            minimumTrackTintColor={theme.primary}
-            value={volume}
-            onValueChange={setVolume}
-          />
-          <AppText variant="bodySm" color="slate">{Math.round(volume * 100)}%</AppText>
-        </View>
-      )}
-
       <AppText variant="caption" color="steel" style={styles.credits}>
         미션 출처: 365 서울챌린지(서울특별시), 서울 열린데이터광장{'\n'}글꼴: Pretendard (SIL Open Font License){'\n'}배경음: DesiFreeMusic, Pixabay Content License
       </AppText>
@@ -116,9 +74,6 @@ export function Settings() {
 const styles = StyleSheet.create({
   group: {
     marginTop: Spacing.md,
-  },
-  groupTitle: {
-    marginTop: Spacing.xxl,
   },
   row: {
     minHeight: 56,
@@ -132,14 +87,5 @@ const styles = StyleSheet.create({
   },
   credits: {
     marginTop: Spacing.xxl,
-  },
-  volumes: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.xs,
-    marginTop: Spacing.md,
-  },
-  slider: {
-    flex: 1,
   },
 });
