@@ -8,68 +8,56 @@ import type { TextStyle } from 'react-native';
 
 import type { Enums } from '@/types/database';
 
-import { ThemeVariants, type VariantName } from './theme-variants';
-
-/** UI 비교안 미리보기용. 빌드할 때 EXPO_PUBLIC_THEME_VARIANT로 고르고, 없으면 기준안(A). theme-variants.ts 참고 */
-const variant = ThemeVariants[process.env.EXPO_PUBLIC_THEME_VARIANT as VariantName] as
-  | (typeof ThemeVariants)[VariantName]
-  | undefined;
-
-/** 비교안 이름. 기준안이면 null */
-export const ThemeVariantLabel = variant?.label ?? null;
-
-const BaseColors = {
+export const Colors = {
   light: {
-    canvas: '#faf9f7',
+    canvas: '#f7f8f4',
     surface: '#ffffff',
-    surfaceSunken: '#f3f1ee',
-    hairline: '#e8e5e0',
-    hairlineStrong: '#cfcbc4',
-    ink: '#2b2a27',
-    slate: '#5f5d57',
-    steel: '#6b6862',
-    muted: '#b5b1a9',
-    primary: '#4f5bd5',
-    primaryPressed: '#3f4ab8',
-    primarySoft: '#eceefb',
+    surfaceSunken: '#eef1ea',
+    hairline: '#e2e6dc',
+    hairlineStrong: '#c8cfbf',
+    ink: '#232822',
+    slate: '#555c52',
+    steel: '#5f665b',
+    muted: '#aab2a3',
+    primary: '#2b7656',
+    primaryPressed: '#215f45',
+    primarySoft: '#e3f2ea',
     onPrimary: '#ffffff',
-    accent: '#f08a3e',
-    accentInk: '#a8520f',
-    accentSoft: '#fff1e5',
-    success: '#2f9e5b',
-    error: '#d9483b',
-    helpSoft: '#e8f1fb',
-    roomWall: '#f3ede4',
-    roomFloor: '#e3d5c3',
+    accent: '#f2b134',
+    accentInk: '#7d5200',
+    accentSoft: '#fff6dc',
+    success: '#2f8f5b',
+    error: '#c4463a',
+    helpSoft: '#e6f0f7',
+    roomWall: '#eef0e6',
+    roomFloor: '#d9cfb8',
   },
   dark: {
-    canvas: '#151517',
-    surface: '#1f1f22',
-    surfaceSunken: '#1f1f22',
-    hairline: '#2e2e33',
-    hairlineStrong: '#2e2e33',
-    ink: '#ecebe8',
-    slate: '#a9a7a1',
-    steel: '#a9a7a1',
-    muted: '#5f5d57',
-    primary: '#8a93f0',
-    primaryPressed: '#6f79e6',
-    primarySoft: '#262a4a',
-    onPrimary: '#151517',
-    accent: '#f5a065',
-    accentInk: '#f5a065',
-    accentSoft: '#2e2620',
-    success: '#4cbb78',
+    canvas: '#131614',
+    surface: '#1c201d',
+    surfaceSunken: '#1c201d',
+    hairline: '#2a302b',
+    hairlineStrong: '#2a302b',
+    ink: '#e9ece6',
+    slate: '#a3aa9f',
+    steel: '#a3aa9f',
+    muted: '#5c6358',
+    primary: '#6cc59a',
+    primaryPressed: '#52b083',
+    primarySoft: '#1f3329',
+    onPrimary: '#131614',
+    accent: '#f5c463',
+    accentInk: '#f5c463',
+    accentSoft: '#2e2a1c',
+    success: '#6cc59a',
     error: '#e8695e',
-    helpSoft: '#1e2a38',
-    roomWall: '#2a2723',
-    roomFloor: '#3a332b',
+    helpSoft: '#1c2933',
+    roomWall: '#232822',
+    roomFloor: '#333a2c',
   },
 } as const;
 
-export type ThemeColors = { [K in keyof typeof BaseColors.light]: string };
-
-export const Colors: { light: ThemeColors; dark: ThemeColors } = variant?.colors ?? BaseColors;
+export type ThemeColors = { [K in keyof typeof Colors.light]: string };
 
 type Category = Enums<'mission_category'>;
 
@@ -103,15 +91,13 @@ export const Typography = {
 
 export type TypographyVariant = keyof typeof Typography;
 
-const BaseRadius = {
+export const Radius = {
   sm: 6,
   md: 10,
   lg: 16,
   xl: 24,
   full: 9999,
-};
-
-export const Radius = variant?.radius ?? BaseRadius;
+} as const;
 
 export const Spacing = {
   xxs: 4,

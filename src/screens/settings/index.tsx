@@ -9,7 +9,7 @@ import { BackHeader } from '@/components/back-header';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { CategoryLabel, DailyMinuteOptions } from '@/constants/domain';
-import { Spacing, ThemeVariantLabel } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useSession } from '@/providers/session-provider';
 import { useBackgroundAudio } from '@/providers/background-audio';
@@ -107,8 +107,6 @@ export function Settings() {
 
       <AppText variant="caption" color="steel" style={styles.credits}>
         미션 출처: 365 서울챌린지(서울특별시), 서울 열린데이터광장{'\n'}글꼴: Pretendard (SIL Open Font License){'\n'}배경음: DesiFreeMusic, Pixabay Content License
-        {ThemeVariantLabel && `
-디자인 비교안: ${ThemeVariantLabel}`}
       </AppText>
     </Screen>
   );
