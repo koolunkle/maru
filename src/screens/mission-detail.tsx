@@ -1,7 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 
 import { AiCard } from '@/components/ai-card';
 import { AppText } from '@/components/app-text';
@@ -16,12 +16,14 @@ import { Functions } from '@/lib/functions';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
-import { kstEndOfDay, kstEndOfWeek } from '@/utils/date';
+import { formatDateRange, kstEndOfDay, kstEndOfWeek } from '@/utils/date';
 
 type MissionType = Enums<'mission_type'>;
 
+type MissionEvent = Pick<Tables<'events'>, 'title' | 'place' | 'start_date' | 'end_date' | 'url'>;
+
 type Detail = {
-  mission: Tables<'missions'>;
+  mission: Tables<'missions'> & { event: MissionEvent | null };
   mine: Tables<'user_missions'> | null;
   joined: boolean;
   participants: number;
@@ -32,7 +34,7 @@ type Detail = {
 
 async function fetchDetail(missionId: string, userId: string): Promise<Detail> {
   const [mission, mine, joined, counts, recent, relays, ownRelay] = await Promise.all([
-    supabase.from('missions').select('*').eq('id', missionId).single(),
+    supabase.from('missions').select('*, event:events(title, place, start_date, end_date, url)').eq('id', missionId).single(),
     supabase
       .from('user_missions')
       .select('*')
@@ -217,6 +219,28 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
           </AppText>
           <AppText>{mission.verify_hint} 사진 한 장</AppText>
         </View>
+
+        {mission.event && (
+          <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+            <AppText variant="label" color="steel">
+              행사 정보
+            </AppText>
+            <AppText>{mission.event.title}</AppText>
+            <AppText variant="bodySm" color="slate">
+              {formatDateRange(mission.event.start_date, mission.event.end_date)}
+              {mission.event.place ? ` · ${mission.event.place}` : ''}
+            </AppText>
+            {/* 외부 데이터의 주소라 https만 연다 */}
+            {mission.event.url?.startsWith('https://') && (
+              <Button
+                label="행사 정보 보기"
+                variant="ghost"
+                size="sm"
+                onPress={() => mission.event?.url && Linking.openURL(mission.event.url)}
+              />
+            )}
+          </View>
+        )}
 
         {mission.reason && <AiCard>{mission.reason}</AiCard>}
 

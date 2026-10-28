@@ -172,7 +172,7 @@ flowchart LR
 ### F2. AI 미션 추천
 
 - 함수: `recommend-missions`. 호출 시점: 온보딩 완료, 당일(KST) 첫 홈 진입, '다른 미션 보기'(하루 1회).
-- 입력: 프로필, 최근 14일 `user_missions`, 시드 36개, 해당 구의 진행 중 문화행사 최대 10건.
+- 입력: 프로필, 최근 14일 `user_missions`, 시드 36개, 해당 구에서 이번 주(일요일까지) 안에 열려 있는 문화행사 최대 10건(`sync-events`가 매일 수집).
 - 출력: 일일 3개 + 주간 1개. 각 미션 필드
 
 | 필드 | 타입 | 규칙 |
@@ -183,7 +183,7 @@ flowchart LR
 | minutes | int | 일일: 프로필 하루 가능 시간 이하 |
 | verify_hint | string | 30자 이하. 사진에 담길 대상 (예: "하늘이 보이는 사진") |
 | reason | string | 50자 이하. 추천 이유, S4에 표시 |
-| event_id | uuid \| null | 문화행사 연계 시 |
+| event_id | uuid \| null | 문화행사 연계 시. 주간 미션에만 허용(기한 안에 갈 수 있도록). 제목은 "OO 보러 가기"처럼 할 일로, 난이도 4, 60분 이상 |
 
 - 난이도 정의: 1 = 5분, 집 반경 100m / 2 = 15분, 동네 / 3 = 30분, 공공장소 방문 / 4 = 1시간+, 행사 참여 / 5 = 타인과 함께하는 활동.
 - 신규 사용자 난이도 1~2. 주간 미션은 프로필 난이도 +1.
@@ -391,7 +391,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 | `moderate-comment` | comment_id 또는 relay_id | status | 댓글·릴레이 insert 직후 (F10에서 relay_id 추가) |
 | `mailbox` | action(`send`·`inbox`·`sent`·`read`), body·requestId 또는 id | 본인 발신·수신 글, 검수 상태·읽음 | F14 작성·수신함 진입·본문 열기 |
 | `write-weekly-letter` | 주차별 본인 기록과 완료 미션으로 편지 생성, 보관된 주차 목록 조회 | — | F13 |
-| `sync-events` | — | upsert 건수 | pg_cron 매일 05:00 KST (미구현) |
+| `sync-events` | — | upsert 건수 | pg_cron 매일 05:00 KST. 서울 열린데이터광장 문화행사 중 30일 안에 진행되는 행사를 저장 |
 
 `publish_due_comments()`는 `relay_messages`도 함께 공개하도록 확장한다(F10).
 
