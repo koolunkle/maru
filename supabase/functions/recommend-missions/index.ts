@@ -10,8 +10,8 @@ import { admin, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
 import { pickSeeds } from '../_shared/fallback.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
-import { addDays, kstDate, weekStart } from '../_shared/kst.ts';
-import { eventMissionTitle } from '../_shared/seoul-events.ts';
+import { addDays, kstDate } from '../_shared/kst.ts';
+import { eventMissionTitle, weeklyEventWindow } from '../_shared/seoul-events.ts';
 
 const Categories = ['walk', 'food', 'culture', 'growth', 'neighborhood', 'rhythm', 'people'] as const;
 
@@ -72,6 +72,7 @@ Deno.serve(
       throw new HttpError(400, 'invalid_request');
     }
     const today = kstDate();
+    const eventWindow = weeklyEventWindow(today);
 
     const { data: prior, error: priorError } = await admin.from('recommendation_requests')
       .select('response, rec_date, refresh').eq('user_id', userId).eq('request_id', requestId).maybeSingle();
@@ -113,13 +114,13 @@ Deno.serve(
         .order('started_at', { ascending: false })
         .limit(30),
       admin.from('missions').select('*').eq('source', 'seed'),
-      // 행사 미션은 주간 미션(기한: 이번 주 일요일)으로만 내므로 이번 주 안에 열려 있는 행사만 넘긴다
+      // 행사 미션은 주간 미션(기한: 이번 주 일요일)으로만 낸다. 곧 끝나는 행사는 빼고 이번 주 안에 갈 수 있는 행사만 넘긴다(#21)
       admin
         .from('events')
         .select('id, title, place, start_date, end_date')
         .eq('district', profile.district)
-        .gte('end_date', today)
-        .lte('start_date', addDays(weekStart(today), 6))
+        .gte('end_date', eventWindow.minEnd)
+        .lte('start_date', eventWindow.maxStart)
         .order('start_date')
         .limit(10),
     ]);
