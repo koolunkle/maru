@@ -23,7 +23,7 @@
 | 등록된 시크릿 이름 확인 | Supabase 대시보드 → Edge Functions → Secrets, 또는 `npx supabase secrets list` | Supabase 멤버 | 값은 다시 볼 수 없고 해시만 보인다 |
 | `app_config` 값 | Supabase 대시보드 → Table Editor → `app_config`, 또는 SQL Editor | Supabase 멤버 | 전달 불필요 |
 | DB 비밀번호 | **조회 불가.** Project Settings → Database → Reset database password로 재설정만 가능 | 관리자 | 비밀번호 관리자·1회성 비밀 링크. 메신저 금지 |
-| Expo 프로젝트 ID | `app.json`의 `extra.eas.projectId` | 누구나 | 전달 불필요 |
+| Expo 프로젝트 ID | `app.json`의 `owner`, `extra.eas.projectId` | 누구나 | 전달 불필요. 바꾸지 않는다 |
 
 - 재설정한 DB 비밀번호는 기존에 `supabase link` 해 둔 사람도 다시 입력해야 한다. 재설정 전에 팀에 알린다.
 - AI 키는 한 번 만든 뒤 콘솔에서도 전체 값을 다시 볼 수 없다. 잃어버리면 새로 발급하고 이전 키는 폐기한다.
@@ -128,7 +128,7 @@ update public.app_config set value = '"retry_later"' where key = 'verify_fallbac
 | --- | --- | --- |
 | GitHub `koolunkle/maru` Collaborator(Write) | GitHub 초대 | 모든 작업 |
 | Supabase 조직 멤버(Developer) | 대시보드 초대 | DB·함수 작업, 로그 확인 |
-| Expo 프로젝트 `@koolunkle/seoul-challenge` 멤버 | expo.dev 초대 | 미리보기 배포 |
+| Expo 조직 `koolunkles-team` 멤버(Developer) | expo.dev 조직 설정 → Members → Invite | 미리보기 배포 |
 | Supabase DB 비밀번호 | 비밀번호 관리자 공유 또는 1회성 비밀 링크 | `supabase link`·`db push`를 할 사람만 |
 
 ### 전달하지 않는 것
@@ -160,5 +160,5 @@ npx eas-cli@latest login                                 # 미리보기 배포�
 - [ ] `npm run web`으로 시작 화면이 뜨고 '시작하기' → 온보딩까지 진행됨
 - [ ] `npm run typecheck`, `npm run lint` 통과
 - [ ] (DB·함수 담당) Supabase 초대 수락, `supabase login`·`link`, `npx supabase migration list`에서 로컬·원격 짝이 맞음
-- [ ] (배포 담당) Expo 초대 수락, `eas login`
+- [ ] (배포 담당) Expo 조직 `koolunkles-team` 초대 수락, `npx eas-cli@latest login`
 - [ ] 테스트로 만든 익명 계정·사진은 끝나고 지운다(CONTRIBUTING §7)

@@ -25,7 +25,7 @@ npm start                    # Expo Go (폰)
 ## 배포 (EAS Hosting)
 
 - 운영 URL: https://seoul-challenge.expo.app
-- EAS 프로젝트: `@koolunkle/seoul-challenge`
+- EAS 프로젝트: `@koolunkles-team/seoul-challenge` (Expo 조직 `koolunkles-team`)
 
 ```bash
 npx expo export -p web

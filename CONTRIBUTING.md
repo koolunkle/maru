@@ -19,7 +19,7 @@
 | --- | --- | --- |
 | GitHub `koolunkle/maru` | 브랜치 push, PR | Collaborator 초대 (Write) |
 | Supabase 프로젝트 `seoul-challenge` | 마이그레이션 적용, 함수 배포, 로그 확인 | 조직 멤버 초대 (Developer) |
-| Expo 프로젝트 `@koolunkle/seoul-challenge` | 미리보기 배포 | 프로젝트 멤버 추가 |
+| Expo 조직 `koolunkles-team` | 미리보기 배포 | 조직 멤버 초대 (Developer) |
 
 AI API 키(Gemini, Anthropic)는 Supabase 함수 환경 변수에만 있다. 개인 PC나 저장소, 메신저로 받지 않는다. DB 작업을 맡으면 DB 비밀번호를 추가로 받는다. 무엇을 받고 무엇을 받지 않는지는 [docs/ENV.md](./docs/ENV.md) D절.
 
@@ -59,9 +59,13 @@ npm run lint
 ### 미리보기 배포 (운영과 분리된 주소)
 
 ```bash
+npx eas-cli@latest login           # 처음 한 번. Expo 조직 초대를 수락한 계정으로
 npx expo export -p web
 npx eas-cli@latest deploy          # --prod 없이. 출력된 미리보기 URL을 PR에 붙인다
 ```
+
+- 운영 배포(`--prod`)는 관리자만 한다.
+- `app.json`의 `owner`·`extra.eas.projectId`는 바꾸지 않는다. 각자 Expo 프로젝트를 새로 만들어 연결하지 않는다. 배포 권한 오류가 나면 관리자에게 알린다.
 
 ## 4. 커밋·PR 규칙
 
