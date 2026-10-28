@@ -1,7 +1,7 @@
 import type { Feather } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 
-/** 마음 휴게소(S10) 도움받을 수 있는 곳. PRD §8.4: 서울마음편의점 공식 안내 URL은 미확정이라 검색 링크를 둔다 */
+/** 마음 휴게소(S10) 도움받을 수 있는 곳. 서울마음편의점은 서울시 복지 누리집 사업 안내(지점 목록 포함) */
 export const HelpPlaces: {
   name: string;
   description: string;
@@ -13,7 +13,7 @@ export const HelpPlaces: {
     name: '서울마음편의점',
     description: '예약 없이 들러 쉬어 가는 동네 공간',
     icon: 'map-pin',
-    url: 'https://www.google.com/search?q=서울마음편의점',
+    url: 'https://news.seoul.go.kr/welfare/archives/569285',
   },
   {
     name: '청년마음건강 지원사업',

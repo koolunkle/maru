@@ -99,7 +99,7 @@ DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nick
 ## 5. 알아 둘 점
 
 - **문화행사는 매일 05:00 KST에 동기화된다.** `sync-events`가 서울 열린데이터광장에서 30일 안에 진행되는 행사를 `events`에 넣고, 추천 함수가 사용자 구의 7일 안 행사를 AI에 넘긴다. 키·Vault 설정은 [ENV.md](./ENV.md) B·E절.
-- **임시 링크:** 휴게소의 서울마음편의점 행은 구글 검색 URL이다(`src/constants/help.ts`). 공식 URL이 확정되면(PRD §8.4) 이 파일만 바꾼다.
+- **도움 안내 링크:** 휴게소의 기관 주소는 `src/constants/help.ts` 한 곳에 있다. 기관 페이지가 바뀌면 이 파일만 고친다.
 - **테스트는 일부만 있다.** `tests/*.test.mjs`(node)와 `supabase/tests/*.sql`(로컬 DB용, 롤백)이 있다. 그 밖은 `typecheck`·`lint`와 미리보기 배포 수동 확인이다.
 - **운영 DB를 함께 쓴다.** 로컬에서 만든 계정·사진도 운영 데이터다. 마이그레이션은 리뷰 후에만 `db push`한다.
 - `supabase/config.toml`이 없다. 함수 배포는 매번 `--project-ref jpipzrmspryzvjykxefm`을 붙인다.
