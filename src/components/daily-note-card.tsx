@@ -8,6 +8,7 @@ import { Chip } from '@/components/chip';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { DailyNoteMaxLength, deleteDailyNote, getDailyNote, saveDailyNote, type DailyNote } from '@/lib/daily-note';
+import { clearDraft, readDraft, writeDraft } from '@/lib/drafts';
 import { kstDate } from '@/utils/date';
 
 const Moods = [
@@ -17,6 +18,10 @@ const Moods = [
   { value: 4, label: '조금 무거워요', icon: 'cloud-drizzle' },
   { value: 5, label: '마음이 무거워요', icon: 'cloud-rain' },
 ] as const;
+
+/** 시트를 닫았다 열어도 유지할 작성 중인 기록. day는 불러온 기록의 날짜 */
+type NoteDraft = { day: string; mood: number | null; text: string };
+const draftKey = (userId: string) => `daily-note:${userId}`;
 
 /** F15: 본인만 볼 수 있는 오늘의 기분과 한 줄. */
 export function DailyNoteCard({ userId }: { userId: string }) {
@@ -71,8 +76,16 @@ export function DailyNoteCard({ userId }: { userId: string }) {
           if (!active || dirty.current || working.current) return;
           loadedDay.current = today;
           setSaved(note);
-          setMood(note?.mood ?? null);
-          setText(note?.text ?? '');
+          const draft = readDraft<NoteDraft>(draftKey(userId));
+          if (draft?.day === today) {
+            dirty.current = true;
+            setMood(draft.mood);
+            setText(draft.text);
+          } else {
+            if (draft) clearDraft(draftKey(userId));
+            setMood(note?.mood ?? null);
+            setText(note?.text ?? '');
+          }
           setNotice(null);
           setLoading(false);
         },
@@ -106,6 +119,7 @@ export function DailyNoteCard({ userId }: { userId: string }) {
     try {
       const note = await saveDailyNote(userId, today, mood, text);
       dirty.current = false;
+      clearDraft(draftKey(userId));
       setSaved(note);
       loadedDay.current = note.note_date;
       setNotice('오늘의 기록을 저장했어요.');
@@ -138,6 +152,7 @@ export function DailyNoteCard({ userId }: { userId: string }) {
     try {
       await deleteDailyNote(userId, saved.note_date);
       dirty.current = false;
+      clearDraft(draftKey(userId));
       setSaved(null);
       setMood(null);
       setText('');
@@ -153,6 +168,7 @@ export function DailyNoteCard({ userId }: { userId: string }) {
 
   function discardAndReload() {
     dirty.current = false;
+    clearDraft(draftKey(userId));
     setDayChanged(false);
     setReload((value) => value + 1);
   }
@@ -188,6 +204,7 @@ export function DailyNoteCard({ userId }: { userId: string }) {
                 onPress={() => {
                   dirty.current = true;
                   setMood(item.value);
+                  writeDraft<NoteDraft>(draftKey(userId), { day: loadedDay.current, mood: item.value, text });
                   if (!dayChanged) setNotice(null);
                   setConfirmDelete(false);
                 }}
@@ -201,6 +218,7 @@ export function DailyNoteCard({ userId }: { userId: string }) {
             onChangeText={(value) => {
               dirty.current = true;
               setText(value.slice(0, DailyNoteMaxLength));
+              writeDraft<NoteDraft>(draftKey(userId), { day: loadedDay.current, mood, text: value.slice(0, DailyNoteMaxLength) });
               if (!dayChanged) setNotice(null);
               setConfirmDelete(false);
             }}
