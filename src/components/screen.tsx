@@ -31,7 +31,7 @@ export function Screen({ children, footer, scroll = true, edges = ['top', 'botto
         <View
           style={[
             styles.footer,
-            { backgroundColor: theme.canvas, boxShadow: '0 -2px 8px rgba(43,42,39,0.06)' },
+            { backgroundColor: theme.canvas, boxShadow: '0 -2px 8px rgba(35,40,34,0.06)' },
           ]}>
           {footer}
         </View>

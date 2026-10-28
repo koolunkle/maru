@@ -1,28 +1,28 @@
 ---
 version: alpha
 name: seoul-challenge-design
-description: 따뜻한 오프화이트 위에 카테고리별 파스텔 카드로 하루 5분 미션을 보여주는, 헤어라인 중심의 웜 미니멀 디자인 시스템.
+description: 옅은 초록빛 오프화이트 위에 카테고리별 파스텔 카드로 하루 5분 미션을 보여주는, 산책·성장을 떠올리는 초록 강조의 헤어라인 중심 미니멀 디자인 시스템.
 
 colors:
-  canvas: "#faf9f7"
+  canvas: "#f7f8f4"
   surface: "#ffffff"
-  surface-sunken: "#f3f1ee"
-  hairline: "#e8e5e0"
-  hairline-strong: "#cfcbc4"
-  ink: "#2b2a27"
-  slate: "#5f5d57"
-  steel: "#6b6862"
-  muted: "#b5b1a9"
-  primary: "#4f5bd5"
-  primary-pressed: "#3f4ab8"
-  primary-soft: "#eceefb"
+  surface-sunken: "#eef1ea"
+  hairline: "#e2e6dc"
+  hairline-strong: "#c8cfbf"
+  ink: "#232822"
+  slate: "#555c52"
+  steel: "#5f665b"
+  muted: "#aab2a3"
+  primary: "#2b7656"
+  primary-pressed: "#215f45"
+  primary-soft: "#e3f2ea"
   on-primary: "#ffffff"
-  accent: "#f08a3e"
-  accent-ink: "#a8520f"
-  accent-soft: "#fff1e5"
-  success: "#2f9e5b"
-  error: "#d9483b"
-  help-soft: "#e8f1fb"
+  accent: "#f2b134"
+  accent-ink: "#7d5200"
+  accent-soft: "#fff6dc"
+  success: "#2f8f5b"
+  error: "#c4463a"
+  help-soft: "#e6f0f7"
   tint-walk: "#ddf2e3"
   tint-food: "#ffe8d4"
   tint-culture: "#e8e2f6"
@@ -30,25 +30,25 @@ colors:
   tint-neighborhood: "#dcecfa"
   tint-rhythm: "#f5efe3"
   tint-people: "#fce3ec"
-  room-wall: "#f3ede4"
-  room-floor: "#e3d5c3"
-  dark-canvas: "#151517"
-  dark-surface: "#1f1f22"
-  dark-hairline: "#2e2e33"
-  dark-ink: "#ecebe8"
-  dark-slate: "#a9a7a1"
-  dark-primary: "#8a93f0"
-  dark-primary-soft: "#262a4a"
-  dark-accent: "#f5a065"
-  dark-primary-pressed: "#6f79e6"
-  dark-on-primary: "#151517"
-  dark-muted: "#5f5d57"
-  dark-accent-soft: "#2e2620"
-  dark-success: "#4cbb78"
+  room-wall: "#eef0e6"
+  room-floor: "#d9cfb8"
+  dark-canvas: "#131614"
+  dark-surface: "#1c201d"
+  dark-hairline: "#2a302b"
+  dark-ink: "#e9ece6"
+  dark-slate: "#a3aa9f"
+  dark-primary: "#6cc59a"
+  dark-primary-soft: "#1f3329"
+  dark-accent: "#f5c463"
+  dark-primary-pressed: "#52b083"
+  dark-on-primary: "#131614"
+  dark-muted: "#5c6358"
+  dark-accent-soft: "#2e2a1c"
+  dark-success: "#6cc59a"
   dark-error: "#e8695e"
-  dark-help-soft: "#1e2a38"
-  dark-room-wall: "#2a2723"
-  dark-room-floor: "#3a332b"
+  dark-help-soft: "#1c2933"
+  dark-room-wall: "#232822"
+  dark-room-floor: "#333a2c"
 
 typography:
   display:
@@ -238,10 +238,10 @@ components:
 
 | 키워드 | 구현 규칙 |
 | --- | --- |
-| 웜 미니멀 | 배경 `canvas` #faf9f7, 텍스트 `ink` #2b2a27. 순백·순흑 미사용 |
+| 숲길 미니멀 | 배경 `canvas` #f7f8f4, 텍스트 `ink` #232822. 순백·순흑 미사용 |
 | 파스텔 카드 | 미션 카드는 카테고리 틴트 7색 중 하나로 채움. 테두리·그림자 없음 |
 | 헤어라인 | 면 구분은 1px `hairline`. 그림자는 시트·하단 고정 영역에만 |
-| 차분함 | 강조색은 화면당 인디고 1곳(주요 버튼) + 오렌지 1곳(보상)까지 |
+| 차분함 | 강조색은 화면당 초록 1곳(주요 버튼) + 햇살 노랑 1곳(보상)까지 |
 
 ## 3. 컬러 팔레트
 
@@ -249,9 +249,9 @@ components:
 
 | 비율 | 역할 | 토큰 (HEX) | 적용 위치 |
 | --- | --- | --- | --- |
-| 60% | 중립 베이스 | `canvas` #faf9f7, `surface` #ffffff | 화면 배경, 일반 카드, 탭 바, 입력창 |
-| 30% | 보조 면 | `tint-*` 7색, `primary-soft` #eceefb, `surface-sunken` #f3f1ee, `hairline` #e8e5e0 | 미션 카드, AI 카드, 대기 댓글, 구분선 |
-| 10% | 강조 | `primary` #4f5bd5 (약 7%), `accent` #f08a3e (약 3%) | 주요 버튼, 활성 표시 / 보상 뱃지, 연속 출석 |
+| 60% | 중립 베이스 | `canvas` #f7f8f4, `surface` #ffffff | 화면 배경, 일반 카드, 탭 바, 입력창 |
+| 30% | 보조 면 | `tint-*` 7색, `primary-soft` #e3f2ea, `surface-sunken` #eef1ea, `hairline` #e2e6dc | 미션 카드, AI 카드, 대기 댓글, 구분선 |
+| 10% | 강조 | `primary` #2b7656 (약 7%), `accent` #f2b134 (약 3%) | 주요 버튼, 활성 표시 / 보상 뱃지, 연속 출석 |
 
 텍스트 색(`ink`, `slate`, `steel`)은 배분 계산에서 제외한다.
 
@@ -259,24 +259,24 @@ components:
 
 | 그룹 | 토큰 | HEX | 용도 |
 | --- | --- | --- | --- |
-| 베이스 | `canvas` | #faf9f7 | 화면 배경 |
+| 베이스 | `canvas` | #f7f8f4 | 화면 배경 |
 | | `surface` | #ffffff | 카드, 탭 바, 입력창 |
-| | `surface-sunken` | #f3f1ee | 공개 대기 댓글, 비활성 영역 |
-| | `hairline` | #e8e5e0 | 카드 테두리, 구분선 |
-| | `hairline-strong` | #cfcbc4 | 입력창·보조 버튼 테두리, 빈 슬롯 |
-| 텍스트 | `ink` | #2b2a27 | 제목, 본문 (대비 13.6:1) |
-| | `slate` | #5f5d57 | 보조 텍스트 (6.3:1) |
-| | `steel` | #6b6862 | 캡션, 메타 (5.3:1) |
-| | `muted` | #b5b1a9 | 비활성 아이콘·텍스트 전용 |
-| 브랜드 | `primary` | #4f5bd5 | 주요 버튼, 링크, AI 카드 테두리 (흰 글자 대비 5.5:1) |
-| | `primary-pressed` | #3f4ab8 | 눌림·호버 |
-| | `primary-soft` | #eceefb | AI 카드 배경 |
-| | `accent` | #f08a3e | 보상·출석 아이콘 (텍스트 사용 금지) |
-| | `accent-ink` | #a8520f | 오렌지 계열 텍스트 (4.9:1) |
-| | `accent-soft` | #fff1e5 | 보상 뱃지 배경 |
-| 상태 | `success` | #2f9e5b | 인증 통과 아이콘 |
-| | `error` | #d9483b | 입력 검증 오류만 |
-| | `help-soft` | #e8f1fb | 도움 안내 카드 배경 |
+| | `surface-sunken` | #eef1ea | 공개 대기 댓글, 비활성 영역 |
+| | `hairline` | #e2e6dc | 카드 테두리, 구분선 |
+| | `hairline-strong` | #c8cfbf | 입력창·보조 버튼 테두리, 빈 슬롯 |
+| 텍스트 | `ink` | #232822 | 제목, 본문 (대비 14.1:1) |
+| | `slate` | #555c52 | 보조 텍스트 (6.9:1) |
+| | `steel` | #5f665b | 캡션, 메타 (5.9:1) |
+| | `muted` | #aab2a3 | 비활성 아이콘·텍스트 전용 |
+| 브랜드 | `primary` | #2b7656 | 주요 버튼, 링크, AI 카드 테두리 (흰 글자 대비 5.5:1, `primary-soft` 위 4.7:1) |
+| | `primary-pressed` | #215f45 | 눌림·호버 |
+| | `primary-soft` | #e3f2ea | AI 카드 배경 |
+| | `accent` | #f2b134 | 보상·출석 아이콘 (텍스트 사용 금지) |
+| | `accent-ink` | #7d5200 | 노랑 계열 텍스트 (6.3:1) |
+| | `accent-soft` | #fff6dc | 보상 뱃지 배경 |
+| 상태 | `success` | #2f8f5b | 인증 통과 아이콘 |
+| | `error` | #c4463a | 입력 검증 오류만 |
+| | `help-soft` | #e6f0f7 | 도움 안내 카드 배경 |
 | 카테고리 | `tint-walk` | #ddf2e3 | 산책·운동 |
 | | `tint-food` | #ffe8d4 | 요리·식사 |
 | | `tint-culture` | #e8e2f6 | 문화·전시 |
@@ -284,8 +284,8 @@ components:
 | | `tint-neighborhood` | #dcecfa | 동네 탐방 |
 | | `tint-rhythm` | #f5efe3 | 생활 리듬 |
 | | `tint-people` | #fce3ec | 사람 만나기 |
-| 내 방 | `room-wall` | #f3ede4 | 방 벽 |
-| | `room-floor` | #e3d5c3 | 방 바닥 |
+| 내 방 | `room-wall` | #eef0e6 | 방 벽 |
+| | `room-floor` | #d9cfb8 | 방 바닥 |
 
 ### 3.3 다크 모드
 
@@ -293,20 +293,20 @@ components:
 
 | 라이트 | 다크 |
 | --- | --- |
-| `canvas` | `dark-canvas` #151517 |
-| `surface` | `dark-surface` #1f1f22 |
-| `hairline`, `hairline-strong` | `dark-hairline` #2e2e33 |
-| `ink` / `slate`, `steel` | `dark-ink` #ecebe8 / `dark-slate` #a9a7a1 |
-| `primary` / `primary-soft` | `dark-primary` #8a93f0 / `dark-primary-soft` #262a4a |
-| `accent`, `accent-ink` | `dark-accent` #f5a065 |
-| `primary-pressed` | `dark-primary-pressed` #6f79e6 |
-| `on-primary` | `dark-on-primary` #151517 (대비 6.5:1) |
-| `muted` | `dark-muted` #5f5d57 |
-| `accent-soft` | `dark-accent-soft` #2e2620 |
-| `success` / `error` | `dark-success` #4cbb78 / `dark-error` #e8695e |
-| `help-soft` | `dark-help-soft` #1e2a38 |
+| `canvas` | `dark-canvas` #131614 |
+| `surface` | `dark-surface` #1c201d |
+| `hairline`, `hairline-strong` | `dark-hairline` #2a302b |
+| `ink` / `slate`, `steel` | `dark-ink` #e9ece6 / `dark-slate` #a3aa9f |
+| `primary` / `primary-soft` | `dark-primary` #6cc59a / `dark-primary-soft` #1f3329 |
+| `accent`, `accent-ink` | `dark-accent` #f5c463 |
+| `primary-pressed` | `dark-primary-pressed` #52b083 |
+| `on-primary` | `dark-on-primary` #131614 (대비 8.8:1) |
+| `muted` | `dark-muted` #5c6358 |
+| `accent-soft` | `dark-accent-soft` #2e2a1c |
+| `success` / `error` | `dark-success` #6cc59a / `dark-error` #e8695e |
+| `help-soft` | `dark-help-soft` #1c2933 |
 | `mission-card` 틴트 배경 | `dark-surface` 배경 + 왼쪽 4px 막대(해당 `tint-*` 색) |
-| `room-wall` / `room-floor` | `dark-room-wall` #2a2723 / `dark-room-floor` #3a332b |
+| `room-wall` / `room-floor` | `dark-room-wall` #232822 / `dark-room-floor` #333a2c |
 
 ## 4. 타이포그래피
 
@@ -464,10 +464,10 @@ components:
 | 토큰 외 HEX·px 하드코딩 | 일관성. `theme.ts`의 토큰만 참조 |
 | 두 번째 서체, Pretendard 외 굵기(Light, ExtraBold 등) | 4.1의 3개 굵기만 |
 | `primary`·`accent`를 넓은 면 배경으로 사용 | 강조 10% 초과. 넓은 면은 `primary-soft`·`accent-soft` |
-| `accent` #f08a3e를 텍스트 색으로 사용 | 대비 부족. `accent-ink` 사용 |
+| `accent` #f2b134를 텍스트 색으로 사용 | 대비 부족. `accent-ink` 사용 |
 | 실패·미완료·위기에 빨간색, 경고 아이콘(`alert-triangle`) | 부정적 신호 회피. 무채색 또는 `help-soft` |
 | pill 모양 버튼 | pill은 칩·뱃지 전용 |
-| 그라데이션, 글래스모피즘, 네온·형광색 | 웜 미니멀과 충돌 |
+| 그라데이션, 글래스모피즘, 네온·형광색 | 숲길 미니멀과 충돌 |
 | 캐릭터·마스코트, 이모지 | 유치함 회피, OS마다 모양이 달라짐. 아이콘은 Feather(UI)와 MaterialCommunityIcons(가구)만 |
 | 미션 카드에 그림자·테두리 | 틴트 면만으로 구분 |
 | 화면당 주요 버튼 2개 이상 | 하나의 행동만 강조 |
