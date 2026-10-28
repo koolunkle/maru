@@ -1,3 +1,4 @@
+import { Feather } from '@expo/vector-icons';
 import { StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 
 import { AppText } from '@/components/app-text';
@@ -11,15 +12,19 @@ type ChipProps = {
   onPress: () => void;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  icon?: keyof typeof Feather.glyphMap;
+  role?: 'checkbox' | 'radio';
 };
 
 /** chip-category / chip-category-selected (DESIGN.md) */
-export function Chip({ label, selected, onPress, disabled, style }: ChipProps) {
+export function Chip({ label, selected, onPress, disabled, style, icon, role = 'checkbox' }: ChipProps) {
   const theme = useTheme();
   return (
     <PressableScale
-      accessibilityRole="checkbox"
+      accessibilityRole={role}
+      accessibilityLabel={label}
       accessibilityState={{ checked: selected, disabled }}
+      aria-checked={selected}
       disabled={disabled}
       onPress={onPress}
       style={({ hovered }) => [
@@ -31,6 +36,7 @@ export function Chip({ label, selected, onPress, disabled, style }: ChipProps) {
         },
         style,
       ]}>
+      {icon && <Feather name={icon} size={18} color={selected ? theme.surface : theme.ink} />}
       <AppText variant="bodySm" color={selected ? 'surface' : 'ink'}>
         {label}
       </AppText>
@@ -44,6 +50,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     borderRadius: Radius.full,
     borderWidth: 1,
+    flexDirection: 'row',
+    gap: Spacing.xxs,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xs,

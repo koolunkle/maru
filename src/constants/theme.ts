@@ -113,6 +113,9 @@ export const Spacing = {
 /** 웹에서 앱처럼 보이도록 하는 최대 컬럼 폭 (DESIGN.md §5.1) */
 export const MaxContentWidth = 480;
 
+/** DESIGN.md bottom-sheet.scrim */
+export const SheetScrim = 'rgba(0,0,0,0.3)';
+
 export const Motion = {
   pressOpacity: 0.85,
   pressScale: 0.98,

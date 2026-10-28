@@ -1,26 +1,28 @@
-import { Feather } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { Feather } from "@expo/vector-icons";
+import { router, useFocusEffect } from "expo-router";
+import { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, StyleSheet, View } from "react-native";
 
-import { AppText } from '@/components/app-text';
-import { Button } from '@/components/button';
-import { GrowthCard } from '@/components/growth-card';
-import { MissionCard } from '@/components/mission-card';
-import { PressableScale } from '@/components/pressable-scale';
-import { Screen } from '@/components/screen';
-import { Spacing } from '@/constants/theme';
-import { useTheme } from '@/hooks/use-theme';
-import { useTodayMissions } from '@/hooks/use-today-missions';
-import { useSession } from '@/providers/session-provider';
-import type { Tables } from '@/types/database';
-import { formatKstToday } from '@/utils/date';
+import { AppText } from "@/components/app-text";
+import { Button } from "@/components/button";
+import { CapsuleCard } from "@/components/capsule-card";
+import { GrowthCard } from "@/components/growth-card";
+import { MailboxCard } from "@/components/mailbox-card";
+import { MissionCard } from "@/components/mission-card";
+import { PressableScale } from "@/components/pressable-scale";
+import { Screen } from "@/components/screen";
+import { Radius, Spacing } from "@/constants/theme";
+import { useTheme } from "@/hooks/use-theme";
+import { useTodayMissions } from "@/hooks/use-today-missions";
+import { useSession } from "@/providers/session-provider";
+import type { Tables } from "@/types/database";
+import { formatKstToday } from "@/utils/date";
 
-type Mission = Tables<'missions'>;
+type Mission = Tables<"missions">;
 
 const RefreshNotice = {
-  limit: '다른 미션은 하루에 한 번만 볼 수 있어요',
-  failed: '지금은 새 미션을 가져오지 못했어요',
+  limit: "다른 미션은 하루에 한 번만 볼 수 있어요",
+  failed: "지금은 새 미션을 가져오지 못했어요",
 } as const;
 
 /** S3 홈 (DESIGN.md §5.2) */
@@ -43,33 +45,40 @@ export function Home() {
     }, [reload, refreshProfile]),
   );
 
-  function open(mission: Mission, type: 'daily' | 'weekly') {
-    router.push({ pathname: '/mission/[id]', params: { id: mission.id, type } });
+  function open(mission: Mission, type: "daily" | "weekly") {
+    router.push({
+      pathname: "/mission/[id]",
+      params: { id: mission.id, type },
+    });
   }
 
   async function showOthers() {
     setNotice(null);
     const result = await refresh();
-    if (result !== 'ok') setNotice(RefreshNotice[result]);
+    if (result !== "ok") setNotice(RefreshNotice[result]);
   }
 
   const anyStarted = data ? data.daily.some((m) => data.progress[m.id]) : false;
   const completedDailyCount = data
     ? Math.min(
-        Object.values(data.progress).filter((mission) => mission.type === 'daily' && mission.status === 'completed').length,
+        Object.values(data.progress).filter(
+          (mission) =>
+            mission.type === "daily" && mission.status === "completed",
+        ).length,
         3,
       )
     : 0;
 
   return (
-    <Screen edges={['top']}>
+    <Screen edges={["top"]}>
       <View style={styles.header}>
         <AppText variant="titleLg">{formatKstToday()}</AppText>
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel="설정"
-          onPress={() => router.push('/settings')}
-          style={styles.iconButton}>
+          onPress={() => router.push("/settings")}
+          style={styles.iconButton}
+        >
           <Feather name="settings" size={24} color={theme.ink} />
         </PressableScale>
       </View>
@@ -92,7 +101,12 @@ export function Home() {
         {error ? (
           <View style={styles.state}>
             <AppText color="slate">미션을 불러오지 못했어요.</AppText>
-            <Button label="다시 불러오기" variant="secondary" size="sm" onPress={reload} />
+            <Button
+              label="다시 불러오기"
+              variant="secondary"
+              size="sm"
+              onPress={reload}
+            />
           </View>
         ) : !data ? (
           <View style={styles.state}>
@@ -103,7 +117,12 @@ export function Home() {
           </View>
         ) : (
           data.daily.map((m) => (
-            <MissionCard key={m.id} mission={m} status={data.progress[m.id]?.status} onPress={() => open(m, 'daily')} />
+            <MissionCard
+              key={m.id}
+              mission={m}
+              status={data.progress[m.id]?.status}
+              onPress={() => open(m, "daily")}
+            />
           ))
         )}
       </View>
@@ -114,14 +133,19 @@ export function Home() {
           <MissionCard
             mission={data.weekly}
             status={data.progress[data.weekly.id]?.status}
-            onPress={() => data.weekly && open(data.weekly, 'weekly')}
+            onPress={() => data.weekly && open(data.weekly, "weekly")}
           />
         </View>
       )}
 
       {data && !anyStarted && (
         <View style={styles.others}>
-          <Button label="다른 미션 보기" variant="ghost" onPress={showOthers} loading={refreshing} />
+          <Button
+            label="다른 미션 보기"
+            variant="ghost"
+            onPress={showOthers}
+            loading={refreshing}
+          />
           {notice && (
             <AppText variant="caption" color="steel" style={styles.center}>
               {notice}
@@ -129,6 +153,29 @@ export function Home() {
           )}
         </View>
       )}
+
+      {profile && <MailboxCard key={profile.id} userId={profile.id} />}
+      {profile && (
+        <PressableScale
+          accessibilityRole="button"
+          accessibilityLabel="한 줄 기록 작성하기"
+          onPress={() => router.push("/daily-note")}
+          style={[
+            styles.noteMenu,
+            { backgroundColor: theme.surface, borderColor: theme.hairline },
+          ]}
+        >
+          <Feather name="edit-3" size={20} color={theme.accent} />
+          <View style={styles.noteText}>
+            <AppText variant="titleMd">한 줄 기록</AppText>
+            <AppText variant="caption" color="steel">
+              오늘의 기분과 한 줄을 남겨요
+            </AppText>
+          </View>
+          <Feather name="chevron-right" size={20} color={theme.steel} />
+        </PressableScale>
+      )}
+      {profile && <CapsuleCard key={`capsule:${profile.id}`} />}
     </Screen>
   );
 }
@@ -136,31 +183,41 @@ export function Home() {
 const styles = StyleSheet.create({
   header: {
     height: 56,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   iconButton: {
     width: 44,
     height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: -10,
   },
   streak: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: Spacing.xs,
   },
   growth: {
     marginTop: Spacing.sm,
   },
+  noteMenu: {
+    marginTop: Spacing.xl,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  noteText: { flex: 1 },
   section: {
     marginTop: Spacing.xxl,
     gap: Spacing.sm,
   },
   state: {
-    alignItems: 'center',
+    alignItems: "center",
     gap: Spacing.sm,
     paddingVertical: Spacing.xxl,
   },
@@ -169,6 +226,6 @@ const styles = StyleSheet.create({
     gap: Spacing.xxs,
   },
   center: {
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

@@ -8,6 +8,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { Colors, MaxContentWidth } from '@/constants/theme';
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import { BackgroundAudioProvider } from '@/providers/background-audio';
 import { SessionProvider, useSession } from '@/providers/session-provider';
 
 SplashScreen.preventAutoHideAsync();
@@ -42,6 +43,9 @@ function RootStack() {
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings/index" />
         <Stack.Screen name="settings/[field]" />
+        <Stack.Screen name="letter/[week]" />
+        <Stack.Screen name="capsule" />
+        <Stack.Screen name="daily-note" />
         <Stack.Screen name="mission/[id]/index" />
         <Stack.Screen name="mission/[id]/verify" />
       </Stack.Protected>
@@ -62,7 +66,9 @@ export default function RootLayout() {
       <View style={[styles.outer, { backgroundColor: colors.canvas }]}>
         <View style={styles.column}>
           <SessionProvider>
-            <RootStack />
+            <BackgroundAudioProvider>
+              <RootStack />
+            </BackgroundAudioProvider>
           </SessionProvider>
         </View>
       </View>

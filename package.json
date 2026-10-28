@@ -8,6 +8,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@supabase/supabase-js": "^2.118.0",
     "expo": "~58.0.14",
+    "expo-audio": "~58.0.10",
     "expo-constants": "~58.0.12",
     "expo-device": "~58.0.5",
     "expo-font": "~58.0.8",
@@ -46,6 +47,10 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "typecheck": "tsc --noEmit",
+    "test:mailbox": "node --test tests/mailbox.test.mjs",
+    "test:relay": "node --test tests/relay.test.mjs",
+    "test:daily-note": "node --test tests/daily-note.test.mjs",
+    "test:weekly-letter": "node --test tests/weekly-letter.test.mjs",
     "seed:build": "python scripts/build-seed.py"
   },
   "private": true

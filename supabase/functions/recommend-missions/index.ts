@@ -63,8 +63,21 @@ function sanitize(m: AiMission, maxMinutes: number | null): AiMission | null {
 Deno.serve(
   handler(async (req) => {
     const userId = await requireUserId(req);
-    const { refresh = false } = (await req.json().catch(() => ({}))) as { refresh?: boolean };
+    const input = (await req.json().catch(() => ({}))) as { refresh?: boolean; requestId?: string };
+    const { refresh = false } = input;
+    const requestId = input.requestId ?? crypto.randomUUID();
+    if (typeof refresh !== 'boolean' || typeof requestId !== 'string' || requestId.length < 1 || requestId.length > 100) {
+      throw new HttpError(400, 'invalid_request');
+    }
     const today = kstDate();
+
+    const { data: prior, error: priorError } = await admin.from('recommendation_requests')
+      .select('response, rec_date, refresh').eq('user_id', userId).eq('request_id', requestId).maybeSingle();
+    if (priorError) throw priorError;
+    if (prior) {
+      if (prior.rec_date !== today || prior.refresh !== refresh) throw new HttpError(409, 'request_body_changed');
+      return json(prior.response);
+    }
 
     const { data: existing } = await admin
       .from('daily_recommendations')
@@ -107,15 +120,16 @@ Deno.serve(
         .limit(10),
     ]);
 
-    async function save(dailyIds: string[], weeklyId: string | null) {
-      const { error } = await admin.from('daily_recommendations').upsert({
-        user_id: userId,
-        rec_date: today,
-        daily_mission_ids: dailyIds,
-        weekly_mission_id: weeklyId,
-        refresh_count: existing ? existing.refresh_count + 1 : 0,
+    async function save(dailyIds: string[], weeklyId: string | null, aiMissions: unknown = null) {
+      const { data, error } = await admin.rpc('save_recommendation', {
+        p_user_id: userId, p_date: today, p_refresh: refresh, p_request_id: requestId,
+        p_expected_count: existing?.refresh_count ?? -1, p_daily_ids: dailyIds,
+        p_weekly_id: weeklyId, p_ai_missions: aiMissions,
       });
+      if (error?.message === 'refresh_limit') throw new HttpError(409, 'refresh_limit');
+      if (error?.message === 'request_body_changed') throw new HttpError(409, 'request_body_changed');
       if (error) throw error;
+      return json(data);
     }
 
     const context = {
@@ -158,11 +172,10 @@ Deno.serve(
       let picked = pickSeeds(seeds.data ?? [], profile, exclude);
       // 직전 추천을 빼고 3개가 안 되면 전체에서 다시 고른다
       if (picked.daily.length < 3) picked = pickSeeds(seeds.data ?? [], profile);
-      await save(
+      return await save(
         picked.daily.map((m) => m.id),
         picked.weekly?.id ?? null,
       );
-      return json({ ...picked, source: 'rule' });
     }
 
     const eventIds = new Set((events.data ?? []).map((e: { id: string }) => e.id));
@@ -177,13 +190,6 @@ Deno.serve(
       reason: m.reason,
       event_id: m.event_id && eventIds.has(m.event_id) ? m.event_id : null,
     }));
-    const { data: inserted, error } = await admin.from('missions').insert(rows).select('*');
-    if (error) throw error;
-
-    await save(
-      inserted.slice(0, 3).map((m: MissionRow) => m.id),
-      inserted[3].id,
-    );
-    return json({ daily: inserted.slice(0, 3), weekly: inserted[3], source: 'ai' });
+    return await save([], null, rows);
   }),
 );
