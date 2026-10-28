@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
+import { AppText } from '@/components/app-text';
 import { Chip } from '@/components/chip';
 import { Categories, DailyMinuteOptions, Districts, MaxCategories } from '@/constants/domain';
 import { Spacing } from '@/constants/theme';
@@ -35,10 +36,18 @@ export function CategoryPicker({ value, onChange }: { value: Category[]; onChang
 /** 생활권 자치구 (S2 2단계, S9 재설정) */
 export function DistrictPicker({ value, onChange }: { value: string | null; onChange: (next: string) => void }) {
   return (
-    <View style={styles.grid}>
-      {Districts.map((d) => (
-        <Chip key={d} label={d} selected={value === d} onPress={() => onChange(d)} style={styles.gridItem} />
-      ))}
+    <View style={styles.list}>
+      {/* 목록 아래쪽 구를 골랐을 때도 무엇을 골랐는지 보이게 한다 */}
+      {value && (
+        <AppText variant="bodySm" color="slate" accessibilityLiveRegion="polite">
+          고른 동네: {value}
+        </AppText>
+      )}
+      <View accessibilityRole="radiogroup" accessibilityLabel="동네" style={styles.grid}>
+        {Districts.map((d) => (
+          <Chip key={d} label={d} role="radio" selected={value === d} onPress={() => onChange(d)} style={styles.gridItem} />
+        ))}
+      </View>
     </View>
   );
 }
@@ -46,7 +55,7 @@ export function DistrictPicker({ value, onChange }: { value: string | null; onCh
 /** 하루 가능 시간 (S2 3단계, S9 재설정) */
 export function MinutePicker({ value, onChange }: { value: number | null; onChange: (next: number) => void }) {
   return (
-    <View style={styles.list}>
+    <View accessibilityRole="radiogroup" accessibilityLabel="하루 가능 시간" style={styles.list}>
       {DailyMinuteOptions.map((o) => (
         <MinuteOption
           key={o.value}
