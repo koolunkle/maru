@@ -4,10 +4,11 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Platform, StyleSheet, Switch, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 import { AiCard } from '@/components/ai-card';
+import { AppSwitch } from '@/components/app-switch';
 import { AppText } from '@/components/app-text';
 import { BackHeader } from '@/components/back-header';
 import { Button } from '@/components/button';
@@ -369,13 +370,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
             닉네임으로만 보여요. 공개하면 익명 댓글을 받을 수 있어요.
           </AppText>
         </View>
-        <Switch
-          accessibilityLabel="피드에 공개하기"
-          value={isPublic}
-          onValueChange={setIsPublic}
-          trackColor={{ true: theme.primary, false: theme.hairlineStrong }}
-          thumbColor={theme.surface}
-        />
+        <AppSwitch accessibilityLabel="피드에 공개하기" value={isPublic} onValueChange={setIsPublic} />
       </View>
     </Screen>
   );
