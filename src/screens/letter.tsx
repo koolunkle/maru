@@ -10,6 +10,7 @@ import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { MoodLabels } from '@/lib/daily-note';
 import { supabase } from '@/lib/supabase';
 import { demoLetterWeeks, formatLetterWeek } from '@/utils/weekly-letter';
 import { formatDayWithWeekday, kstWeekStart } from '@/utils/date';
@@ -21,7 +22,6 @@ type Report = {
   missions: { completed_at: string; missions: { title: string } | null }[];
 };
 
-const moods = ['마음이 가벼워요', '조금 가벼워요', '보통이에요', '조금 무거워요', '마음이 무거워요'];
 
 export function Letter({ week }: { week: string }) {
   const theme = useTheme();
@@ -89,7 +89,7 @@ export function Letter({ week }: { week: string }) {
                 <AppText variant="titleMd" accessibilityRole="header">한 주의 마음 흐름</AppText>
                 {report.notes.length === 0 ? <AppText>기록한 기분이 없어요.</AppText> : report.notes.map((note) => (
                   <View key={note.note_date}>
-                    <AppText variant="caption" color="steel">{formatDayWithWeekday(note.note_date)} · {moods[note.mood - 1]}</AppText>
+                    <AppText variant="caption" color="steel">{formatDayWithWeekday(note.note_date)} · {MoodLabels[note.mood - 1]}</AppText>
                     {!!note.text && <AppText>{note.text}</AppText>}
                   </View>
                 ))}
