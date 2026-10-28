@@ -8,7 +8,7 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
-import { FurnitureIcon, SlotPosition, SlotTypeOf, unlockText } from '@/constants/room';
+import { FurnitureIcon, SlotName, SlotPosition, SlotTypeOf, unlockText } from '@/constants/room';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
@@ -32,6 +32,7 @@ export function Room() {
   const [editing, setEditing] = useState<Slot | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const load = useCallback(() => {
     let active = true;
@@ -40,9 +41,12 @@ export function Room() {
       supabase.from('user_furniture').select('*').eq('user_id', userId),
     ]).then(([f, o]) => {
       if (!active) return;
-      setFurniture(f.data ?? []);
-      setOwned(o.data ?? []);
-    });
+      // 실패하면 보이던 방을 지우지 않는다
+      if (f.error || o.error) { setLoadFailed(true); return; }
+      setLoadFailed(false);
+      setFurniture(f.data);
+      setOwned(o.data);
+    }, () => active && setLoadFailed(true));
     return () => {
       active = false;
     };
@@ -60,6 +64,12 @@ export function Room() {
     load();
   }
 
+  function open(slot: Slot) {
+    setError(false);
+    setEditing(slot);
+  }
+
+  const nameOf = (id: string) => furniture?.find((f) => f.id === id)?.name ?? '가구';
   const ownedIds = new Set(owned.map((o) => o.furniture_id));
   const roomHeight = roomWidth * 0.85;
   const candidates = editing
@@ -85,8 +95,9 @@ export function Room() {
               <PressableScale
                 key={slot}
                 accessibilityRole="button"
-                accessibilityLabel={item ? `${item.furniture_id} 바꾸기` : '빈 자리'}
-                onPress={() => setEditing(slot)}
+                accessibilityLabel={`${SlotName[slot]}, ${item ? nameOf(item.furniture_id) : '빈 자리'}`}
+                accessibilityHint={item ? '눌러서 다른 가구로 바꿔요' : '눌러서 가구를 놓아요'}
+                onPress={() => open(slot)}
                 style={[
                   styles.slot,
                   {
@@ -110,7 +121,20 @@ export function Room() {
       <AppText variant="titleMd" style={styles.sectionTitle}>
         가진 가구
       </AppText>
-      {!furniture ? (
+      {loadFailed ? (
+        <View style={styles.failed}>
+          <AppText color="slate" accessibilityRole="alert">내 방을 불러오지 못했어요.</AppText>
+          <Button
+            label="다시 불러오기"
+            variant="secondary"
+            size="sm"
+            onPress={() => {
+              setLoadFailed(false);
+              load();
+            }}
+          />
+        </View>
+      ) : !furniture ? (
         <ActivityIndicator color={theme.primary} />
       ) : (
         <View style={styles.grid}>
@@ -120,6 +144,8 @@ export function Room() {
             return (
               <View
                 key={f.id}
+                accessible
+                accessibilityLabel={have ? `${f.name}, 가짐` : `${f.name}, 잠김, ${unlockText(f.unlock_rule)}`}
                 style={[styles.item, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
                 {have && icon ? (
                   <MaterialCommunityIcons name={icon.name} size={32} color={theme[icon.color]} />
@@ -157,6 +183,8 @@ export function Room() {
                 return (
                   <PressableScale
                     key={f.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${f.name} 놓기`}
                     disabled={busy}
                     onPress={() => editing && place(editing, f.id)}
                     style={[styles.item, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
@@ -217,6 +245,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 2,
+  },
+  failed: {
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
   },
   centerText: {
     textAlign: 'center',
