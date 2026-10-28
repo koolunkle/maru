@@ -2,8 +2,9 @@ import { Feather } from '@expo/vector-icons';
 import { Slider } from '@expo/ui/community/slider';
 import { router } from 'expo-router';
 import type { ComponentProps } from 'react';
-import { Linking, StyleSheet, Switch, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
 
+import { AppSwitch } from '@/components/app-switch';
 import { AppText } from '@/components/app-text';
 import { BackHeader } from '@/components/back-header';
 import { PressableScale } from '@/components/pressable-scale';
@@ -87,7 +88,7 @@ export function Settings() {
       <View style={[styles.row, { borderBottomColor: theme.hairline }]}>
         <Feather name="cloud-rain" size={20} color={theme.ink} />
         <AppText style={styles.rowLabel}>배경음 틀어 두기</AppText>
-        <Switch accessibilityLabel="배경음 틀어 두기" value={playing} onValueChange={toggle} />
+        <AppSwitch accessibilityLabel="배경음 틀어 두기" value={playing} onValueChange={toggle} />
       </View>
       {playing && (
         <View style={styles.volumes}>
