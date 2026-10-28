@@ -31,6 +31,7 @@ export function Room() {
   const [roomWidth, setRoomWidth] = useState(0);
   const [editing, setEditing] = useState<Slot | null>(null);
   const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(false);
 
   const load = useCallback(() => {
     let active = true;
@@ -51,15 +52,10 @@ export function Room() {
 
   async function place(slot: Slot, furnitureId: string | null) {
     setBusy(true);
-    // 한 슬롯에는 가구 하나: 기존 가구를 먼저 비운다
-    const current = owned.find((o) => o.slot === slot);
-    if (current && current.furniture_id !== furnitureId) {
-      await supabase.from('user_furniture').update({ slot: null }).eq('user_id', userId).eq('furniture_id', current.furniture_id);
-    }
-    if (furnitureId) {
-      await supabase.from('user_furniture').update({ slot }).eq('user_id', userId).eq('furniture_id', furnitureId);
-    }
+    setError(false);
+    const { error: placementError } = await supabase.functions.invoke('place-furniture', { body: { slot, furnitureId } });
     setBusy(false);
+    if (placementError) { setError(true); return; }
     setEditing(null);
     load();
   }
@@ -149,6 +145,7 @@ export function Room() {
         <Pressable style={styles.backdrop} onPress={() => setEditing(null)} accessibilityLabel="닫기" />
         <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
           <AppText variant="titleMd">이 자리에 놓을 가구</AppText>
+          {error && <AppText accessibilityRole="alert" color="slate">가구를 놓지 못했어요. 다시 시도해 주세요.</AppText>}
           {candidates.length === 0 ? (
             <AppText variant="bodySm" color="steel">
               이 자리에 놓을 수 있는 가구가 아직 없어요. 미션을 하면 모을 수 있어요.

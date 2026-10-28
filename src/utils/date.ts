@@ -5,6 +5,13 @@ export function kstDate(date: Date = new Date()) {
   return new Date(date.getTime() + KstOffsetMs).toISOString().slice(0, 10);
 }
 
+/** 한국 날짜가 속한 주의 월요일 'YYYY-MM-DD'. */
+export function kstWeekStart(today: string = kstDate()) {
+  const date = new Date(`${today}T00:00:00Z`);
+  const offset = (date.getUTCDay() + 6) % 7;
+  return new Date(date.getTime() - offset * 86_400_000).toISOString().slice(0, 10);
+}
+
 /** KST 기준 해당 날짜 23:59:59.999 의 UTC Date (PRD F3 일일 미션 마감) */
 export function kstEndOfDay(date: Date = new Date()) {
   return new Date(Date.parse(`${kstDate(date)}T23:59:59.999+09:00`));

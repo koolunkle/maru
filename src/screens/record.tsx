@@ -1,14 +1,15 @@
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
+import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
-import { kstDate } from '@/utils/date';
+import { kstDate, kstWeekStart } from '@/utils/date';
 
 const Weekdays = ['월', '화', '수', '목', '금', '토', '일'];
 
@@ -18,13 +19,6 @@ type Stats = {
   weekStarted: number;
   attended: Set<string>;
 };
-
-/** KST 기준 이번 주 월요일 'YYYY-MM-DD' */
-function kstWeekStart(today: string) {
-  const d = new Date(`${today}T00:00:00Z`);
-  const offset = (d.getUTCDay() + 6) % 7;
-  return new Date(d.getTime() - offset * 86_400_000).toISOString().slice(0, 10);
-}
 
 async function fetchStats(userId: string, today: string): Promise<Stats> {
   const monthStart = `${today.slice(0, 8)}01`;
@@ -63,7 +57,7 @@ function monthCells(today: string) {
   ];
 }
 
-/** S7 기록 (PRD F5 / DESIGN.md §5.2). 주간 피드백은 축소 범위로 생략(PRD §3) */
+/** S7 기록과 F13 마음 리포트 진입. */
 export function Record() {
   const theme = useTheme();
   const { session, profile } = useSession();
@@ -140,6 +134,15 @@ export function Record() {
           </View>
         </>
       )}
+      <View style={[styles.letter, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+        <AppText variant="label" color="steel">이번 주 편지</AppText>
+        <AppText>기분과 한 줄, 완료한 미션을 돌아봐요.</AppText>
+        <Button
+          label="이번 주 마음 리포트 보기"
+          variant="ghost"
+          onPress={() => router.push({ pathname: '/letter/[week]', params: { week: kstWeekStart() } })}
+        />
+      </View>
     </Screen>
   );
 }
@@ -154,6 +157,13 @@ const styles = StyleSheet.create({
   },
   section: {
     marginTop: Spacing.xl,
+    gap: Spacing.xs,
+  },
+  letter: {
+    marginTop: Spacing.xxl,
+    padding: Spacing.lg,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
     gap: Spacing.xs,
   },
   track: {
