@@ -16,8 +16,8 @@ export type FeedPost = FeedRow & {
 
 const PageSize = 20;
 
-async function fetchFeed(userId: string): Promise<FeedPost[]> {
-  const { data: rows, error } = await supabase.rpc('get_feed', { page_size: PageSize });
+async function fetchFeed(userId: string, before?: string): Promise<FeedPost[]> {
+  const { data: rows, error } = await supabase.rpc('get_feed', { page_size: PageSize, ...(before ? { before } : {}) });
   if (error) throw error;
   if (!rows.length) return [];
 
@@ -55,17 +55,25 @@ async function fetchFeed(userId: string): Promise<FeedPost[]> {
   });
 }
 
-/** S6 피드: 공개 인증 최신 20개 (PRD §5.2) */
+/** S6 피드: 공개 인증 최신순, 20개씩 (PRD §5.2) */
 export function useFeed(userId: string | undefined) {
   const [posts, setPosts] = useState<FeedPost[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [moreError, setMoreError] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
     let active = true;
     fetchFeed(userId).then(
-      (result) => active && setPosts(result),
+      (result) => {
+        if (!active) return;
+        setPosts(result);
+        setHasMore(result.length === PageSize);
+        setMoreError(false);
+      },
       (e: unknown) => active && setError(e instanceof Error ? e : new Error(String(e))),
     );
     return () => {
@@ -78,5 +86,25 @@ export function useFeed(userId: string | undefined) {
     setAttempt((n) => n + 1);
   }, []);
 
-  return { posts, error, reload, setPosts };
+  /** 이전 인증 20개 더 (#29). 마지막 게시물 시각보다 이전 것을 이어 붙인다 */
+  const loadMore = useCallback(async () => {
+    const last = posts?.at(-1);
+    if (!userId || !last || loadingMore) return;
+    setLoadingMore(true);
+    setMoreError(false);
+    try {
+      const older = await fetchFeed(userId, last.created_at);
+      setPosts((prev) => {
+        const seen = new Set((prev ?? []).map((p) => p.id));
+        return [...(prev ?? []), ...older.filter((p) => !seen.has(p.id))];
+      });
+      setHasMore(older.length === PageSize);
+    } catch {
+      setMoreError(true);
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [userId, posts, loadingMore]);
+
+  return { posts, error, reload, setPosts, hasMore, loadingMore, moreError, loadMore };
 }
