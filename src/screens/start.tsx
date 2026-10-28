@@ -31,7 +31,7 @@ export function Start() {
       footer={
         <View style={styles.footer}>
           {failed && (
-            <AppText variant="caption" color="error" style={styles.center}>
+            <AppText variant="caption" color="slate" accessibilityRole="alert" style={styles.center}>
               연결이 원활하지 않아요. 다시 시도해 주세요.
             </AppText>
           )}
