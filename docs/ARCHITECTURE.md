@@ -65,17 +65,17 @@ flowchart LR
 | --- | --- | --- | --- |
 | S1 | `/welcome` | `screens/start.tsx` | 완료 |
 | S2 | `/onboarding` | `screens/onboarding/` | 완료 |
-| S3 | `/` (`(tabs)/index`) | `screens/home.tsx` | 완료. 성장 화분(F11), 마음 우체통(F14), 한 줄 기록(F15), 타임캡슐 메뉴(F16) 반영 |
+| S3 | `/` (`(tabs)/index`) | `screens/home.tsx` | 완료. 성장 화분(F11), 다음 보상 표시 반영 |
 | S4 | `/mission/[id]` | `screens/mission-detail.tsx` | 완료. 릴레이 표시(F10) 반영 |
 | S5 | `/mission/[id]/verify` | `screens/verify.tsx` | 완료. 다음 사람에게 한 줄(F10) 반영 |
 | S6 | `/feed` | `screens/feed/` | 완료 |
 | S7 | `/record` | `screens/record.tsx` | 완료. 주간 리포트 카드(F13) 반영 |
 | S8 | `/room` | `screens/room.tsx` | 완료 |
 | S9 | `/settings`, `/settings/[field]` | `screens/settings/` | 완료. 도움 안내·빗소리는 S10으로 옮김 |
-| S10 | `/rest` | `screens/rest.tsx` | 완료(T5). 도움 안내 주소는 `constants/help.ts` |
+| S10 | `/rest` | `screens/rest.tsx` | 완료(T5). 위에 마음 보관함(우체통 F14·한 줄 기록 F15·타임캡슐 F16), 아래에 도움 안내·빗소리. 도움 안내 주소는 `constants/help.ts` |
 | S11 | `/letter/[week]` | `screens/letter.tsx` | 완료(T8). AI 개인화는 T7 진행 중 |
-| S12 | `/capsule`, 홈 시트 | `screens/capsule.tsx` | 완료. 앱에서는 홈 카드 → 시트로 연다 |
-| S13 | 홈 시트 | `components/daily-note-card.tsx` | 한 줄 기록·기분(F15). 별도 경로 없음 |
+| S12 | `/capsule`, 휴게소 시트 | `screens/capsule.tsx` | 완료. 앱에서는 휴게소 카드 → 시트로 연다 |
+| S13 | 휴게소 시트 | `components/daily-note-card.tsx` | 한 줄 기록·기분(F15). 별도 경로 없음 |
 
 새 Stack 화면은 `src/app/_layout.tsx`의 로그인·온보딩 완료 `Stack.Protected` 블록에 `Stack.Screen`을 추가해야 접근된다.
 
