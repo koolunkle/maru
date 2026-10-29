@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Defs, Ellipse, G, Line, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
 
+import { FloorFill, WallFill } from '@/components/room/room-surfaces';
 import { Sky, type DayPart, type RoomArtColors } from '@/constants/room-art';
 import type { Enums } from '@/types/database';
 
@@ -22,14 +23,12 @@ export const SlotAnchor: Record<Slot, { x: number; y: number; height: number; al
   'floor-2': { x: 61, y: 81, height: 19, align: 'bottom' },
 };
 
-type SceneProps = { width: number; colors: RoomArtColors; wall: string; floor: string; dayPart: DayPart };
+type SceneProps = { width: number; colors: RoomArtColors; wallpaper: string; floor: string; dark: boolean; dayPart: DayPart };
 
-/** 방 배경: 벽·걸레받이·원근 바닥·러그·창문(시간대별 하늘)·책상 */
-export function RoomScene({ width, colors, wall, floor, dayPart }: SceneProps) {
+/** 방 배경: 벽지·걸레받이·바닥·러그·창문(시간대별 하늘)·책상 */
+export function RoomScene({ width, colors, wallpaper, floor, dark, dayPart }: SceneProps) {
   const sky = Sky[dayPart];
   const night = dayPart === 'night';
-  // 바닥 판자: 소실점(50, 20)에서 퍼지는 선
-  const boards = [-60, -30, 0, 20, 40, 60, 80, 100, 130, 160];
   return (
     <Svg width={width} height={(width * SceneHeight) / 100} viewBox={`0 0 100 ${SceneHeight}`} style={StyleSheet.absoluteFill} aria-hidden>
       <Defs>
@@ -37,24 +36,20 @@ export function RoomScene({ width, colors, wall, floor, dayPart }: SceneProps) {
           <Stop offset="0" stopColor={sky.top} />
           <Stop offset="1" stopColor={sky.bottom} />
         </LinearGradient>
-        <LinearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={colors.floorShade} />
-          <Stop offset="0.35" stopColor={floor} />
+        <LinearGradient id="floorShade" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={colors.shadow} stopOpacity={1} />
+          <Stop offset="0.4" stopColor={colors.shadow} stopOpacity={0} />
         </LinearGradient>
       </Defs>
 
       {/* 벽 */}
-      <Rect x={0} y={0} width={100} height={50} fill={wall} />
-      <Rect x={0} y={0} width={100} height={3} fill={colors.wallShade} />
+      <WallFill uid="scene" id={wallpaper} dark={dark} x={0} y={0} width={100} height={50} />
+      <Rect x={0} y={0} width={100} height={3} fill={colors.wallShade} opacity={0.7} />
       <Rect x={0} y={46.5} width={100} height={3.5} fill={colors.baseboard} />
 
       {/* 바닥 */}
-      <Rect x={0} y={50} width={100} height={35} fill="url(#floor)" />
-      <G opacity={0.55}>
-        {boards.map((x) => (
-          <Line key={x} x1={50 + (x - 50) * 0.42} y1={50} x2={x} y2={SceneHeight} stroke={colors.floorLine} strokeWidth={0.35} />
-        ))}
-      </G>
+      <FloorFill uid="scene" id={floor} dark={dark} x={0} y={50} width={100} height={35} />
+      <Rect x={0} y={50} width={100} height={35} fill="url(#floorShade)" />
 
       {/* 러그 */}
       <Ellipse cx={42} cy={75} rx={31} ry={6.5} fill={colors.rugEdge} />

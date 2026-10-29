@@ -1,4 +1,6 @@
+import { CategoryLabel } from '@/constants/domain';
 import type { DayPart } from '@/constants/room-art';
+import type { ThemeRule } from '@/constants/room-themes';
 
 /** KST 시각으로 창밖 하늘을 고른다 (5~10시 아침, 10~17시 낮, 17~19시 저녁, 그 외 밤) */
 export function dayPartOf(now: Date = new Date()): DayPart {
@@ -54,4 +56,40 @@ export function withObject(word: string) {
   const code = word.charCodeAt(word.length - 1) - 0xac00;
   const final = code >= 0 && code <= 11171 ? code % 28 : 0;
   return `${word}${final ? '을' : '를'}`;
+}
+
+export type ThemeProgress = Progress & { weeklyCount: number };
+
+/** 벽지·바닥 잠금 해제 여부 (시안: 지금 미션 기록으로 계산) */
+export function themeUnlocked(rule: ThemeRule, progress: ThemeProgress) {
+  switch (rule.type) {
+    case 'none':
+      return true;
+    case 'category_count':
+      return (progress.completedByCategory[rule.category] ?? 0) >= rule.count;
+    case 'streak':
+      return progress.streak >= rule.days;
+    case 'weekly_count':
+      return progress.weeklyCount >= rule.count;
+  }
+}
+
+/** 벽지·바닥 획득 조건과 남은 횟수: "산책·운동 3회 · 1번 더" */
+export function themeRuleText(rule: ThemeRule, progress: ThemeProgress) {
+  switch (rule.type) {
+    case 'none':
+      return '처음부터 있어요';
+    case 'category_count': {
+      const left = rule.count - (progress.completedByCategory[rule.category] ?? 0);
+      return `${CategoryLabel[rule.category]} ${rule.count}회${left > 0 ? ` · ${left}번 더` : ''}`;
+    }
+    case 'streak': {
+      const left = rule.days - progress.streak;
+      return `연속 출석 ${rule.days}일${left > 0 ? ` · ${left}일 더` : ''}`;
+    }
+    case 'weekly_count': {
+      const left = rule.count - progress.weeklyCount;
+      return `주간 미션 ${rule.count}번${left > 0 ? ` · ${left}번 더` : ''}`;
+    }
+  }
 }

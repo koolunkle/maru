@@ -1,4 +1,5 @@
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from 'react-native';
@@ -10,16 +11,18 @@ import { PressableScale } from '@/components/pressable-scale';
 import { Collection } from '@/components/room/collection';
 import { ArtAspect, FurnitureArt, type FurnitureState } from '@/components/room/furniture-art';
 import { RoomLight, RoomScene, SceneHeight, SlotAnchor } from '@/components/room/room-scene';
+import { SurfaceSwatch } from '@/components/room/room-surfaces';
 import { Screen } from '@/components/screen';
 import { SlotName, SlotTypeOf } from '@/constants/room';
 import { RoomArt, Sky, type DayPart } from '@/constants/room-art';
+import { DefaultTheme, Floors, themeStorageKey, Wallpapers } from '@/constants/room-themes';
 import { Radius, Spacing } from '@/constants/theme';
 import { useIsDark, useTheme } from '@/hooks/use-theme';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
 import { kstDate } from '@/utils/date';
-import { dayPartOf, kstClock, plantStageOf, withObject } from '@/utils/room-state';
+import { dayPartOf, kstClock, plantStageOf, themeRuleText, themeUnlocked, withObject } from '@/utils/room-state';
 import { currentStreak } from '@/utils/streak';
 
 type Slot = Enums<'room_slot'>;
@@ -42,7 +45,8 @@ function slotRect(slot: Slot, width: number, aspect: number) {
 /** S8 내 방 (PRD F7 / DESIGN.md §5.4) — 시안: 일러스트 방, 보기·꾸미기 분리, 도감, 내 기록이 남는 가구 */
 export function Room() {
   const theme = useTheme();
-  const colors = useIsDark() ? RoomArt.dark : RoomArt.light;
+  const isDark = useIsDark();
+  const colors = isDark ? RoomArt.dark : RoomArt.light;
   const { session, profile } = useSession();
   const userId = session?.user.id ?? '';
   const params = useLocalSearchParams<{ place?: string; time?: string }>();
@@ -50,6 +54,8 @@ export function Room() {
   const [furniture, setFurniture] = useState<Furniture[] | null>(null);
   const [owned, setOwned] = useState<Owned[]>([]);
   const [completedByCategory, setCompletedByCategory] = useState<Record<string, number>>({});
+  const [weeklyCount, setWeeklyCount] = useState(0);
+  const [roomTheme, setRoomTheme] = useState(DefaultTheme);
   const [posterTitle, setPosterTitle] = useState<string | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
   const [roomWidth, setRoomWidth] = useState(0);
@@ -97,7 +103,7 @@ export function Room() {
     Promise.all([
       supabase.from('furniture').select('*').order('sort'),
       supabase.from('user_furniture').select('*').eq('user_id', userId),
-      supabase.from('user_missions').select('missions!inner(category)').eq('user_id', userId).eq('status', 'completed'),
+      supabase.from('user_missions').select('type, missions!inner(category)').eq('user_id', userId).eq('status', 'completed'),
       supabase
         .from('user_missions')
         .select('completed_at, missions!inner(event_id, events(title))')
@@ -106,7 +112,8 @@ export function Room() {
         .not('missions.event_id', 'is', null)
         .order('completed_at', { ascending: false })
         .limit(1),
-    ]).then(([f, o, done, event]) => {
+      AsyncStorage.getItem(themeStorageKey(userId)).catch(() => null),
+    ]).then(([f, o, done, event, savedTheme]) => {
       if (!active) return;
       // 실패하면 보이던 방을 지우지 않는다
       if (f.error || o.error) { setLoadFailed(true); return; }
@@ -116,6 +123,10 @@ export function Room() {
       const counts: Record<string, number> = {};
       for (const row of done.data ?? []) counts[row.missions.category] = (counts[row.missions.category] ?? 0) + 1;
       setCompletedByCategory(counts);
+      setWeeklyCount((done.data ?? []).filter((row) => row.type === 'weekly').length);
+      try {
+        if (savedTheme) setRoomTheme({ ...DefaultTheme, ...JSON.parse(savedTheme) });
+      } catch {}
       // 행사 이름 앞의 "[기관명]" 말머리는 뗀다
       setPosterTitle(event.data?.[0]?.missions.events?.title?.replace(/^\s*\[[^\]]*\]\s*/, '') ?? null);
       if (placeParam) placeReward(placeParam, f.data, o.data);
@@ -169,6 +180,7 @@ export function Room() {
   const lampAt = state.lampOn && lampSlot ? { x: SlotAnchor[lampSlot].x, y: SlotAnchor[lampSlot].y - SlotAnchor[lampSlot].height * 0.7 } : null;
 
   const ownedIds = new Set(owned.map((o) => o.furniture_id));
+  const themeProgress = { streak, completedByCategory, weeklyCount };
   const candidates = editing ? (furniture ?? []).filter((f) => ownedIds.has(f.id) && f.slot_type === SlotTypeOf[editing]) : [];
   const editingItem = editing ? owned.find((o) => o.slot === editing) : undefined;
   const movingType = moving ? furniture?.find((f) => f.id === moving)?.slot_type : undefined;
@@ -182,6 +194,13 @@ export function Room() {
     setDecorating((value) => !value);
     setMoving(null);
     setNotice(null);
+  }
+
+  /** 벽지·바닥 고르기 (시안: 이 기기에만 저장) */
+  function chooseTheme(kind: 'wallpaper' | 'floor', id: string) {
+    const next = { ...roomTheme, [kind]: id };
+    setRoomTheme(next);
+    AsyncStorage.setItem(themeStorageKey(userId), JSON.stringify(next)).catch(() => {});
   }
 
   function pressSlot(slot: Slot) {
@@ -217,7 +236,7 @@ export function Room() {
         style={[styles.room, { height: (roomWidth * SceneHeight) / 100 || undefined, backgroundColor: theme.roomWall }]}>
         {roomWidth > 0 && (
           <>
-            <RoomScene width={roomWidth} colors={colors} wall={theme.roomWall} floor={theme.roomFloor} dayPart={dayPart} />
+            <RoomScene width={roomWidth} colors={colors} wallpaper={roomTheme.wallpaper} floor={roomTheme.floor} dark={isDark} dayPart={dayPart} />
             {Slots.map((slot) => {
               const item = owned.find((o) => o.slot === slot);
               if (!item) return null;
@@ -282,6 +301,51 @@ export function Room() {
           </AppText>
         )}
       </View>
+
+      {decorating && (
+        <View style={styles.themes}>
+          {([
+            ['wallpaper', '벽지', Wallpapers, 'wall'],
+            ['floor', '바닥', Floors, 'floor'],
+          ] as const).map(([kind, label, items, swatch]) => (
+            <View key={kind} style={styles.themeGroup}>
+              <AppText variant="titleMd" accessibilityRole="header">{label}</AppText>
+              <View style={styles.themeRow}>
+                {items.map((item) => {
+                  const open = themeUnlocked(item.rule, themeProgress);
+                  const selected = roomTheme[kind] === item.id;
+                  return (
+                    <PressableScale
+                      key={item.id}
+                      accessibilityRole="radio"
+                      accessibilityState={{ selected, disabled: !open }}
+                      accessibilityLabel={open ? `${label} ${item.name}` : `${label} ${item.name}, 잠김. ${themeRuleText(item.rule, themeProgress)}`}
+                      disabled={!open}
+                      onPress={() => chooseTheme(kind, item.id)}
+                      style={[styles.themeItem, { borderColor: selected ? theme.primary : theme.hairline, backgroundColor: selected ? theme.primarySoft : theme.surface }]}>
+                      <View style={[styles.swatch, !open && styles.lockedSwatch]}>
+                        <SurfaceSwatch kind={swatch} id={item.id} size={44} dark={isDark} />
+                        {!open && (
+                          <View style={styles.lock}>
+                            <Feather aria-hidden name="lock" size={14} color={theme.slate} />
+                          </View>
+                        )}
+                      </View>
+                      <AppText variant="caption" color={open ? 'ink' : 'steel'} numberOfLines={1}>{item.name}</AppText>
+                      {!open && (
+                        <AppText variant="label" color="accentInk" numberOfLines={2} style={styles.centerText}>
+                          {themeRuleText(item.rule, themeProgress)}
+                        </AppText>
+                      )}
+                    </PressableScale>
+                  );
+                })}
+              </View>
+            </View>
+          ))}
+          <AppText variant="caption" color="steel">시안이라 벽지·바닥은 이 기기에만 저장돼요.</AppText>
+        </View>
+      )}
 
       <View style={styles.collection}>
         {loadFailed ? (
@@ -385,6 +449,46 @@ const styles = StyleSheet.create({
   },
   collection: {
     marginTop: Spacing.md,
+  },
+  themes: {
+    marginTop: Spacing.sm,
+    gap: Spacing.md,
+  },
+  themeGroup: {
+    gap: Spacing.xs,
+  },
+  themeRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.xs,
+  },
+  themeItem: {
+    width: 76,
+    minHeight: 96,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    padding: Spacing.xs,
+    alignItems: 'center',
+    gap: 2,
+  },
+  swatch: {
+    borderRadius: Radius.md,
+    overflow: 'hidden',
+  },
+  lockedSwatch: {
+    opacity: 0.45,
+  },
+  lock: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  centerText: {
+    textAlign: 'center',
   },
   failed: {
     alignItems: 'flex-start',
