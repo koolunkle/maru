@@ -8,7 +8,7 @@ import { PressableScale } from '@/components/pressable-scale';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { listCapsules, type Capsule } from '@/lib/capsule';
-import { HomeSheet } from '@/components/home-sheet';
+import { BottomSheet } from '@/components/bottom-sheet';
 import { CapsuleScreen } from '@/screens/capsule';
 
 export function CapsuleCard() {
@@ -33,7 +33,7 @@ export function CapsuleCard() {
       </View>
       <Feather aria-hidden name="chevron-right" size={20} color={theme.steel} />
     </PressableScale>
-    {visible && <HomeSheet title="타임캡슐" onClose={() => { setVisible(false); listCapsules().then((items) => setArrival(items.find((item) => item.ready && !item.opened_at) ?? null), () => {}); }}><CapsuleScreen sheet arrivalId={arrival?.id} /></HomeSheet>}
+    {visible && <BottomSheet title="타임캡슐" onClose={() => { setVisible(false); listCapsules().then((items) => setArrival(items.find((item) => item.ready && !item.opened_at) ?? null), () => {}); }}><CapsuleScreen sheet arrivalId={arrival?.id} /></BottomSheet>}
     </>
   );
 }

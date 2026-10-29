@@ -8,7 +8,7 @@ import { AppSwitch } from '@/components/app-switch';
 import { AppText } from '@/components/app-text';
 import { CapsuleCard } from '@/components/capsule-card';
 import { DailyNoteCard } from '@/components/daily-note-card';
-import { HomeSheet } from '@/components/home-sheet';
+import { BottomSheet } from '@/components/bottom-sheet';
 import { MailboxCard } from '@/components/mailbox-card';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
@@ -65,9 +65,9 @@ export function Rest() {
             <Feather aria-hidden name="chevron-right" size={20} color={theme.steel} />
           </PressableScale>
           {noteOpen && (
-            <HomeSheet title="한 줄 기록" onClose={() => { setNoteOpen(false); loadTodayNote(); }}>
+            <BottomSheet title="한 줄 기록" onClose={() => { setNoteOpen(false); loadTodayNote(); }}>
               <DailyNoteCard userId={profile.id} />
-            </HomeSheet>
+            </BottomSheet>
           )}
           <CapsuleCard key={`capsule:${profile.id}`} />
         </>
