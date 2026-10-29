@@ -61,7 +61,7 @@ export type ThemeColors = { [K in keyof typeof Colors.light]: string };
 
 type Category = Enums<'mission_category'>;
 
-/** 미션 카드 배경 (라이트). 다크에서는 surface + 왼쪽 4px 막대로 대체한다. */
+/** 미션 카드 배경 (라이트). 다크에서는 surface + 왼쪽 4px 막대(CategoryBar)로 대체한다. */
 export const CategoryTint: Record<Category, string> = {
   walk: '#ddf2e3',
   food: '#ffe8d4',
@@ -70,6 +70,17 @@ export const CategoryTint: Record<Category, string> = {
   neighborhood: '#dcecfa',
   rhythm: '#f5efe3',
   people: '#fce3ec',
+};
+
+/** 미션 카드 왼쪽 4px 막대 (다크). 연한 틴트는 어두운 면에서 흰 테두리처럼 보여 같은 계열의 진한 색을 쓴다. */
+export const CategoryBar: Record<Category, string> = {
+  walk: '#7cc99a',
+  food: '#eba26f',
+  culture: '#a993d6',
+  growth: '#e2bf55',
+  neighborhood: '#78aee0',
+  rhythm: '#c9ad7f',
+  people: '#e391ad',
 };
 
 export const FontFamily = {

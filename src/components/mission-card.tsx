@@ -4,7 +4,7 @@ import { StyleSheet, View } from 'react-native';
 import { AppText } from '@/components/app-text';
 import { PressableScale } from '@/components/pressable-scale';
 import { CategoryLabel } from '@/constants/domain';
-import { CategoryTint, Radius, Spacing } from '@/constants/theme';
+import { CategoryBar, CategoryTint, Radius, Spacing } from '@/constants/theme';
 import { useIsDark, useTheme } from '@/hooks/use-theme';
 import type { Enums, Tables } from '@/types/database';
 
@@ -38,11 +38,10 @@ export function MissionCard({ mission, status, reward, onPress }: MissionCardPro
       onPress={onPress}
       style={[
         styles.card,
-        isDark
-          ? { backgroundColor: theme.surface, borderLeftWidth: 4, borderLeftColor: tint }
-          : { backgroundColor: tint },
+        { backgroundColor: isDark ? theme.surface : tint },
         done && styles.done,
       ]}>
+      {isDark && <View style={[styles.bar, { backgroundColor: CategoryBar[mission.category] }]} />}
       <View style={styles.body}>
         <AppText variant="label" color="slate">
           {CategoryLabel[mission.category]} · {mission.minutes}분{statusLabel ? ` · ${statusLabel}` : ''}
@@ -75,6 +74,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
+    overflow: 'hidden',
+  },
+  // 다크 모드 카테고리 막대: 테두리로 그리면 둥근 모서리를 따라 휘므로 곧은 막대를 카드 모서리에서 자른다
+  bar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
   },
   body: {
     flex: 1,
