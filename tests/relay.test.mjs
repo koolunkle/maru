@@ -74,13 +74,23 @@ test('변형된 연락처와 식별번호, 문맥상 이름과 주소를 가린�
     ['900101-1234567', '900101'],
     ['1234 5678 1234 5678', '1234'],
     ['저는 홍길동이에요', '홍길동'],
-    ['홍길동이 힘들어요', '홍길동'],
     ['주소: 푸른 아파트 101동 202호', '푸른 아파트'],
+    ['망원동 123-4에 살아요', '123-4'],
+    ['101동 202호로 오세요', '202호'],
   ];
   for (const [input, privatePart] of cases) assert.ok(!privacy.filterModerationText(input).text.includes(privatePart), input);
   assert.equal(privacy.filterModerationText('０１０-１２３４-５６７８').text, '[연락처]');
   assert.equal(privacy.filterModerationText('공일공 일이삼사 오육칠팔').hasContact, true);
   assert.ok(privacy.filterModerationText('010-1234-5678 자살하고 싶어요').text.includes('자살하고 싶어요'));
+});
+test('일상 문장과 기분 표현은 가리지 않는다', () => {
+  for (const value of [
+    '마음이 무거워요', '호수 공원 하늘이 정말 맑았어요', '오늘 하루도 버틴 당신, 정말 잘했어요', '천천히 가도 괜찮아요',
+    '이번주는 정말 힘들었어요', '고양이가 귀여웠어요', '오늘은 성수동 카페에 갔어요', '연남동 1번 출구 앞에서 만났어요',
+    '서울둘레길 1구간 걸었어요', '선생님 감사합니다', '저는 학생이에요', '이름 모를 꽃이 피었어요',
+  ]) {
+    assert.equal(privacy.filterModerationText(value).text, value, value);
+  }
 });
 await load(
   '../supabase/functions/moderate-comment/index.ts',

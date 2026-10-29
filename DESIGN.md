@@ -370,18 +370,18 @@ F10~F16 화면·요소
 | 화면·위치 | 구조 |
 | --- | --- |
 | S3 성장 화분 (F11) | 연속 출석 줄 → 12px → `growth-card`: 왼쪽 단계 아이콘 48px, 오른쪽 문구 `title-md` → 8px → 진행 막대(높이 6px, `success`, 배경 `surface-sunken`) → 4px → 단계 이름 4개 `caption`(현재 단계만 `success` SemiBold). 그 아래 32px 뒤 "오늘의 미션" |
-| S3 타임캡슐 메뉴 (F16) | 한 줄 기록 아래 `card-base`: `mail` 아이콘 20px `accent` + "타임캡슐" `title-md` + 도착한 한 줄 또는 미래의 나에게 보내기 안내 `caption` `steel` + `chevron-right` |
-| S3 마음 우체통 카드 (F14) | 미션 영역 아래 → `card-base`: Feather `mail` 24px `accent` + "마음 우체통" `title-md` + 안 읽은 글이 있으면 "아직 읽지 않은 한 줄 {N}개가 있어요", 없으면 "한 줄을 주고받아 볼까요?" `caption` `steel` + `chevron-right`. 카드 전체가 터치 영역. 미션·릴레이와 독립 |
-| S3 마음 우체통 수신함 (F14) | `bottom-sheet`: "마음 우체통" `title-md` → 받은 한 줄·보낸 한 줄 전환 버튼 → `list-row` 목록(본문 1줄 말줄임, 안 읽음은 `accent` 라벨, 읽음은 `steel`) → "한 줄 쓰기" `button-primary` → "닫기" `button-ghost`. 목록은 가상화하고 로딩·빈 상태·오류·다시 불러오기 제공. 본문은 `letter-card`에 "누군가가 보낸 한 줄" + 전체 글 + "목록으로". 작성자 정보·답장 기능 없음 |
-| S3 마음 우체통 작성 (F14) | `bottom-sheet`: Feather `mail` 32px `accent` → 12px → 제목 "누군가에게 한 줄 보내볼까요?" `title-md` → 안내 `body-sm` → `text-input` 여러 줄(0/60) → "검수를 거친 뒤 다른 사람에게 전달돼요" `comment-pending` → `button-primary` "보내기" → `button-ghost` "우체통으로". 저장 후 `check-circle` + "한 줄을 맡겼어요" + 본문 `relay-item` + 실제 검수 상태 안내 + "우체통으로". 비공개 결과는 중립 문구, 위기 표현에는 `help-card`. 보낸 목록의 검수 대기 항목에는 "검수 다시 요청". 키보드 회피·스크롤·safe area 적용, 최대 폭 480px |
+| S10 타임캡슐 메뉴 (F16) | 한 줄 기록 아래 8px `card-base`: `mail` 아이콘 20px `accent` + "타임캡슐" `title-md` + 도착한 한 줄 또는 미래의 나에게 보내기 안내 `caption` `steel` + `chevron-right` |
+| S10 마음 우체통 카드 (F14) | "마음 보관함" `title-md` 아래 8px → `card-base`: Feather `mail` 24px `accent` + "마음 우체통" `title-md` + 안 읽은 글이 있으면 "아직 읽지 않은 한 줄 {N}개가 있어요", 없으면 "한 줄을 주고받아 볼까요?" `caption` `steel` + `chevron-right`. 카드 전체가 터치 영역. 미션·릴레이와 독립 |
+| S10 마음 우체통 수신함 (F14) | `bottom-sheet`: "마음 우체통" `title-md` → 받은 한 줄·보낸 한 줄 전환 버튼 → `list-row` 목록(본문 1줄 말줄임, 안 읽음은 `accent` 라벨, 읽음은 `steel`) → "한 줄 쓰기" `button-primary` → "닫기" `button-ghost`. 목록은 가상화하고 로딩·빈 상태·오류·다시 불러오기 제공. 본문은 `letter-card`에 "누군가가 보낸 한 줄" + 전체 글 + "목록으로". 작성자 정보·답장 기능 없음 |
+| S10 마음 우체통 작성 (F14) | `bottom-sheet`: Feather `mail` 32px `accent` → 12px → 제목 "누군가에게 한 줄 보내볼까요?" `title-md` → 안내 `body-sm` → `text-input` 여러 줄(0/60) → "검수를 거친 뒤 다른 사람에게 전달돼요" `comment-pending` → `button-primary` "보내기" → `button-ghost` "우체통으로". 저장 후 `check-circle` + "한 줄을 맡겼어요" + 본문 `relay-item` + 실제 검수 상태 안내 + "우체통으로". 비공개 결과는 중립 문구, 위기 표현에는 `help-card`. 보낸 목록의 검수 대기 항목에는 "검수 다시 요청". 키보드 회피·스크롤·safe area 적용, 최대 폭 480px |
 | S4 먼저 해낸 사람의 한 줄 (F10) | 같이 할래요 행 아래 32px → 제목 `title-md` → 8px → `relay-item` 최대 3개(간격 8px, 따옴표·닉네임 없음). 없으면 `caption` `steel` 한 줄 |
 | S5 다음 사람에게 한 줄 (F10) | 판정 결과 `ai-card` 아래 24px → 제목 `title-md` → 8px → `text-input` 1줄(우하단 "0/60") → 하단 고정 버튼이 "남기기"로 바뀌고 그 위에 `button-ghost` "건너뛰기". 남긴 뒤 `comment-pending` 형태로 "약 {N}시간 뒤 다음 사람에게 보여요" |
 | S7 이번 주 편지 (F13) | 월간 캘린더 아래 32px → `letter-card`: "이번 주 편지" `label` `steel`, 기분·한 줄·완료 미션 안내, `button-ghost` "이번 주 마음 리포트 보기". 통계 조회와 독립적으로 표시 |
-| S3 한 줄 기록 메뉴 (F15) | 마음 우체통 아래 24px → `card-base`: Feather `edit-3`, "한 줄 기록", 안내 문구와 `chevron-right`. 누르면 한 줄 기록 바텀 시트를 연다 |
-| S13 한 줄 기록 (F15) | 홈에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → "오늘 한 줄" `title-md` → 안내 `body-sm` → 기분 칩 5개(`chip-category` 모양, 아이콘 + 이름, 줄바꿈) → 선택 입력 `text-input`(0/60) → `button-primary` "저장하기". 기존 기록은 불러와 수정하고, 삭제는 화면 안 확인 후 실행. 로딩·저장 오류·재시도 표시 |
-| S10 마음 휴게소 (F12, 미구현 T5) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) |
+| S10 한 줄 기록 메뉴 (F15) | 마음 우체통 아래 8px → `card-base`: Feather `edit-3`, "한 줄 기록", 안내 문구와 `chevron-right`. 누르면 한 줄 기록 바텀 시트를 연다 |
+| S13 한 줄 기록 (F15) | 휴게소에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → "오늘 한 줄" `title-md` → 안내 `body-sm` → 기분 칩 5개(`chip-category` 모양, 아이콘 + 이름, 줄바꿈) → 선택 입력 `text-input`(0/60) → `button-primary` "저장하기". 기존 기록은 불러와 수정하고, 삭제는 화면 안 확인 후 실행. 로딩·저장 오류·재시도 표시 |
+| S10 마음 휴게소 (F12) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → "마음 보관함" `title-md` + 우체통·한 줄 기록·타임캡슐 카드 → 32px → "도움받을 수 있는 곳" `title-md` → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) |
 | S11 주간 편지 (F13) | `BackHeader`와 KST 주차 → Gemini 원문 전송·보관 안내와 생성 버튼 → 실제 기분·한 줄·완료 미션 목록 → AI 편지는 `ai-card`, 기본 편지는 일반 카드 → 마음이 무거운 기록이 있으면 `help-soft`와 설정 안내 → 지난 3주 및 보관된 주차 목록과 이번 주 복귀. 현재 표시되는 원본과 과거 생성 편지의 시점 차이를 안내한다. |
-| S12 타임캡슐 (F16) | 홈에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
+| S12 타임캡슐 (F16) | 휴게소에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
 
 ### 5.3 컴포넌트 구조
 

@@ -36,7 +36,7 @@ export function MinuteOption({ label, description, selected, onPress }: MinuteOp
           {description}
         </AppText>
       </View>
-      {selected && <Feather name="check" size={20} color={theme.primary} />}
+      {selected && <Feather aria-hidden name="check" size={20} color={theme.primary} />}
     </PressableScale>
   );
 }

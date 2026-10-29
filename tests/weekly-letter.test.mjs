@@ -54,16 +54,16 @@ test('KST 일요일에서 월요일로 넘어갈 때 주차가 바뀐다', () =>
 });
 
 test('시연용 주차는 이번 주와 지난 3주이며 연도 경계를 넘을 수 있다', () => {
-  assert.deepEqual(letter.demoLetterWeeks('2027-01-01'), [
+  assert.deepEqual(letter.letterWeeks('2027-01-01'), [
     '2026-12-28', '2026-12-21', '2026-12-14', '2026-12-07',
   ]);
-  assert.deepEqual(letter.demoLetterWeeks('2026-10-27'), [
+  assert.deepEqual(letter.letterWeeks('2026-10-27'), [
     '2026-10-26', '2026-10-19', '2026-10-12', '2026-10-05',
   ]);
 });
 
 test('잘못된 날짜·월요일 아닌 날짜·미래·범위 밖 주차는 시연 목록에 없다', () => {
-  const weeks = letter.demoLetterWeeks('2026-10-27');
+  const weeks = letter.letterWeeks('2026-10-27');
   for (const invalid of ['', 'bad', '2026-02-30', '2026-10-27', '2026-11-02', '2026-09-28', '2026-10-26/extra']) {
     assert.equal(weeks.includes(invalid), false, invalid);
   }
@@ -75,13 +75,3 @@ test('편지 날짜 범위는 월요일부터 일요일까지이며 윤년과 �
   assert.equal(letter.formatLetterWeek('2024-02-26'), '2024.02.26 – 2024.03.03');
 });
 
-test('예시에는 7일의 기분과 한 줄·미션·편지가 있고 시연용임을 명시한다', () => {
-  const demo = letter.DemoLetter;
-  assert.match(demo.notice, /시연용/);
-  assert.match(demo.notice, /예시/);
-  assert.deepEqual(demo.flow.map((day) => day.day), ['월', '화', '수', '목', '금', '토', '일']);
-  assert.ok(demo.flow.every((day) => Number.isInteger(day.level) && day.level >= 1 && day.level <= 5));
-  assert.ok(demo.note && demo.mission && demo.paragraphs.length > 0);
-  const copy = JSON.stringify(demo);
-  assert.doesNotMatch(copy, /외로움|고립|우울|상담|실패/);
-});

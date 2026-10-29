@@ -12,6 +12,8 @@ type MissionCardProps = {
   mission: Pick<Tables<'missions'>, 'title' | 'category' | 'minutes'>;
   /** 이 미션의 내 진행 상태 (없으면 아직 시작 전) */
   status?: Enums<'user_mission_status'>;
+  /** 다음 보상까지 남은 조건 (PRD F8, reward-badge) */
+  reward?: string | null;
   onPress?: () => void;
 };
 
@@ -22,7 +24,7 @@ const StatusLabel: Partial<Record<Enums<'user_mission_status'>, string>> = {
 };
 
 /** mission-card (DESIGN.md §5.3). 라이트: 카테고리 틴트 면 / 다크: surface + 왼쪽 4px 틴트 막대 */
-export function MissionCard({ mission, status, onPress }: MissionCardProps) {
+export function MissionCard({ mission, status, reward, onPress }: MissionCardProps) {
   const theme = useTheme();
   const isDark = useIsDark();
   const tint = CategoryTint[mission.category];
@@ -48,11 +50,19 @@ export function MissionCard({ mission, status, onPress }: MissionCardProps) {
         <AppText variant="titleMd" numberOfLines={2}>
           {mission.title}
         </AppText>
+        {reward && !done && (
+          <View style={[styles.badge, { backgroundColor: theme.accentSoft }]}>
+            <Feather aria-hidden name="award" size={14} color={theme.accent} />
+            <AppText variant="label" color="accentInk">
+              {reward}
+            </AppText>
+          </View>
+        )}
       </View>
       {done ? (
-        <Feather name="check-circle" size={20} color={theme.success} />
+        <Feather aria-hidden name="check-circle" size={20} color={theme.success} />
       ) : (
-        onPress && <Feather name="chevron-right" size={20} color={theme.slate} />
+        onPress && <Feather aria-hidden name="chevron-right" size={20} color={theme.slate} />
       )}
     </PressableScale>
   );
@@ -72,5 +82,16 @@ const styles = StyleSheet.create({
   },
   done: {
     opacity: 0.7,
+  },
+  // reward-badge (DESIGN.md: 24px, rounded.full, paddingX 10px)
+  badge: {
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xxs,
+    height: 24,
+    paddingHorizontal: 10,
+    borderRadius: Radius.full,
+    marginTop: Spacing.xxs,
   },
 });

@@ -185,7 +185,8 @@ export function DailyNoteCard({ userId }: { userId: string }) {
           <AppText variant="bodySm" color="slate" accessibilityRole="alert">
             오늘의 기록을 불러오지 못했어요.
           </AppText>
-          <Button label="다시 불러오기" variant="secondary" onPress={discardAndReload} />
+          {/* 작성 중인 내용은 지우지 않고 다시 불러온다 (#48) */}
+          <Button label="다시 불러오기" variant="secondary" onPress={() => setReload((value) => value + 1)} />
         </>
       ) : (
         <>

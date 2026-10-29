@@ -2,6 +2,8 @@ import { supabase } from './supabase';
 import type { Tables } from '../types/database';
 
 export const DailyNoteMaxLength = 60;
+/** 기분 저장 값 1~5의 문구 (PRD F15) */
+export const MoodLabels = ['마음이 가벼워요', '조금 가벼워요', '보통이에요', '조금 무거워요', '마음이 무거워요'] as const;
 export type DailyNote = Pick<Tables<'daily_notes'>, 'note_date' | 'mood' | 'text'>;
 
 export async function getDailyNote(userId: string, date: string): Promise<DailyNote | null> {

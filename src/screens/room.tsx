@@ -1,17 +1,19 @@
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
+import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
-import { FurnitureIcon, SlotPosition, SlotTypeOf, unlockText } from '@/constants/room';
+import { FurnitureIcon, SlotName, SlotPosition, SlotTypeOf, unlockText } from '@/constants/room';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { supabase } from '@/lib/supabase';
+import { Functions } from '@/lib/functions';
+import { getRoom } from '@/lib/room';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
 
@@ -32,17 +34,16 @@ export function Room() {
   const [editing, setEditing] = useState<Slot | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   const load = useCallback(() => {
     let active = true;
-    Promise.all([
-      supabase.from('furniture').select('*').order('sort'),
-      supabase.from('user_furniture').select('*').eq('user_id', userId),
-    ]).then(([f, o]) => {
+    getRoom(userId).then((room) => {
       if (!active) return;
-      setFurniture(f.data ?? []);
-      setOwned(o.data ?? []);
-    });
+      setLoadFailed(false);
+      setFurniture(room.furniture);
+      setOwned(room.owned);
+    }, () => active && setLoadFailed(true)); // 실패하면 보이던 방을 지우지 않는다
     return () => {
       active = false;
     };
@@ -53,13 +54,19 @@ export function Room() {
   async function place(slot: Slot, furnitureId: string | null) {
     setBusy(true);
     setError(false);
-    const { error: placementError } = await supabase.functions.invoke('place-furniture', { body: { slot, furnitureId } });
+    const placed = await Functions.placeFurniture(slot, furnitureId).then(() => true, () => false);
     setBusy(false);
-    if (placementError) { setError(true); return; }
+    if (!placed) { setError(true); return; }
     setEditing(null);
     load();
   }
 
+  function open(slot: Slot) {
+    setError(false);
+    setEditing(slot);
+  }
+
+  const nameOf = (id: string) => furniture?.find((f) => f.id === id)?.name ?? '가구';
   const ownedIds = new Set(owned.map((o) => o.furniture_id));
   const roomHeight = roomWidth * 0.85;
   const candidates = editing
@@ -85,8 +92,9 @@ export function Room() {
               <PressableScale
                 key={slot}
                 accessibilityRole="button"
-                accessibilityLabel={item ? `${item.furniture_id} 바꾸기` : '빈 자리'}
-                onPress={() => setEditing(slot)}
+                accessibilityLabel={`${SlotName[slot]}, ${item ? nameOf(item.furniture_id) : '빈 자리'}`}
+                accessibilityHint={item ? '눌러서 다른 가구로 바꿔요' : '눌러서 가구를 놓아요'}
+                onPress={() => open(slot)}
                 style={[
                   styles.slot,
                   {
@@ -97,10 +105,10 @@ export function Room() {
                 ]}>
                 {icon ? (
                   <Animated.View key={item.furniture_id} entering={ZoomIn.springify().damping(12)}>
-                    <MaterialCommunityIcons name={icon.name} size={40} color={theme[icon.color]} />
+                    <MaterialCommunityIcons aria-hidden name={icon.name} size={40} color={theme[icon.color]} />
                   </Animated.View>
                 ) : (
-                  <Feather name="plus" size={16} color={theme.muted} />
+                  <Feather aria-hidden name="plus" size={16} color={theme.muted} />
                 )}
               </PressableScale>
             );
@@ -110,7 +118,20 @@ export function Room() {
       <AppText variant="titleMd" style={styles.sectionTitle}>
         가진 가구
       </AppText>
-      {!furniture ? (
+      {loadFailed ? (
+        <View style={styles.failed}>
+          <AppText color="slate" accessibilityRole="alert">내 방을 불러오지 못했어요.</AppText>
+          <Button
+            label="다시 불러오기"
+            variant="secondary"
+            size="sm"
+            onPress={() => {
+              setLoadFailed(false);
+              load();
+            }}
+          />
+        </View>
+      ) : !furniture ? (
         <ActivityIndicator color={theme.primary} />
       ) : (
         <View style={styles.grid}>
@@ -120,11 +141,13 @@ export function Room() {
             return (
               <View
                 key={f.id}
+                accessible
+                accessibilityLabel={have ? `${f.name}, 가짐` : `${f.name}, 잠김, ${unlockText(f.unlock_rule)}`}
                 style={[styles.item, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
                 {have && icon ? (
-                  <MaterialCommunityIcons name={icon.name} size={32} color={theme[icon.color]} />
+                  <MaterialCommunityIcons aria-hidden name={icon.name} size={32} color={theme[icon.color]} />
                 ) : (
-                  <MaterialCommunityIcons name="lock-outline" size={24} color={theme.muted} />
+                  <MaterialCommunityIcons aria-hidden name="lock-outline" size={24} color={theme.muted} />
                 )}
                 <AppText variant="caption" color={have ? 'ink' : 'steel'} numberOfLines={1}>
                   {f.name}
@@ -140,11 +163,8 @@ export function Room() {
         </View>
       )}
 
-      {/* 인벤토리 바텀 시트 (DESIGN.md §6: 250ms 슬라이드, 뒤 배경 rgba(0,0,0,0.3)) */}
-      <Modal visible={editing !== null} transparent animationType="slide" onRequestClose={() => setEditing(null)}>
-        <Pressable style={styles.backdrop} onPress={() => setEditing(null)} accessibilityLabel="닫기" />
-        <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
-          <AppText variant="titleMd">이 자리에 놓을 가구</AppText>
+      {editing !== null && (
+        <BottomSheet title="이 자리에 놓을 가구" onClose={() => setEditing(null)} closeDisabled={busy}>
           {error && <AppText accessibilityRole="alert" color="slate">가구를 놓지 못했어요. 다시 시도해 주세요.</AppText>}
           {candidates.length === 0 ? (
             <AppText variant="bodySm" color="steel">
@@ -157,22 +177,23 @@ export function Room() {
                 return (
                   <PressableScale
                     key={f.id}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${f.name} 놓기`}
                     disabled={busy}
-                    onPress={() => editing && place(editing, f.id)}
+                    onPress={() => place(editing, f.id)}
                     style={[styles.item, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
-                    {icon && <MaterialCommunityIcons name={icon.name} size={32} color={theme[icon.color]} />}
+                    {icon && <MaterialCommunityIcons aria-hidden name={icon.name} size={32} color={theme[icon.color]} />}
                     <AppText variant="caption">{f.name}</AppText>
                   </PressableScale>
                 );
               })}
             </View>
           )}
-          {editing && owned.some((o) => o.slot === editing) && (
+          {owned.some((o) => o.slot === editing) && (
             <Button label="비우기" variant="secondary" onPress={() => place(editing, null)} disabled={busy} />
           )}
-          <Button label="닫기" variant="ghost" onPress={() => setEditing(null)} />
-        </View>
-      </Modal>
+        </BottomSheet>
+      )}
     </Screen>
   );
 }
@@ -218,22 +239,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 2,
   },
+  failed: {
+    alignItems: 'flex-start',
+    gap: Spacing.sm,
+  },
   centerText: {
     textAlign: 'center',
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  sheet: {
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.sm,
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
   },
   sheetList: {
     flexDirection: 'row',

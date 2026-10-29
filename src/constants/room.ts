@@ -16,6 +16,16 @@ export const SlotPosition: Record<Slot, { x: number; y: number }> = {
   'floor-2': { x: 66, y: 82 },
 };
 
+/** 슬롯 낭독 이름 */
+export const SlotName: Record<Slot, string> = {
+  'wall-1': '왼쪽 벽',
+  window: '창가',
+  'wall-2': '오른쪽 벽',
+  desk: '책상',
+  'floor-1': '왼쪽 바닥',
+  'floor-2': '오른쪽 바닥',
+};
+
 export const SlotTypeOf: Record<Slot, Enums<'furniture_slot_type'>> = {
   'wall-1': 'wall',
   'wall-2': 'wall',
@@ -51,7 +61,7 @@ export function unlockText(rule: unknown) {
     case 'first_weekly':
       return '첫 주간 미션 완료';
     case 'event_mission':
-      return '동네 문화행사 미션 완료';
+      return '문화행사 미션 완료';
     default:
       return '';
   }

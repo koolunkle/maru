@@ -4,10 +4,11 @@ import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useRef, useState } from 'react';
-import { Platform, StyleSheet, Switch, TextInput, View } from 'react-native';
+import { Platform, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 
 import { AiCard } from '@/components/ai-card';
+import { AppSwitch } from '@/components/app-switch';
 import { AppText } from '@/components/app-text';
 import { BackHeader } from '@/components/back-header';
 import { Button } from '@/components/button';
@@ -17,14 +18,13 @@ import { Screen } from '@/components/screen';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { FunctionError, Functions, type JudgedBy, type JudgeResult } from '@/lib/functions';
-import { supabase } from '@/lib/supabase';
+import { leaveRelay, type Relay } from '@/lib/relay';
+import { uploadVerification } from '@/lib/verification';
 import { useSession } from '@/providers/session-provider';
-import type { Tables } from '@/types/database';
 import { preparePhoto } from '@/utils/prepare-photo';
 
 const MaxNote = 100;
 const MaxRelay = 60;
-type Relay = Pick<Tables<'relay_messages'>, 'id' | 'body' | 'status' | 'publish_at'>;
 
 function relayStatus(relay: Relay) {
   if (relay.status === 'pending') return '검수를 기다리고 있어요. 아직 공개되지 않았어요.';
@@ -80,24 +80,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
     try {
       let saved = relay;
       if (!saved) {
-        const inserted = await supabase
-          .from('relay_messages')
-          .insert({ mission_id: missionId, body })
-          .select('id, body, status, publish_at')
-          .single();
-        if (inserted.error?.code === '23505') {
-          const existing = await supabase
-            .from('relay_messages')
-            .select('id, body, status, publish_at')
-            .eq('mission_id', missionId)
-            .eq('user_id', session.user.id)
-            .single();
-          if (existing.error) throw existing.error;
-          saved = existing.data;
-        } else {
-          if (inserted.error) throw inserted.error;
-          saved = inserted.data;
-        }
+        saved = await leaveRelay(missionId, session.user.id, body);
         setRelay(saved);
       }
       if (saved.status === 'pending') {
@@ -155,25 +138,9 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
         if (!uploadRequest.current || uploadRequest.current.note !== text || uploadRequest.current.isPublic !== isPublic) {
           uploadRequest.current = { path: `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 12)}.jpg`, note: text, isPublic };
         }
-        const path = uploadRequest.current.path;
-        const upload = await supabase.storage
-          .from('verifications')
-          .upload(path, photo.bytes, { contentType: 'image/jpeg' });
-        if (upload.error) {
-          const existing = await supabase.storage.from('verifications').download(path);
-          if (existing.error || !existing.data) throw upload.error;
-        }
-        const { data, error } = await supabase
-          .from('verifications')
-          .insert({ user_mission_id: userMissionId, photo_path: path, text: text || null, is_public: isPublic })
-          .select('id')
-          .single();
-        if (error) {
-          const existing = await supabase.from('verifications').select('id, user_mission_id, text')
-            .eq('user_id', session.user.id).eq('photo_path', path).maybeSingle();
-          if (existing.error || !existing.data || existing.data.user_mission_id !== userMissionId || existing.data.text !== (text || null)) throw error;
-          verificationId = existing.data.id;
-        } else verificationId = data.id;
+        verificationId = await uploadVerification({
+          userId: session.user.id, userMissionId, path: uploadRequest.current.path, bytes: photo.bytes, text: text || null, isPublic,
+        });
         setPendingId(verificationId);
       }
 
@@ -226,7 +193,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
         <BackHeader />
         <View style={styles.result}>
           <Animated.View entering={ZoomIn.springify().damping(15).stiffness(200)}>
-            <Feather name="check-circle" size={32} color={theme.success} />
+            <Feather aria-hidden name="check-circle" size={32} color={theme.success} />
           </Animated.View>
           <ResultMessage text={result.message} judgedBy={result.judged_by} />
           {result.rewards.map((f, i) => (
@@ -234,7 +201,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
               key={f.id}
               entering={FadeInDown.duration(200).delay(150 + i * 100)}
               style={[styles.badge, { backgroundColor: theme.accentSoft }]}>
-              <Feather name="award" size={14} color={theme.accent} />
+              <Feather aria-hidden name="award" size={14} color={theme.accent} />
               <AppText variant="label" color="accentInk">
                 {f.name} 획득
               </AppText>
@@ -317,7 +284,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           <Image source={{ uri: photo.uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : (
           <View style={styles.photoEmpty}>
-            <Feather name="camera" size={24} color={theme.slate} />
+            <Feather aria-hidden name="camera" size={24} color={theme.slate} />
             <AppText variant="bodySm" color="slate">
               사진 추가
             </AppText>
@@ -369,13 +336,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
             닉네임으로만 보여요. 공개하면 익명 댓글을 받을 수 있어요.
           </AppText>
         </View>
-        <Switch
-          accessibilityLabel="피드에 공개하기"
-          value={isPublic}
-          onValueChange={setIsPublic}
-          trackColor={{ true: theme.primary, false: theme.hairlineStrong }}
-          thumbColor={theme.surface}
-        />
+        <AppSwitch accessibilityLabel="피드에 공개하기" value={isPublic} onValueChange={setIsPublic} />
       </View>
     </Screen>
   );

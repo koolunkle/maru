@@ -36,7 +36,7 @@ export function Chip({ label, selected, onPress, disabled, style, icon, role = '
         },
         style,
       ]}>
-      {icon && <Feather name={icon} size={18} color={selected ? theme.surface : theme.ink} />}
+      {icon && <Feather aria-hidden name={icon} size={18} color={selected ? theme.surface : theme.ink} />}
       <AppText variant="bodySm" color={selected ? 'surface' : 'ink'}>
         {label}
       </AppText>

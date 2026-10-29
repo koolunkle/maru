@@ -83,7 +83,7 @@ export function GrowthCard({ completedCount }: GrowthCardProps) {
               : ZoomIn.springify().damping(12).stiffness(180)
           }
           exiting={FadeOut.duration(120)}>
-          <MaterialCommunityIcons name={current.icon} size={48} color={theme[current.color]} />
+          <MaterialCommunityIcons aria-hidden name={current.icon} size={48} color={theme[current.color]} />
         </Animated.View>
       </View>
 

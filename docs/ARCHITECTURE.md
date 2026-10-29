@@ -39,22 +39,22 @@ flowchart LR
 | --- | --- |
 | `src/app/` | Expo Router 라우트. 파일 = 화면. 본문은 두지 않고 `src/screens/`를 렌더한다 |
 | `src/app/_layout.tsx` | 글꼴 로드, 세션 상태에 따른 `Stack.Protected` 분기(시작 → 온보딩 → 탭), 웹 480px 컬럼 |
-| `src/app/(tabs)/_layout.tsx` | 하단 탭(현재 4개, T5에서 휴게소 추가) |
+| `src/app/(tabs)/_layout.tsx` | 하단 탭 5개(홈·피드·기록·내 방·휴게소) |
 | `src/providers/background-audio.tsx` | 빗소리 배경음(expo-audio). 탭을 옮겨도 유지 |
 | `src/screens/` | 화면 본문. 큰 화면은 폴더(`feed/`, `onboarding/`, `settings/`) |
-| `src/components/` | 공용 UI(`mission-card`, `ai-card`, `help-card`, `growth-card`, `mailbox-card`, `daily-note-card`, `capsule-card` 등). DESIGN.md §5.3 이름과 맞춘다 |
-| `src/hooks/` | `use-today-missions`(홈 추천·진행), `use-feed`(피드), `use-theme` |
+| `src/components/` | 공용 UI(`bottom-sheet`(모든 시트), `mission-card`, `ai-card`, `help-card`, `growth-card`, `mailbox-card`, `daily-note-card`, `capsule-card` 등). DESIGN.md §5.3 이름과 맞춘다 |
+| `src/hooks/` | `use-today-missions`(홈 추천·진행), `use-reward-progress`(다음 보상), `use-feed`(피드), `use-theme` |
 | `src/providers/session-provider.tsx` | 익명 세션과 `profiles` 행 로드, 삭제된 계정 세션 정리 |
 | `src/lib/supabase.ts` | Supabase 클라이언트(환경 변수 읽는 유일한 곳) |
 | `src/lib/functions.ts` | Edge Function 호출 래퍼 `Functions.*`와 응답 타입. 새 함수는 여기에 추가 |
-| `src/lib/mailbox.ts`, `daily-note.ts`, `capsule.ts` | 우체통·한 줄 기록·타임캡슐 서버 호출 |
+| `src/lib/mailbox.ts`, `daily-note.ts`, `capsule.ts`, `missions.ts`, `relay.ts`, `verification.ts`, `feed.ts`, `room.ts` | 화면별 테이블·Storage 호출. 화면은 `supabase`를 직접 부르지 않고 이 파일과 `Functions.*`를 쓴다 |
 | `src/constants/theme.ts` | 디자인 토큰(DESIGN.md와 같은 값) |
 | `src/constants/domain.ts`, `room.ts` | 카테고리·구 목록, 방 슬롯 좌표·가구 아이콘 |
 | `src/utils/` | KST 날짜(`date.ts`), 시드 미션 고르기, 사진 리사이즈 |
 | `src/types/database.ts` | `supabase gen types`로 생성. 직접 수정 금지 |
 | `supabase/migrations/` | 스키마·RLS·트리거·RPC·cron. 적용된 파일은 고치지 않는다 |
 | `supabase/functions/` | Edge Functions(Deno). `_shared/`: `ai.ts`(AI 호출), `clients.ts`(서버 클라이언트·호출자 확인), `copy.ts`(금칙어), `fallback.ts`, `http.ts`, `kst.ts`, `weekly-letter.ts` |
-| `supabase/tests/`, `tests/` | SQL 시나리오 테스트(로컬 DB용), node 테스트(`npm run test:mailbox` 등) |
+| `supabase/tests/`, `tests/` | SQL 시나리오 테스트(로컬 DB용), node 테스트(전체 `npm test`, 하나만 `npm run test:mailbox` 등) |
 | `supabase/seed.sql` | 시드(365 서울챌린지 36개 + 가구 6종). `npm run seed:build`로 생성 |
 | `data/`, `scripts/build-seed.py` | 시드 원본 JSON과 변환 스크립트 |
 | `assets/fonts/` | Pretendard 3종 + 라이선스 |
@@ -65,17 +65,17 @@ flowchart LR
 | --- | --- | --- | --- |
 | S1 | `/welcome` | `screens/start.tsx` | 완료 |
 | S2 | `/onboarding` | `screens/onboarding/` | 완료 |
-| S3 | `/` (`(tabs)/index`) | `screens/home.tsx` | 완료. 성장 화분(F11), 마음 우체통(F14), 한 줄 기록(F15), 타임캡슐 메뉴(F16) 반영 |
+| S3 | `/` (`(tabs)/index`) | `screens/home.tsx` | 완료. 성장 화분(F11), 다음 보상 표시 반영 |
 | S4 | `/mission/[id]` | `screens/mission-detail.tsx` | 완료. 릴레이 표시(F10) 반영 |
 | S5 | `/mission/[id]/verify` | `screens/verify.tsx` | 완료. 다음 사람에게 한 줄(F10) 반영 |
 | S6 | `/feed` | `screens/feed/` | 완료 |
 | S7 | `/record` | `screens/record.tsx` | 완료. 주간 리포트 카드(F13) 반영 |
 | S8 | `/room` | `screens/room.tsx` | 완료 |
-| S9 | `/settings`, `/settings/[field]` | `screens/settings/` | 완료. 배경음 설정 포함. "도움받을 수 있는 곳"은 T5에서 S10으로 이동 예정 |
-| S10 | `/rest` | — | 미구현(T5). 빗소리 배경음(T6)은 설정에 먼저 구현됨 |
+| S9 | `/settings`, `/settings/[field]` | `screens/settings/` | 완료. 도움 안내·빗소리는 S10으로 옮김 |
+| S10 | `/rest` | `screens/rest.tsx` | 완료(T5). 위에 마음 보관함(우체통 F14·한 줄 기록 F15·타임캡슐 F16), 아래에 도움 안내·빗소리. 도움 안내 주소는 `constants/help.ts` |
 | S11 | `/letter/[week]` | `screens/letter.tsx` | 완료(T8). AI 개인화는 T7 진행 중 |
-| S12 | `/capsule` | `screens/capsule.tsx` | 완료 |
-| — | `/daily-note` | `screens/daily-note.tsx` | 한 줄 기록·기분(F15) |
+| S12 | `/capsule`, 휴게소 시트 | `screens/capsule.tsx` | 완료. 앱에서는 휴게소 카드 → 시트로 연다 |
+| S13 | 휴게소 시트 | `components/daily-note-card.tsx` | 한 줄 기록·기분(F15). 별도 경로 없음 |
 
 새 Stack 화면은 `src/app/_layout.tsx`의 로그인·온보딩 완료 `Stack.Protected` 블록에 `Stack.Screen`을 추가해야 접근된다.
 
@@ -99,8 +99,8 @@ DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nick
 ## 5. 알아 둘 점
 
 - **문화행사는 매일 05:00 KST에 동기화된다.** `sync-events`가 서울 열린데이터광장에서 30일 안에 진행되는 행사를 `events`에 넣고, 추천 함수가 사용자 구의 7일 안 행사를 AI에 넘긴다. 키·Vault 설정은 [ENV.md](./ENV.md) B·E절.
-- **임시 링크:** 설정의 서울마음편의점 행은 구글 검색 URL이다. 공식 URL 확정(PRD §8.4) 후 T5에서 `src/constants/help.ts`로 옮긴다.
-- **테스트는 일부만 있다.** `tests/*.test.mjs`(node)와 `supabase/tests/*.sql`(로컬 DB용, 롤백)이 있다. 그 밖은 `typecheck`·`lint`와 미리보기 배포 수동 확인이다.
+- **도움 안내 링크:** 휴게소의 기관 주소는 `src/constants/help.ts` 한 곳에 있다. 기관 페이지가 바뀌면 이 파일만 고친다.
+- **테스트는 일부만 있다.** `tests/*.test.mjs`(node, `npm test`)와 `supabase/tests/*.sql`(로컬 DB용, 롤백)이 있다. 그 밖은 `typecheck`·`lint`와 미리보기 배포 수동 확인이다.
 - **운영 DB를 함께 쓴다.** 로컬에서 만든 계정·사진도 운영 데이터다. 마이그레이션은 리뷰 후에만 `db push`한다.
 - `supabase/config.toml`이 없다. 함수 배포는 매번 `--project-ref jpipzrmspryzvjykxefm`을 붙인다.
 - 웹이 주력이다. `Alert.alert`처럼 웹에서 동작하지 않는 API를 필수 흐름에 쓰지 않는다.

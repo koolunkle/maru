@@ -12,9 +12,11 @@ import { Screen } from "@/components/screen";
 import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useTodayMissions } from "@/hooks/use-today-missions";
+import { useRewardProgress } from "@/hooks/use-reward-progress";
 import { useSession } from "@/providers/session-provider";
 import type { Tables } from "@/types/database";
 import { formatKstToday, kstDate } from "@/utils/date";
+import { nextReward } from "@/utils/next-reward";
 import { currentStreak } from "@/utils/streak";
 
 type Mission = Tables<"missions">;
@@ -29,6 +31,7 @@ export function Home() {
   const theme = useTheme();
   const { profile, refreshProfile } = useSession();
   const { data, error, reload, refresh, refreshing } = useTodayMissions();
+  const rewardData = useRewardProgress(profile?.id);
   const [notice, setNotice] = useState<string | null>(null);
 
   // 인증을 마치고 돌아오면 진행 상태·연속 출석을 다시 읽는다 (첫 진입은 훅이 이미 불러온다)
@@ -58,6 +61,14 @@ export function Home() {
   }
 
   const streak = profile ? currentStreak(profile, kstDate()) : 0;
+  const rewardFor = (mission: Mission, type: "daily" | "weekly") =>
+    rewardData && profile
+      ? nextReward(mission, type, rewardData.furniture, {
+          ...rewardData,
+          streak,
+          attendedToday: profile.last_attended === kstDate(),
+        })
+      : null;
   const anyStarted = data ? data.daily.some((m) => data.progress[m.id]) : false;
   const completedDailyCount = data
     ? Math.min(
@@ -79,7 +90,7 @@ export function Home() {
           onPress={() => router.push("/settings")}
           style={styles.iconButton}
         >
-          <Feather name="settings" size={24} color={theme.ink} />
+          <Feather aria-hidden name="settings" size={24} color={theme.ink} />
         </PressableScale>
       </View>
 
@@ -88,7 +99,7 @@ export function Home() {
         accessible
         accessibilityLabel={streak > 0 ? `연속 출석 ${streak}일째` : "연속 출석 없음. 오늘 미션 하나로 출석해 볼까요?"}
       >
-        <Feather name="zap" size={20} color={theme.accent} />
+        <Feather aria-hidden name="zap" size={20} color={theme.accent} />
         {streak > 0 ? (
           <AppText variant="titleMd" tabular>
             {streak}일째
@@ -129,6 +140,7 @@ export function Home() {
               key={m.id}
               mission={m}
               status={data.progress[m.id]?.status}
+              reward={rewardFor(m, "daily")}
               onPress={() => open(m, "daily")}
             />
           ))
@@ -141,6 +153,7 @@ export function Home() {
           <MissionCard
             mission={data.weekly}
             status={data.progress[data.weekly.id]?.status}
+            reward={rewardFor(data.weekly, "weekly")}
             onPress={() => data.weekly && open(data.weekly, "weekly")}
           />
         </View>
@@ -161,7 +174,6 @@ export function Home() {
           )}
         </View>
       )}
-
 
     </Screen>
   );
