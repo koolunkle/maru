@@ -143,7 +143,6 @@ Deno.serve(
         district: profile.district,
         daily_minutes: profile.daily_minutes,
         difficulty: profile.difficulty,
-        preferences: profile.preferences,
       },
       recent_missions: history.data ?? [],
       seoul_challenge: (seeds.data ?? []).map(({ seed_no, title, category, difficulty, minutes }: Record<string, unknown>) => ({
