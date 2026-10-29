@@ -43,7 +43,7 @@ flowchart LR
 | `src/providers/background-audio.tsx` | 빗소리 배경음(expo-audio). 탭을 옮겨도 유지 |
 | `src/screens/` | 화면 본문. 큰 화면은 폴더(`feed/`, `onboarding/`, `settings/`) |
 | `src/components/` | 공용 UI(`mission-card`, `ai-card`, `help-card`, `growth-card`, `mailbox-card`, `daily-note-card`, `capsule-card` 등). DESIGN.md §5.3 이름과 맞춘다 |
-| `src/hooks/` | `use-today-missions`(홈 추천·진행), `use-feed`(피드), `use-theme` |
+| `src/hooks/` | `use-today-missions`(홈 추천·진행), `use-reward-progress`(다음 보상), `use-feed`(피드), `use-theme` |
 | `src/providers/session-provider.tsx` | 익명 세션과 `profiles` 행 로드, 삭제된 계정 세션 정리 |
 | `src/lib/supabase.ts` | Supabase 클라이언트(환경 변수 읽는 유일한 곳) |
 | `src/lib/functions.ts` | Edge Function 호출 래퍼 `Functions.*`와 응답 타입. 새 함수는 여기에 추가 |
@@ -54,7 +54,7 @@ flowchart LR
 | `src/types/database.ts` | `supabase gen types`로 생성. 직접 수정 금지 |
 | `supabase/migrations/` | 스키마·RLS·트리거·RPC·cron. 적용된 파일은 고치지 않는다 |
 | `supabase/functions/` | Edge Functions(Deno). `_shared/`: `ai.ts`(AI 호출), `clients.ts`(서버 클라이언트·호출자 확인), `copy.ts`(금칙어), `fallback.ts`, `http.ts`, `kst.ts`, `weekly-letter.ts` |
-| `supabase/tests/`, `tests/` | SQL 시나리오 테스트(로컬 DB용), node 테스트(`npm run test:mailbox` 등) |
+| `supabase/tests/`, `tests/` | SQL 시나리오 테스트(로컬 DB용), node 테스트(전체 `npm test`, 하나만 `npm run test:mailbox` 등) |
 | `supabase/seed.sql` | 시드(365 서울챌린지 36개 + 가구 6종). `npm run seed:build`로 생성 |
 | `data/`, `scripts/build-seed.py` | 시드 원본 JSON과 변환 스크립트 |
 | `assets/fonts/` | Pretendard 3종 + 라이선스 |
@@ -100,7 +100,7 @@ DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nick
 
 - **문화행사는 매일 05:00 KST에 동기화된다.** `sync-events`가 서울 열린데이터광장에서 30일 안에 진행되는 행사를 `events`에 넣고, 추천 함수가 사용자 구의 7일 안 행사를 AI에 넘긴다. 키·Vault 설정은 [ENV.md](./ENV.md) B·E절.
 - **도움 안내 링크:** 휴게소의 기관 주소는 `src/constants/help.ts` 한 곳에 있다. 기관 페이지가 바뀌면 이 파일만 고친다.
-- **테스트는 일부만 있다.** `tests/*.test.mjs`(node)와 `supabase/tests/*.sql`(로컬 DB용, 롤백)이 있다. 그 밖은 `typecheck`·`lint`와 미리보기 배포 수동 확인이다.
+- **테스트는 일부만 있다.** `tests/*.test.mjs`(node, `npm test`)와 `supabase/tests/*.sql`(로컬 DB용, 롤백)이 있다. 그 밖은 `typecheck`·`lint`와 미리보기 배포 수동 확인이다.
 - **운영 DB를 함께 쓴다.** 로컬에서 만든 계정·사진도 운영 데이터다. 마이그레이션은 리뷰 후에만 `db push`한다.
 - `supabase/config.toml`이 없다. 함수 배포는 매번 `--project-ref jpipzrmspryzvjykxefm`을 붙인다.
 - 웹이 주력이다. `Alert.alert`처럼 웹에서 동작하지 않는 API를 필수 흐름에 쓰지 않는다.

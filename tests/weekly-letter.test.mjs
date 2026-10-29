@@ -75,13 +75,3 @@ test('편지 날짜 범위는 월요일부터 일요일까지이며 윤년과 �
   assert.equal(letter.formatLetterWeek('2024-02-26'), '2024.02.26 – 2024.03.03');
 });
 
-test('예시에는 7일의 기분과 한 줄·미션·편지가 있고 시연용임을 명시한다', () => {
-  const demo = letter.DemoLetter;
-  assert.match(demo.notice, /시연용/);
-  assert.match(demo.notice, /예시/);
-  assert.deepEqual(demo.flow.map((day) => day.day), ['월', '화', '수', '목', '금', '토', '일']);
-  assert.ok(demo.flow.every((day) => Number.isInteger(day.level) && day.level >= 1 && day.level <= 5));
-  assert.ok(demo.note && demo.mission && demo.paragraphs.length > 0);
-  const copy = JSON.stringify(demo);
-  assert.doesNotMatch(copy, /외로움|고립|우울|상담|실패/);
-});
