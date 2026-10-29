@@ -13,7 +13,7 @@ import type { FeedPost } from '@/hooks/use-feed';
 import { useTheme } from '@/hooks/use-theme';
 import { Functions } from '@/lib/functions';
 import { createMailboxRequestId } from '@/lib/mailbox';
-import { supabase } from '@/lib/supabase';
+import { setReaction } from '@/lib/feed';
 import type { Enums } from '@/types/database';
 
 type ReactionType = Enums<'reaction_type'>;
@@ -60,11 +60,9 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
     if (reactionWorking.current) return;
     reactionWorking.current = true;
     const on = post.myReactions.includes(type);
-    const { error } = on
-      ? await supabase.from('reactions').delete().eq('verification_id', post.id).eq('user_id', userId).eq('type', type)
-      : await supabase.from('reactions').upsert({ verification_id: post.id, type }, { onConflict: 'verification_id,user_id,type', ignoreDuplicates: true });
+    const saved = await setReaction(post.id, userId, type, !on).then(() => true, () => false);
     reactionWorking.current = false;
-    if (error) {
+    if (!saved) {
       setNotice('지금은 반응을 남기지 못했어요. 다시 눌러 볼까요?');
       return;
     }
@@ -83,15 +81,7 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
     if (commentRequest.current?.body !== body) commentRequest.current = { body, id: createMailboxRequestId() };
     setSending(true);
     setNotice(null);
-    const { data, error } = await supabase.functions.invoke<FeedPost['comments'][number]>('submit-comment', {
-      body: { verificationId: post.id, body, requestId: commentRequest.current.id },
-    });
-    if (error) {
-      commentWorking.current = false;
-      setSending(false);
-      setNotice('댓글을 남기지 못했어요. 다시 시도해 주세요.');
-      return;
-    }
+    const data = await Functions.submitComment(post.id, body, commentRequest.current.id).catch(() => null);
     if (!data) { commentWorking.current = false; setSending(false); setNotice('댓글을 남기지 못했어요. 다시 시도해 주세요.'); return; }
     commentRequest.current = null;
     setDraft('');
