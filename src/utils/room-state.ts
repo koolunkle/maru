@@ -60,7 +60,7 @@ export function withObject(word: string) {
 
 export type ThemeProgress = Progress & { weeklyCount: number };
 
-/** 벽지·바닥 잠금 해제 여부 (시안: 지금 미션 기록으로 계산) */
+/** 벽지·바닥 잠금 해제 여부 (지금 미션 기록으로 계산) */
 export function themeUnlocked(rule: ThemeRule, progress: ThemeProgress) {
   switch (rule.type) {
     case 'none':

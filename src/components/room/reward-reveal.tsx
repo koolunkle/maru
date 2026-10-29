@@ -18,7 +18,7 @@ type Props = {
   onClose: () => void;
 };
 
-/** 인증으로 가구를 받았을 때: 상자가 흔들리고 열리며 가구가 나온다 (시안) */
+/** 인증으로 가구를 받았을 때: 상자가 흔들리고 열리며 가구가 나온다 */
 export function RewardReveal({ rewards, streak, onPlace, onClose }: Props) {
   const theme = useTheme();
   const colors = useIsDark() ? RoomArt.dark : RoomArt.light;

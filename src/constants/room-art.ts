@@ -1,6 +1,6 @@
 /**
- * 내 방 일러스트 색 (시안). 앱 토큰(roomWall·roomFloor·primary·accent)을 바탕으로 같은 차분한 톤에서 고른다.
- * 팀이 채택하면 DESIGN.md 토큰으로 옮긴다.
+ * 내 방 일러스트 색 (DESIGN.md §5.4). 앱 토큰(roomWall·roomFloor·primary·accent)을 바탕으로 같은 차분한 톤에서 고른다.
+ * 그림 안에서만 쓰므로 앱 토큰(theme.ts)에 넣지 않는다.
  */
 export const RoomArt = {
   light: {

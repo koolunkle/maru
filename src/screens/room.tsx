@@ -44,7 +44,7 @@ function slotRect(slot: Slot, width: number, aspect: number) {
   return { left: a.x * unit - w / 2, top: a.align === 'bottom' ? a.y * unit - h : a.y * unit - h / 2, width: w, height: h };
 }
 
-/** S8 내 방 (PRD F7 / DESIGN.md §5.4) — 시안: 일러스트 방, 보기·꾸미기 분리, 도감, 내 기록이 남는 가구 */
+/** S8 내 방 (PRD F7 / DESIGN.md §5.4) — 일러스트 방, 보기·꾸미기 분리, 도감, 내 기록이 남는 가구 */
 export function Room() {
   const theme = useTheme();
   const isDark = useIsDark();
@@ -155,7 +155,7 @@ export function Room() {
 
 
   const streak = profile ? currentStreak(profile, kstDate()) : 0;
-  // 시안 확인용: /room?time=night 처럼 시간대를 바꿔 볼 수 있다
+  // 확인·시연용: /room?time=night 처럼 시간대를 바꿔 볼 수 있다
   const previewTime = params.time && params.time in Sky ? (params.time as DayPart) : null;
   const dayPart = previewTime ?? dayPartOf(now);
   const lampPlaced = owned.some((o) => o.furniture_id === 'lamp' && o.slot);
@@ -185,7 +185,7 @@ export function Room() {
     setNotice(null);
   }
 
-  /** 벽지·바닥 고르기 (시안: 이 기기에만 저장) */
+  /** 벽지·바닥 고르기 (이 기기에만 저장) */
   function chooseTheme(kind: 'wallpaper' | 'floor', id: string) {
     const next = { ...roomTheme, [kind]: id };
     setRoomTheme(next);
@@ -332,7 +332,7 @@ export function Room() {
               </View>
             </View>
           ))}
-          <AppText variant="caption" color="steel">시안이라 벽지·바닥은 이 기기에만 저장돼요.</AppText>
+          <AppText variant="caption" color="steel">벽지·바닥은 이 기기에만 저장돼요.</AppText>
         </View>
       )}
 

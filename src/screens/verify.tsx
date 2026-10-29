@@ -51,7 +51,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
   /** 판정이 늦어 다시 시도할 때 같은 인증을 재사용한다 */
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [result, setResult] = useState<JudgeResult | null>(null);
-  // 가구를 받으면 결과 화면 위에 상자 열기를 한 번 보여 준다 (내 방 시안)
+  // 가구를 받으면 결과 화면 위에 상자 열기를 한 번 보여 준다
   const [revealDone, setRevealDone] = useState(false);
   const relay = useRelayComposer(missionId, session?.user.id);
   const submitting = useRef(false);

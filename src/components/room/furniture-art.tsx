@@ -30,7 +30,7 @@ type Props = {
   locked?: boolean;
 };
 
-/** 내 방 가구 일러스트 (시안, 플랫). 모든 도형은 세로 64 좌표계에서 바닥(y=62)에 붙여 그린다 */
+/** 내 방 가구 일러스트 (플랫). 모든 도형은 세로 64 좌표계에서 바닥(y=62)에 붙여 그린다 */
 export function FurnitureArt({ id, height, colors, state, locked }: Props) {
   const aspect = ArtAspect[id] ?? 1;
   const width = 64 * aspect;

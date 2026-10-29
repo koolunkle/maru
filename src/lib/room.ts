@@ -13,7 +13,7 @@ export async function getRoom(userId: string) {
 }
 
 /**
- * 내 방 시안: 도감 남은 조건·벽지 잠금(카테고리별·주간 완료 수)과 포스터에 적을 마지막 행사 이름.
+ * 내 방: 도감 남은 조건·벽지 잠금(카테고리별·주간 완료 수)과 포스터에 적을 마지막 행사 이름.
  * 방 표시에 꼭 필요하지 않아 실패하면 빈 값으로 둔다
  */
 export async function getRoomProgress(userId: string) {

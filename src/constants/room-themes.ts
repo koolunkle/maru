@@ -1,8 +1,8 @@
 import type { Enums } from '@/types/database';
 
 /**
- * 벽지·바닥 (시안). DB 없이 지금 미션 기록으로 잠금을 풀고, 고른 값은 이 기기에만 저장한다.
- * 채택하면 furniture처럼 서버 규칙·보유 표로 옮긴다.
+ * 벽지·바닥 (PRD F7). DB 없이 지금 미션 기록으로 잠금을 풀고, 고른 값은 이 기기에만 저장한다.
+ * 기기 사이에 맞추려면 furniture처럼 서버 규칙·보유 표로 옮긴다(이후 과제).
  */
 export type ThemeRule =
   | { type: 'none' }

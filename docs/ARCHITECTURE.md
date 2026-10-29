@@ -49,7 +49,10 @@ flowchart LR
 | `src/lib/functions.ts` | Edge Function 호출 래퍼 `Functions.*`와 응답 타입. 새 함수는 여기에 추가 |
 | `src/lib/mailbox.ts`, `daily-note.ts`, `capsule.ts`, `missions.ts`, `relay.ts`, `verification.ts`, `feed.ts`, `room.ts` | 화면별 테이블·Storage 호출. 화면은 `supabase`를 직접 부르지 않고 이 파일과 `Functions.*`를 쓴다 |
 | `src/constants/theme.ts` | 디자인 토큰(DESIGN.md와 같은 값) |
-| `src/constants/domain.ts`, `room.ts` | 카테고리·구 목록, 방 슬롯 좌표·가구 아이콘 |
+| `src/constants/domain.ts`, `room.ts` | 카테고리·구 목록, 방 자리 이름·종류, 가구 획득 조건 문구 |
+| `src/constants/room-art.ts`, `room-themes.ts` | 내 방 일러스트 색·시간대 하늘, 벽지·바닥 목록과 잠금 규칙 |
+| `src/components/room/` | 내 방 그림(방 배경·가구 일러스트·벽지 무늬), 가구 도감, 가구 받는 순간 |
+| `src/utils/room-state.ts` | 시간대·벽시계·화분 단계·도감 남은 조건 계산 |
 | `src/utils/` | KST 날짜(`date.ts`), 시드 미션 고르기, 사진 리사이즈 |
 | `src/types/database.ts` | `supabase gen types`로 생성. 직접 수정 금지 |
 | `supabase/migrations/` | 스키마·RLS·트리거·RPC·cron. 적용된 파일은 고치지 않는다 |
