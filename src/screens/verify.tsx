@@ -14,6 +14,7 @@ import { BackHeader } from '@/components/back-header';
 import { Button } from '@/components/button';
 import { HelpCard } from '@/components/help-card';
 import { PressableScale } from '@/components/pressable-scale';
+import { RewardReveal } from '@/components/room/reward-reveal';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -64,6 +65,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
   /** 판정이 늦어 다시 시도할 때 같은 인증을 재사용한다 */
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [result, setResult] = useState<JudgeResult | null>(null);
+  // 가구를 받으면 결과 화면 위에 상자 열기를 한 번 보여 준다 (내 방 시안)
+  const [revealDone, setRevealDone] = useState(false);
   const [relayBody, setRelayBody] = useState('');
   const [relay, setRelay] = useState<Relay | null>(null);
   const [relayBusy, setRelayBusy] = useState(false);
@@ -225,6 +228,18 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           </View>
         }>
         <BackHeader />
+        {!revealDone && result.rewards.length > 0 && (
+          <RewardReveal
+            rewards={result.rewards}
+            streak={result.streak}
+            onClose={() => setRevealDone(true)}
+            onPlace={(id) => {
+              setRevealDone(true);
+              router.dismissTo('/');
+              router.navigate({ pathname: '/room', params: { place: id } });
+            }}
+          />
+        )}
         <View style={styles.result}>
           <Animated.View entering={ZoomIn.springify().damping(15).stiffness(200)}>
             <Feather aria-hidden name="check-circle" size={32} color={theme.success} />
