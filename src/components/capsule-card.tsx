@@ -38,6 +38,6 @@ export function CapsuleCard() {
   );
 }
 const styles = StyleSheet.create({
-  card: { marginTop: Spacing.xl, padding: Spacing.md, borderRadius: Radius.lg, borderWidth: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  card: { marginTop: Spacing.sm, padding: Spacing.md, borderRadius: Radius.lg, borderWidth: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   text: { flex: 1 },
 });

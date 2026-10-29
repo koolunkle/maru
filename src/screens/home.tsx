@@ -5,19 +5,14 @@ import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 import { AppText } from "@/components/app-text";
 import { Button } from "@/components/button";
-import { CapsuleCard } from "@/components/capsule-card";
-import { DailyNoteCard } from "@/components/daily-note-card";
-import { HomeSheet } from "@/components/home-sheet";
 import { GrowthCard } from "@/components/growth-card";
-import { MailboxCard } from "@/components/mailbox-card";
 import { MissionCard } from "@/components/mission-card";
 import { PressableScale } from "@/components/pressable-scale";
 import { Screen } from "@/components/screen";
-import { Radius, Spacing } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 import { useTheme } from "@/hooks/use-theme";
 import { useTodayMissions } from "@/hooks/use-today-missions";
 import { useRewardProgress } from "@/hooks/use-reward-progress";
-import { getDailyNote, MoodLabels } from "@/lib/daily-note";
 import { useSession } from "@/providers/session-provider";
 import type { Tables } from "@/types/database";
 import { formatKstToday, kstDate } from "@/utils/date";
@@ -37,20 +32,7 @@ export function Home() {
   const { profile, refreshProfile } = useSession();
   const { data, error, reload, refresh, refreshing } = useTodayMissions();
   const rewardData = useRewardProgress(profile?.id);
-  const [noteOpen, setNoteOpen] = useState(false);
-  const [todayMood, setTodayMood] = useState<number | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-
-  // 한 줄 기록 카드에 오늘 기록 여부를 보인다. 실패하면 기본 문구를 둔다
-  const userId = profile?.id;
-  const loadTodayNote = useCallback(() => {
-    if (!userId) return;
-    getDailyNote(userId, kstDate()).then(
-      (note) => setTodayMood(note?.mood ?? null),
-      () => {},
-    );
-  }, [userId]);
-  useFocusEffect(loadTodayNote);
 
   // 인증을 마치고 돌아오면 진행 상태·연속 출석을 다시 읽는다 (첫 진입은 훅이 이미 불러온다)
   const firstFocus = useRef(true);
@@ -193,31 +175,6 @@ export function Home() {
         </View>
       )}
 
-      {profile && <MailboxCard key={profile.id} userId={profile.id} />}
-      {profile && (
-        <PressableScale
-          accessibilityRole="button"
-          accessibilityLabel="한 줄 기록 작성하기"
-          onPress={() => setNoteOpen(true)}
-          style={[
-            styles.noteMenu,
-            { backgroundColor: theme.surface, borderColor: theme.hairline },
-          ]}
-        >
-          <Feather aria-hidden name="edit-3" size={20} color={theme.accent} />
-          <View style={styles.noteText}>
-            <AppText variant="titleMd">한 줄 기록</AppText>
-            <AppText variant="caption" color="steel">
-              {todayMood
-                ? `오늘 기록했어요 · ${MoodLabels[todayMood - 1]}`
-                : "오늘의 기분과 한 줄을 남겨요"}
-            </AppText>
-          </View>
-          <Feather aria-hidden name="chevron-right" size={20} color={theme.steel} />
-        </PressableScale>
-      )}
-      {profile && noteOpen && <HomeSheet title="한 줄 기록" onClose={() => { setNoteOpen(false); loadTodayNote(); }}><DailyNoteCard userId={profile.id} /></HomeSheet>}
-      {profile && <CapsuleCard key={`capsule:${profile.id}`} />}
     </Screen>
   );
 }
@@ -244,16 +201,6 @@ const styles = StyleSheet.create({
   growth: {
     marginTop: Spacing.sm,
   },
-  noteMenu: {
-    marginTop: Spacing.xl,
-    padding: Spacing.md,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  noteText: { flex: 1 },
   section: {
     marginTop: Spacing.xxl,
     gap: Spacing.sm,
