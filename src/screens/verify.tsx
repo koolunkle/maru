@@ -2,6 +2,7 @@ import { Feather } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { Platform, StyleSheet, TextInput, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
@@ -13,6 +14,7 @@ import { BackHeader } from '@/components/back-header';
 import { Button } from '@/components/button';
 import { PressableScale } from '@/components/pressable-scale';
 import { RelayActions, RelayComposer, useRelayComposer } from '@/components/relay-composer';
+import { RewardReveal } from '@/components/room/reward-reveal';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -49,6 +51,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
   /** 판정이 늦어 다시 시도할 때 같은 인증을 재사용한다 */
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [result, setResult] = useState<JudgeResult | null>(null);
+  // 가구를 받으면 결과 화면 위에 상자 열기를 한 번 보여 준다
+  const [revealDone, setRevealDone] = useState(false);
   const relay = useRelayComposer(missionId, session?.user.id);
   const submitting = useRef(false);
   const uploadRequest = useRef<{ path: string; note: string; isPublic: boolean } | null>(null);
@@ -134,6 +138,18 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           </View>
         }>
         <BackHeader />
+        {!revealDone && result.rewards.length > 0 && (
+          <RewardReveal
+            rewards={result.rewards}
+            streak={result.streak}
+            onClose={() => setRevealDone(true)}
+            onPlace={(id) => {
+              setRevealDone(true);
+              router.dismissTo('/');
+              router.navigate({ pathname: '/room', params: { place: id } });
+            }}
+          />
+        )}
         <View style={styles.result}>
           <Animated.View entering={ZoomIn.springify().damping(15).stiffness(200)}>
             <Feather aria-hidden name="check-circle" size={32} color={theme.success} />
