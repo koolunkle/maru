@@ -11,17 +11,9 @@ import { Screen } from '@/components/screen';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { MoodLabels } from '@/lib/daily-note';
-import { supabase } from '@/lib/supabase';
+import { Functions, type WeeklyLetter } from '@/lib/functions';
 import { letterWeeks, formatLetterWeek } from '@/utils/weekly-letter';
 import { formatDayWithWeekday, kstWeekStart } from '@/utils/date';
-
-type Report = {
-  body: string;
-  source: 'ai' | 'rule';
-  notes: { note_date: string; mood: number; text: string }[];
-  missions: { completed_at: string; missions: { title: string } | null }[];
-};
-
 
 export function Letter({ week }: { week: string }) {
   const theme = useTheme();
@@ -31,7 +23,7 @@ export function Letter({ week }: { week: string }) {
     Number.isFinite(Date.parse(`${week}T00:00:00Z`)) &&
     new Date(`${week}T00:00:00Z`).toISOString().slice(0, 10) === week &&
     kstWeekStart(week) === week && week <= current;
-  const [report, setReport] = useState<Report | null>(null);
+  const [report, setReport] = useState<WeeklyLetter | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [storedWeeks, setStoredWeeks] = useState<string[]>([]);
@@ -39,12 +31,11 @@ export function Letter({ week }: { week: string }) {
 
   useEffect(() => {
     let active = true;
-    supabase.functions.invoke<string[]>('write-weekly-letter', { body: { action: 'list' } })
-      .then(({ data, error: listError }) => {
-        if (!active) return;
-        if (listError || !data) setHistoryError(true);
-        else setStoredWeeks(data);
-      }).catch(() => { if (active) setHistoryError(true); });
+    Functions.listLetterWeeks().then((data) => {
+      if (!active) return;
+      if (!data) setHistoryError(true);
+      else setStoredWeeks(data);
+    }, () => { if (active) setHistoryError(true); });
     return () => { active = false; };
   }, []);
 
@@ -52,8 +43,8 @@ export function Letter({ week }: { week: string }) {
     setLoading(true);
     setError(false);
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke<Report>('write-weekly-letter', { body: { week } });
-      if (invokeError || !data) throw invokeError ?? new Error('empty response');
+      const data = await Functions.writeWeeklyLetter(week);
+      if (!data) throw new Error('empty response');
       setReport(data);
     } catch {
       setError(true);

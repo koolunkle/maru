@@ -1,7 +1,7 @@
 import { FunctionsHttpError } from '@supabase/supabase-js';
 
 import { supabase } from '@/lib/supabase';
-import type { Tables } from '@/types/database';
+import type { Enums, Tables } from '@/types/database';
 
 type Mission = Tables<'missions'>;
 type Furniture = Tables<'furniture'>;
@@ -39,6 +39,13 @@ export type JudgeResult = {
   rewards: Furniture[];
   judged_by: JudgedBy;
 };
+/** F13 주간 편지와 그 주의 기록 */
+export type WeeklyLetter = {
+  body: string;
+  source: 'ai' | 'rule';
+  notes: { note_date: string; mood: number; text: string }[];
+  missions: { completed_at: string; missions: { title: string } | null }[];
+};
 type ModerationResult = {
   status: 'approved' | 'rejected' | 'crisis' | 'pending' | 'published';
   judged_by: JudgedBy | null;
@@ -55,4 +62,16 @@ export const Functions = {
       comment_id: commentId,
     }),
   moderateRelay: (relayId: string) => invoke<ModerationResult>('moderate-comment', { relay_id: relayId }),
+  /** F3 미션 시작 (한도 초과 시 code 'mission_limit') */
+  startMission: (missionId: string, type: Enums<'mission_type'>, dueAt: string) =>
+    invoke<{ id: string } | null>('start-mission', { missionId, type, dueAt }),
+  /** F7 가구 놓기·비우기 */
+  placeFurniture: (slot: Enums<'room_slot'>, furnitureId: string | null) => invoke<{ ok: boolean }>('place-furniture', { slot, furnitureId }),
+  /** F6 댓글 남기기 (요청 ID로 중복 방지) */
+  submitComment: (verificationId: string, body: string, requestId: string) =>
+    invoke<Tables<'comments'> | null>('submit-comment', { verificationId, body, requestId }),
+  /** F13 편지가 저장된 주차 목록 */
+  listLetterWeeks: () => invoke<string[] | null>('write-weekly-letter', { action: 'list' }),
+  /** F13 주간 편지 만들기·불러오기 */
+  writeWeeklyLetter: (week: string) => invoke<WeeklyLetter | null>('write-weekly-letter', { week }),
 };

@@ -12,7 +12,8 @@ import { Screen } from '@/components/screen';
 import { FurnitureIcon, SlotName, SlotPosition, SlotTypeOf, unlockText } from '@/constants/room';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { supabase } from '@/lib/supabase';
+import { Functions } from '@/lib/functions';
+import { getRoom } from '@/lib/room';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
 
@@ -37,17 +38,12 @@ export function Room() {
 
   const load = useCallback(() => {
     let active = true;
-    Promise.all([
-      supabase.from('furniture').select('*').order('sort'),
-      supabase.from('user_furniture').select('*').eq('user_id', userId),
-    ]).then(([f, o]) => {
+    getRoom(userId).then((room) => {
       if (!active) return;
-      // 실패하면 보이던 방을 지우지 않는다
-      if (f.error || o.error) { setLoadFailed(true); return; }
       setLoadFailed(false);
-      setFurniture(f.data);
-      setOwned(o.data);
-    }, () => active && setLoadFailed(true));
+      setFurniture(room.furniture);
+      setOwned(room.owned);
+    }, () => active && setLoadFailed(true)); // 실패하면 보이던 방을 지우지 않는다
     return () => {
       active = false;
     };
@@ -58,9 +54,9 @@ export function Room() {
   async function place(slot: Slot, furnitureId: string | null) {
     setBusy(true);
     setError(false);
-    const { error: placementError } = await supabase.functions.invoke('place-furniture', { body: { slot, furnitureId } });
+    const placed = await Functions.placeFurniture(slot, furnitureId).then(() => true, () => false);
     setBusy(false);
-    if (placementError) { setError(true); return; }
+    if (!placed) { setError(true); return; }
     setEditing(null);
     load();
   }

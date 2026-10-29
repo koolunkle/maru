@@ -1,5 +1,4 @@
 import { router, useFocusEffect } from 'expo-router';
-import { FunctionsHttpError } from '@supabase/supabase-js';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Linking, StyleSheet, View } from 'react-native';
 
@@ -12,65 +11,13 @@ import { Screen } from '@/components/screen';
 import { CategoryLabel } from '@/constants/domain';
 import { CategoryTint, Radius, Spacing } from '@/constants/theme';
 import { useIsDark, useTheme } from '@/hooks/use-theme';
-import { Functions } from '@/lib/functions';
-import { supabase } from '@/lib/supabase';
+import { FunctionError, Functions } from '@/lib/functions';
+import { getMissionDetail, setParticipation, type MissionDetail as Detail } from '@/lib/missions';
 import { useSession } from '@/providers/session-provider';
-import type { Enums, Tables } from '@/types/database';
+import type { Enums } from '@/types/database';
 import { endingNotice, formatDateRange, kstEndOfDay, kstEndOfWeek } from '@/utils/date';
 
 type MissionType = Enums<'mission_type'>;
-
-type MissionEvent = Pick<Tables<'events'>, 'title' | 'place' | 'start_date' | 'end_date' | 'url'>;
-
-type Detail = {
-  mission: Tables<'missions'> & { event: MissionEvent | null };
-  mine: Tables<'user_missions'> | null;
-  joined: boolean;
-  participants: number;
-  nicknames: string[];
-  relays: string[] | null;
-  ownRelay: Pick<Tables<'relay_messages'>, 'id' | 'status'> | null;
-};
-
-async function fetchDetail(missionId: string, userId: string): Promise<Detail> {
-  const [mission, mine, joined, counts, recent, relays, ownRelay] = await Promise.all([
-    supabase.from('missions').select('*, event:events(title, place, start_date, end_date, url)').eq('id', missionId).single(),
-    supabase
-      .from('user_missions')
-      .select('*')
-      .eq('mission_id', missionId)
-      .eq('user_id', userId)
-      .neq('status', 'expired')
-      .order('started_at', { ascending: false })
-      .limit(1)
-      .maybeSingle(),
-    supabase
-      .from('mission_participants')
-      .select('mission_id')
-      .eq('mission_id', missionId)
-      .eq('user_id', userId)
-      .maybeSingle(),
-    supabase.rpc('get_participant_counts', { mission_ids: [missionId] }),
-    supabase.rpc('get_participant_nicknames', { mission: missionId }),
-    supabase.rpc('get_relay_messages', { mission: missionId }),
-    supabase
-      .from('relay_messages')
-      .select('id, status')
-      .eq('mission_id', missionId)
-      .eq('user_id', userId)
-      .maybeSingle(),
-  ]);
-  if (mission.error) throw mission.error;
-  return {
-    mission: mission.data,
-    mine: mine.data,
-    joined: Boolean(joined.data),
-    participants: counts.data?.[0]?.count ?? 0,
-    nicknames: (recent.data ?? []).map((r) => r.nickname),
-    relays: relays.error ? null : (relays.data ?? []).map((r) => r.body),
-    ownRelay: ownRelay.data,
-  };
-}
 
 /** S4 미션 상세 (PRD F3, F9 / DESIGN.md §5.2) */
 export function MissionDetail({ missionId, type }: { missionId: string; type: MissionType }) {
@@ -88,7 +35,7 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
 
   const load = useCallback(() => {
     let active = true;
-    fetchDetail(missionId, userId).then(
+    getMissionDetail(missionId, userId).then(
       (d) => active && setDetail(d),
       () => active && setFailed(true),
     );
@@ -103,31 +50,31 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
   async function start() {
     setBusy(true);
     setNotice(null);
-    const { data, error } = await supabase.functions.invoke('start-mission', { body: {
-      missionId, type, dueAt: (type === 'daily' ? kstEndOfDay() : kstEndOfWeek()).toISOString(),
-    } });
-    setBusy(false);
-    if (error) {
-      const payload = error instanceof FunctionsHttpError ? await error.context.json().catch(() => null) : null;
-      setNotice(payload?.error === 'mission_limit'
+    try {
+      const data = await Functions.startMission(missionId, type, (type === 'daily' ? kstEndOfDay() : kstEndOfWeek()).toISOString());
+      if (!data?.id) { setNotice('시작하지 못했어요. 다시 시도해 주세요.'); return; }
+      load();
+    } catch (e) {
+      setNotice(e instanceof FunctionError && e.code === 'mission_limit'
         ? (type === 'daily' ? '오늘 미션은 3개까지 함께 할 수 있어요' : '이번 주 미션은 하나씩 해요')
         : '시작하지 못했어요. 다시 시도해 주세요.');
-      return;
+    } finally {
+      setBusy(false);
     }
-    if (!data?.id) { setNotice('시작하지 못했어요. 다시 시도해 주세요.'); return; }
-    load();
   }
 
   async function toggleJoin() {
     if (!detail) return;
     setBusy(true);
     setNotice(null);
-    const { error } = detail.joined
-      ? await supabase.from('mission_participants').delete().eq('mission_id', missionId).eq('user_id', userId)
-      : await supabase.from('mission_participants').upsert({ mission_id: missionId }, { onConflict: 'mission_id,user_id', ignoreDuplicates: true });
-    setBusy(false);
-    if (error) setNotice('지금은 바꾸지 못했어요. 다시 눌러 볼까요?');
-    else load();
+    try {
+      await setParticipation(missionId, userId, !detail.joined);
+      load();
+    } catch {
+      setNotice('지금은 바꾸지 못했어요. 다시 눌러 볼까요?');
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function retryRelay() {

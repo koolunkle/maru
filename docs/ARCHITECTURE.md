@@ -47,7 +47,7 @@ flowchart LR
 | `src/providers/session-provider.tsx` | 익명 세션과 `profiles` 행 로드, 삭제된 계정 세션 정리 |
 | `src/lib/supabase.ts` | Supabase 클라이언트(환경 변수 읽는 유일한 곳) |
 | `src/lib/functions.ts` | Edge Function 호출 래퍼 `Functions.*`와 응답 타입. 새 함수는 여기에 추가 |
-| `src/lib/mailbox.ts`, `daily-note.ts`, `capsule.ts` | 우체통·한 줄 기록·타임캡슐 서버 호출 |
+| `src/lib/mailbox.ts`, `daily-note.ts`, `capsule.ts`, `missions.ts`, `relay.ts`, `verification.ts`, `feed.ts`, `room.ts` | 화면별 테이블·Storage 호출. 화면은 `supabase`를 직접 부르지 않고 이 파일과 `Functions.*`를 쓴다 |
 | `src/constants/theme.ts` | 디자인 토큰(DESIGN.md와 같은 값) |
 | `src/constants/domain.ts`, `room.ts` | 카테고리·구 목록, 방 슬롯 좌표·가구 아이콘 |
 | `src/utils/` | KST 날짜(`date.ts`), 시드 미션 고르기, 사진 리사이즈 |
