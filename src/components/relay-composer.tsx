@@ -23,7 +23,7 @@ function relayStatus(relay: Relay) {
     : `약 ${minutes}분 뒤 다음 사람에게 보여요.`;
 }
 
-export type RelayComposerState = ReturnType<typeof useRelayComposer>;
+type RelayComposerState = ReturnType<typeof useRelayComposer>;
 
 /** F10 인증을 마친 뒤 "다음 사람에게 한 줄": 남기기·검수·검수 다시 요청 */
 export function useRelayComposer(missionId: string, userId: string | undefined) {

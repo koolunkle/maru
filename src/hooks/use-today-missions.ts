@@ -12,7 +12,7 @@ type Mission = Tables<'missions'>;
 type Profile = Tables<'profiles'>;
 type UserMission = Tables<'user_missions'>;
 
-export type TodayMissions = {
+type TodayMissions = {
   daily: Mission[];
   weekly: Mission | null;
   /** 'ai' = AI 추천, 'rule' = 시드 규칙 기반 (서버 대체 또는 함수 호출 실패 시 앱 대체) */
