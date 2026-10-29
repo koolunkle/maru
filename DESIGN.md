@@ -362,7 +362,7 @@ components:
 | S5 인증 | 사진 영역 1:1, `rounded.lg`, 비어 있으면 `surface-sunken` + `camera` 아이콘 + "사진 추가" → 16px → `text-input` 소감(3줄, 우하단 "0/100" `caption`) → 공개 토글 행 / 하단 고정: "제출하기". 판정 중: 전체 오버레이 대신 버튼을 로딩 상태로. 결과: `ai-card`에 결과 문구 + 보상 시 `reward-badge` |
 | S6 피드 | 게시물 `card-base`: 닉네임 `label` + 시각 `caption` → 사진 1:1 → 소감 `body-md` → 빠른 반응 칩 3개 → 댓글 목록(`body-sm`, 들여쓰기 없음) → 댓글 입력 1줄 / 목록 끝: 20개를 넘으면 `button-ghost` "이전 인증 더 보기" |
 | S7 기록 | 이번 주 달성률 `display` 숫자 + 막대(높이 8px, `primary`, 배경 `surface-sunken`) → 32px → 월간 캘린더(7열, 출석일 원 28px `accent-soft` 채움 + 숫자 `accent-ink`) → 32px → 이번 주 편지(F13, 아래 표) |
-| S8 내 방 | 방 영역(5.4) → 16px → "가진 가구" `title-md` → 가구 그리드 4열(칸 72px, `card-base`, 가구 아이콘 32px + 이름 `caption`) |
+| S8 내 방 | 제목 `title-lg` + "꾸미기" 버튼 → 방 영역(5.4) → 한 줄 상태 `body-sm` `slate`(창밖 시간대·화분 단계, 꾸미기 중에는 안내) → (꾸미기) 벽지·바닥 고르기 → 가구 도감 |
 | S9 설정 | `list-row` 목록. 닉네임 → 관심 카테고리 → 생활권 → 하루 가능 시간(오른쪽 `chevron-right`) → 하단 출처 `caption`. 도움 안내는 S10으로 옮긴다 |
 
 F10~F16 화면·요소
@@ -394,35 +394,32 @@ F10~F16 화면·요소
 | `comment-pending` | `clock` 아이콘 14px + "약 {N}시간 뒤 공개돼요" |
 | 판정 `retry` | `ai-card` 동일 형태, 아이콘 `rotate-ccw` `slate`. 빨간색 없음 |
 | 판정 `pass` | `check-circle` 32px `success` + 응원 문구 |
-| `growth-card` 단계 아이콘 (F11) | MaterialCommunityIcons 48px `success`. 0개 `pot-outline`(`muted`) → 1개 `sprout-outline` → 2개 `sprout` → 3개 `flower-tulip`(`accent`). 가구와 같은 아이콘 세트를 쓰되 내 방 슬롯에는 놓지 않는다 |
+| `growth-card` 단계 아이콘 (F11) | MaterialCommunityIcons 48px `success`. 0개 `pot-outline`(`muted`) → 1개 `sprout-outline` → 2개 `sprout` → 3개 `flower-tulip`(`accent`). 내 방 가구는 아이콘이 아닌 일러스트(5.4)다 |
 | 기분 칩 (F15) | Feather 18px + 이름: 마음이 가벼워요 `sun`, 조금 가벼워요 `sunrise`, 보통이에요 `cloud`, 조금 무거워요 `cloud-drizzle`, 마음이 무거워요 `cloud-rain`. 선택 시 `chip-category-selected`. 표정 아이콘·이모지는 쓰지 않는다 |
 | `relay-item` | 본문만 `body-sm`. 작성자·시각을 표시하지 않는다 |
 
 ### 5.4 내 방
 
-- 방 영역: 폭 = 컬럼 폭 − 40px, 높이 = 폭 × 0.85, `rounded.lg`, 벽(상단 60%) `room-wall`, 바닥(하단 40%) `room-floor`.
-- 슬롯 중심 좌표(방 영역 기준 %, 64×64 박스를 중심 정렬):
+- 방 영역: 폭 = 컬럼 폭 − 40px, 높이 = 폭 × 0.85, `rounded.lg`. 방 좌표계는 가로 100 × 세로 85(1단위 = 방 폭의 1%).
+- 그림: `react-native-svg` 플랫 일러스트. 벽지(벽지 무늬)·걸레받이·원근 바닥·러그·창문(시간대별 하늘 그라데이션)·책상. 가구 아래에 옅은 그림자.
+- 일러스트 색: `src/constants/room-art.ts`(라이트·다크 두 벌). `room-wall`·`room-floor`·`primary`·`accent`와 같은 차분한 톤에서 고른 그림 전용 색이라 앱 토큰에는 넣지 않는다. 기본 벽·바닥 색은 `room-wall`·`room-floor`와 같다.
+- 시간대: 저녁·밤에는 방 위에 어두운 층을 덮고, 스탠드가 있으면 그 위에서 `glow` 빛이 둥글게 퍼진다.
+- 가구 자리(방 단위, 기준점에 가구 그림을 맞춘다. 바닥·책상·창가는 아래 가운데, 벽은 가운데):
 
-| 슬롯 | x | y |
-| --- | --- | --- |
-| `wall-1` | 20% | 22% |
-| `window` | 50% | 20% |
-| `wall-2` | 80% | 22% |
-| `desk` | 78% | 55% |
-| `floor-1` | 28% | 80% |
-| `floor-2` | 66% | 82% |
+| 자리 | x | y | 높이 | 기준 |
+| --- | --- | --- | --- | --- |
+| `window` | 50 | 29.5 | 17 | 아래 |
+| `desk` | 85 | 52 | 15 | 아래 |
+| `wall-1` | 17 | 23 | 19 | 가운데 |
+| `wall-2` | 83 | 21 | 17 | 가운데 |
+| `floor-1` | 25 | 78 | 20 | 아래 |
+| `floor-2` | 61 | 81 | 19 | 아래 |
 
-- 빈 슬롯: 점선 `room-slot` + `plus` 아이콘 16px `muted`. 배치된 슬롯: 테두리 없이 가구 아이콘 40px.
-- 가구 표현: `@expo/vector-icons`의 MaterialCommunityIcons. UI 아이콘(Feather)과 구분해 가구에만 쓴다.
-
-| 가구 id | 아이콘 이름 | 색 |
-| --- | --- | --- |
-| `plant` | `sprout` | `success` |
-| `lamp` | `lamp` | `accent` |
-| `sofa` | `sofa` | `primary` |
-| `shoe_rack` | `shoe-sneaker` | `slate` |
-| `clock` | `clock-outline` | `ink` |
-| `poster` | `image-frame` | `accent-ink` |
+- 가구 6종은 일러스트로 그린다(`src/components/room/furniture-art.tsx`). 상태가 그림에 드러난다: 화분 단계(새싹·잎·꽃), 스탠드 불빛, 벽시계 바늘(KST), 포스터 행사 이름. 잠긴 가구는 `silhouette` 단색 실루엣.
+- 보기 모드: 자리 표시 없음. 방 전체를 하나의 그림으로 읽는다(시간대 + 놓인 가구 목록).
+- 꾸미기 모드: 자리마다 테두리 박스. 빈 자리는 반투명 흰 바탕 + `plus` 16px `slate`. 옮길 때 갈 수 있는 자리는 `accent` 테두리.
+- 놓을 때 가구는 살짝 튀어 오르며 커진다(spring). 가구를 받는 순간(S5)은 상자가 흔들리고 열리며 가구가 나온다.
+- 벽지·바닥 선택: 칸마다 견본 44px + 이름 `caption`. 고른 칸은 `primary` 테두리 + `primary-soft` 바탕, 잠긴 칸은 흐린 견본 + `lock` 아이콘 + 남은 조건 `label` `accent-ink`.
 
 ## 6. 인터랙션
 
