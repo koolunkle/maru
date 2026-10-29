@@ -1,29 +1,29 @@
-import { Feather } from "@expo/vector-icons";
-import { router, useFocusEffect } from "expo-router";
-import { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
+import { Feather } from '@expo/vector-icons';
+import { router, useFocusEffect } from 'expo-router';
+import { useCallback, useRef, useState } from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 
-import { AppText } from "@/components/app-text";
-import { Button } from "@/components/button";
-import { GrowthCard } from "@/components/growth-card";
-import { MissionCard } from "@/components/mission-card";
-import { PressableScale } from "@/components/pressable-scale";
-import { Screen } from "@/components/screen";
-import { Spacing } from "@/constants/theme";
-import { useTheme } from "@/hooks/use-theme";
-import { useTodayMissions } from "@/hooks/use-today-missions";
-import { useRewardProgress } from "@/hooks/use-reward-progress";
-import { useSession } from "@/providers/session-provider";
-import type { Tables } from "@/types/database";
-import { formatKstToday, kstDate } from "@/utils/date";
-import { nextReward } from "@/utils/next-reward";
-import { currentStreak } from "@/utils/streak";
+import { AppText } from '@/components/app-text';
+import { Button } from '@/components/button';
+import { GrowthCard } from '@/components/growth-card';
+import { MissionCard } from '@/components/mission-card';
+import { PressableScale } from '@/components/pressable-scale';
+import { Screen } from '@/components/screen';
+import { Spacing } from '@/constants/theme';
+import { useTheme } from '@/hooks/use-theme';
+import { useTodayMissions } from '@/hooks/use-today-missions';
+import { useRewardProgress } from '@/hooks/use-reward-progress';
+import { useSession } from '@/providers/session-provider';
+import type { Tables } from '@/types/database';
+import { formatKstToday, kstDate } from '@/utils/date';
+import { nextReward } from '@/utils/next-reward';
+import { currentStreak } from '@/utils/streak';
 
-type Mission = Tables<"missions">;
+type Mission = Tables<'missions'>;
 
 const RefreshNotice = {
-  limit: "다른 미션은 하루에 한 번만 볼 수 있어요",
-  failed: "지금은 새 미션을 가져오지 못했어요",
+  limit: '다른 미션은 하루에 한 번만 볼 수 있어요',
+  failed: '지금은 새 미션을 가져오지 못했어요',
 } as const;
 
 /** S3 홈 (DESIGN.md §5.2) */
@@ -47,9 +47,9 @@ export function Home() {
     }, [reload, refreshProfile]),
   );
 
-  function open(mission: Mission, type: "daily" | "weekly") {
+  function open(mission: Mission, type: 'daily' | 'weekly') {
     router.push({
-      pathname: "/mission/[id]",
+      pathname: '/mission/[id]',
       params: { id: mission.id, type },
     });
   }
@@ -57,11 +57,11 @@ export function Home() {
   async function showOthers() {
     setNotice(null);
     const result = await refresh();
-    if (result !== "ok") setNotice(RefreshNotice[result]);
+    if (result !== 'ok') setNotice(RefreshNotice[result]);
   }
 
   const streak = profile ? currentStreak(profile, kstDate()) : 0;
-  const rewardFor = (mission: Mission, type: "daily" | "weekly") =>
+  const rewardFor = (mission: Mission, type: 'daily' | 'weekly') =>
     rewardData && profile
       ? nextReward(mission, type, rewardData.furniture, {
           ...rewardData,
@@ -74,20 +74,20 @@ export function Home() {
     ? Math.min(
         Object.values(data.progress).filter(
           (mission) =>
-            mission.type === "daily" && mission.status === "completed",
+            mission.type === 'daily' && mission.status === 'completed',
         ).length,
         3,
       )
     : 0;
 
   return (
-    <Screen edges={["top"]}>
+    <Screen edges={['top']}>
       <View style={styles.header}>
         <AppText variant="titleLg">{formatKstToday()}</AppText>
         <PressableScale
           accessibilityRole="button"
           accessibilityLabel="설정"
-          onPress={() => router.push("/settings")}
+          onPress={() => router.push('/settings')}
           style={styles.iconButton}
         >
           <Feather aria-hidden name="settings" size={24} color={theme.ink} />
@@ -97,7 +97,7 @@ export function Home() {
       <View
         style={styles.streak}
         accessible
-        accessibilityLabel={streak > 0 ? `연속 출석 ${streak}일째` : "연속 출석 없음. 오늘 미션 하나로 출석해 볼까요?"}
+        accessibilityLabel={streak > 0 ? `연속 출석 ${streak}일째` : '연속 출석 없음. 오늘 미션 하나로 출석해 볼까요?'}
       >
         <Feather aria-hidden name="zap" size={20} color={theme.accent} />
         {streak > 0 ? (
@@ -140,8 +140,8 @@ export function Home() {
               key={m.id}
               mission={m}
               status={data.progress[m.id]?.status}
-              reward={rewardFor(m, "daily")}
-              onPress={() => open(m, "daily")}
+              reward={rewardFor(m, 'daily')}
+              onPress={() => open(m, 'daily')}
             />
           ))
         )}
@@ -153,8 +153,8 @@ export function Home() {
           <MissionCard
             mission={data.weekly}
             status={data.progress[data.weekly.id]?.status}
-            reward={rewardFor(data.weekly, "weekly")}
-            onPress={() => data.weekly && open(data.weekly, "weekly")}
+            reward={rewardFor(data.weekly, 'weekly')}
+            onPress={() => data.weekly && open(data.weekly, 'weekly')}
           />
         </View>
       )}
@@ -182,20 +182,20 @@ export function Home() {
 const styles = StyleSheet.create({
   header: {
     height: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   iconButton: {
     width: 44,
     height: 44,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     marginRight: -10,
   },
   streak: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.xs,
   },
   growth: {
@@ -206,7 +206,7 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   state: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: Spacing.sm,
     paddingVertical: Spacing.xxl,
   },
@@ -215,6 +215,6 @@ const styles = StyleSheet.create({
     gap: Spacing.xxs,
   },
   center: {
-    textAlign: "center",
+    textAlign: 'center',
   },
 });
