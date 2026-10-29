@@ -1,10 +1,11 @@
 import { Feather, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { ZoomIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
+import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { PressableScale } from '@/components/pressable-scale';
 import { Screen } from '@/components/screen';
@@ -166,11 +167,8 @@ export function Room() {
         </View>
       )}
 
-      {/* 인벤토리 바텀 시트 (DESIGN.md §6: 250ms 슬라이드, 뒤 배경 rgba(0,0,0,0.3)) */}
-      <Modal visible={editing !== null} transparent animationType="slide" onRequestClose={() => setEditing(null)}>
-        <Pressable style={styles.backdrop} onPress={() => setEditing(null)} accessibilityLabel="닫기" />
-        <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
-          <AppText variant="titleMd">이 자리에 놓을 가구</AppText>
+      {editing !== null && (
+        <BottomSheet title="이 자리에 놓을 가구" onClose={() => setEditing(null)} closeDisabled={busy}>
           {error && <AppText accessibilityRole="alert" color="slate">가구를 놓지 못했어요. 다시 시도해 주세요.</AppText>}
           {candidates.length === 0 ? (
             <AppText variant="bodySm" color="steel">
@@ -186,7 +184,7 @@ export function Room() {
                     accessibilityRole="button"
                     accessibilityLabel={`${f.name} 놓기`}
                     disabled={busy}
-                    onPress={() => editing && place(editing, f.id)}
+                    onPress={() => place(editing, f.id)}
                     style={[styles.item, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
                     {icon && <MaterialCommunityIcons aria-hidden name={icon.name} size={32} color={theme[icon.color]} />}
                     <AppText variant="caption">{f.name}</AppText>
@@ -195,12 +193,11 @@ export function Room() {
               })}
             </View>
           )}
-          {editing && owned.some((o) => o.slot === editing) && (
+          {owned.some((o) => o.slot === editing) && (
             <Button label="비우기" variant="secondary" onPress={() => place(editing, null)} disabled={busy} />
           )}
-          <Button label="닫기" variant="ghost" onPress={() => setEditing(null)} />
-        </View>
-      </Modal>
+        </BottomSheet>
+      )}
     </Screen>
   );
 }
@@ -252,20 +249,6 @@ const styles = StyleSheet.create({
   },
   centerText: {
     textAlign: 'center',
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  sheet: {
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.sm,
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
   },
   sheetList: {
     flexDirection: 'row',

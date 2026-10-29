@@ -12,7 +12,7 @@ import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { MoodLabels } from '@/lib/daily-note';
 import { supabase } from '@/lib/supabase';
-import { demoLetterWeeks, formatLetterWeek } from '@/utils/weekly-letter';
+import { letterWeeks, formatLetterWeek } from '@/utils/weekly-letter';
 import { formatDayWithWeekday, kstWeekStart } from '@/utils/date';
 
 type Report = {
@@ -25,7 +25,7 @@ type Report = {
 
 export function Letter({ week }: { week: string }) {
   const theme = useTheme();
-  const weeks = demoLetterWeeks();
+  const weeks = letterWeeks();
   const current = weeks[0];
   const available = typeof week === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(week) &&
     Number.isFinite(Date.parse(`${week}T00:00:00Z`)) &&
