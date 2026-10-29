@@ -31,7 +31,7 @@ async function invoke<T>(name: string, body: object): Promise<T> {
 /** 'ai' = 생성형 AI 결과, 'rule' = AI를 쓸 수 없을 때의 규칙 기반 대체 */
 export type JudgedBy = 'ai' | 'rule';
 
-export type Recommendation = { daily: Mission[]; weekly: Mission | null; source: JudgedBy };
+type Recommendation = { daily: Mission[]; weekly: Mission | null; source: JudgedBy };
 export type JudgeResult = {
   result: 'pass' | 'retry' | 'privacy';
   message: string;
