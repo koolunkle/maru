@@ -1,6 +1,6 @@
 export type RewardFurniture = { id: string; name: string; unlock_rule: unknown; sort: number };
 
-export type RewardProgress = {
+type RewardProgress = {
   /** 이미 가진 가구 id */
   owned: ReadonlySet<string>;
   /** 카테고리별 완료한 미션 수 */

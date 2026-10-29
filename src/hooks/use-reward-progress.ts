@@ -4,7 +4,7 @@ import { useCallback, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { RewardFurniture } from '@/utils/next-reward';
 
-export type RewardData = {
+type RewardData = {
   furniture: RewardFurniture[];
   owned: Set<string>;
   completedByCategory: Record<string, number>;
