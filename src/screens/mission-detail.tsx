@@ -9,7 +9,7 @@ import { Button } from '@/components/button';
 import { HelpCard } from '@/components/help-card';
 import { Screen } from '@/components/screen';
 import { CategoryLabel } from '@/constants/domain';
-import { CategoryTint, Radius, Spacing } from '@/constants/theme';
+import { CategoryBar, CategoryTint, Radius, Spacing } from '@/constants/theme';
 import { useIsDark, useTheme } from '@/hooks/use-theme';
 import { FunctionError, Functions } from '@/lib/functions';
 import { getMissionDetail, setParticipation, type MissionDetail as Detail } from '@/lib/missions';
@@ -160,12 +160,8 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
       <BackHeader />
 
       <View
-        style={[
-          styles.hero,
-          isDark
-            ? { backgroundColor: theme.surface, borderLeftWidth: 4, borderLeftColor: tint }
-            : { backgroundColor: tint },
-        ]}>
+        style={[styles.hero, { backgroundColor: isDark ? theme.surface : tint }]}>
+        {isDark && <View style={[styles.bar, { backgroundColor: CategoryBar[mission.category] }]} />}
         <AppText variant="label" color="slate">
           {CategoryLabel[mission.category]} · {mission.minutes}분 · {type === 'daily' ? '오늘의 미션' : '이번 주 미션'}
         </AppText>
@@ -283,6 +279,15 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     justifyContent: 'flex-end',
     gap: Spacing.xs,
+    overflow: 'hidden',
+  },
+  // 다크 모드 카테고리 막대 (mission-card와 같은 방식)
+  bar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
   },
   blocks: {
     marginTop: Spacing.xl,
