@@ -34,6 +34,7 @@ const imports = {
   '../_shared/clients.ts': { admin, requireUserId: async () => 'user' },
   '../_shared/copy.ts': { CopyRules: '', hasBannedWord: () => false },
   '../_shared/http.ts': { handler: (fn) => fn, HttpError, json: (body) => body },
+  '../_shared/moderation-privacy.ts': { filterModerationText: (text) => ({ text, hasContact: false }) },
 };
 new Function('require', 'exports', 'Deno', outputText)((name) => {
   assert.ok(name in imports, name); return imports[name];

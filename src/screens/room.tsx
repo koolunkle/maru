@@ -2,10 +2,11 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useFocusEffect, useLocalSearchParams } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
+import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { PressableScale } from '@/components/pressable-scale';
 import { Collection } from '@/components/room/collection';
@@ -18,7 +19,8 @@ import { RoomArt, Sky, type DayPart } from '@/constants/room-art';
 import { DefaultTheme, Floors, themeStorageKey, Wallpapers } from '@/constants/room-themes';
 import { Radius, Spacing } from '@/constants/theme';
 import { useIsDark, useTheme } from '@/hooks/use-theme';
-import { supabase } from '@/lib/supabase';
+import { Functions } from '@/lib/functions';
+import { getRoom, getRoomProgress } from '@/lib/room';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
 import { kstDate } from '@/utils/date';
@@ -74,8 +76,7 @@ export function Room() {
   }, []);
 
   const place = useCallback(async (slot: Slot, furnitureId: string | null) => {
-    const { error: placementError } = await supabase.functions.invoke('place-furniture', { body: { slot, furnitureId } });
-    return !placementError;
+    return Functions.placeFurniture(slot, furnitureId).then(() => true, () => false);
   }, []);
 
   // 인증 뒤 "방에 놓기"로 들어오면 빈 자리에 바로 놓는다. 빈 자리가 없으면 꾸미기에서 고르게 한다
@@ -101,36 +102,24 @@ export function Room() {
   const load = useCallback(() => {
     let active = true;
     Promise.all([
-      supabase.from('furniture').select('*').order('sort'),
-      supabase.from('user_furniture').select('*').eq('user_id', userId),
-      supabase.from('user_missions').select('type, missions!inner(category)').eq('user_id', userId).eq('status', 'completed'),
-      supabase
-        .from('user_missions')
-        .select('completed_at, missions!inner(event_id, events(title))')
-        .eq('user_id', userId)
-        .eq('status', 'completed')
-        .not('missions.event_id', 'is', null)
-        .order('completed_at', { ascending: false })
-        .limit(1),
+      getRoom(userId),
+      getRoomProgress(userId).catch(() => null),
       AsyncStorage.getItem(themeStorageKey(userId)).catch(() => null),
-    ]).then(([f, o, done, event, savedTheme]) => {
+    ]).then(([room, progress, savedTheme]) => {
       if (!active) return;
-      // 실패하면 보이던 방을 지우지 않는다
-      if (f.error || o.error) { setLoadFailed(true); return; }
       setLoadFailed(false);
-      setFurniture(f.data);
-      setOwned(o.data);
-      const counts: Record<string, number> = {};
-      for (const row of done.data ?? []) counts[row.missions.category] = (counts[row.missions.category] ?? 0) + 1;
-      setCompletedByCategory(counts);
-      setWeeklyCount((done.data ?? []).filter((row) => row.type === 'weekly').length);
+      setFurniture(room.furniture);
+      setOwned(room.owned);
+      if (progress) {
+        setCompletedByCategory(progress.completedByCategory);
+        setWeeklyCount(progress.weeklyCount);
+        setPosterTitle(progress.posterTitle);
+      }
       try {
         if (savedTheme) setRoomTheme({ ...DefaultTheme, ...JSON.parse(savedTheme) });
       } catch {}
-      // 행사 이름 앞의 "[기관명]" 말머리는 뗀다
-      setPosterTitle(event.data?.[0]?.missions.events?.title?.replace(/^\s*\[[^\]]*\]\s*/, '') ?? null);
-      if (placeParam) placeReward(placeParam, f.data, o.data);
-    }, () => active && setLoadFailed(true));
+      if (placeParam) placeReward(placeParam, room.furniture, room.owned);
+    }, () => active && setLoadFailed(true)); // 실패하면 보이던 방을 지우지 않는다
     return () => {
       active = false;
     };
@@ -360,11 +349,8 @@ export function Room() {
         )}
       </View>
 
-      {/* 자리 시트 (DESIGN.md §6: 250ms 슬라이드, 뒤 배경 rgba(0,0,0,0.3)) */}
-      <Modal visible={editing !== null} transparent animationType="slide" onRequestClose={() => setEditing(null)}>
-        <Pressable style={styles.backdrop} onPress={() => setEditing(null)} accessibilityLabel="닫기" />
-        <View style={[styles.sheet, { backgroundColor: theme.surface }]}>
-          <AppText variant="titleMd" accessibilityRole="header">{editing ? `${SlotName[editing]} 자리` : ''}</AppText>
+      {editing !== null && (
+        <BottomSheet title={`${SlotName[editing]} 자리`} onClose={() => setEditing(null)} closeDisabled={busy}>
           {error && <AppText accessibilityRole="alert" color="slate">가구를 놓지 못했어요. 다시 시도해 주세요.</AppText>}
           {candidates.length === 0 ? (
             <AppText variant="bodySm" color="steel">
@@ -400,9 +386,8 @@ export function Room() {
           {editing && editingItem && (
             <Button label="비우기" variant="secondary" onPress={() => choose(editing, null)} disabled={busy} />
           )}
-          <Button label="닫기" variant="ghost" onPress={() => setEditing(null)} />
-        </View>
-      </Modal>
+        </BottomSheet>
+      )}
     </Screen>
   );
 }
@@ -493,20 +478,6 @@ const styles = StyleSheet.create({
   failed: {
     alignItems: 'flex-start',
     gap: Spacing.sm,
-  },
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-  },
-  sheet: {
-    borderTopLeftRadius: Radius.xl,
-    borderTopRightRadius: Radius.xl,
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.sm,
-    width: '100%',
-    maxWidth: 480,
-    alignSelf: 'center',
   },
   sheetList: {
     flexDirection: 'row',

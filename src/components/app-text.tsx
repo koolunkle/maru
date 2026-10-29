@@ -3,7 +3,7 @@ import { Text, type TextProps } from 'react-native';
 import { Typography, type ThemeColors, type TypographyVariant } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-export type AppTextProps = TextProps & {
+type AppTextProps = TextProps & {
   variant?: TypographyVariant;
   color?: keyof ThemeColors;
   /** 숫자 자리 맞춤 (연속 출석, 달성률) */

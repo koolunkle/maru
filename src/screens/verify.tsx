@@ -12,32 +12,18 @@ import { AppSwitch } from '@/components/app-switch';
 import { AppText } from '@/components/app-text';
 import { BackHeader } from '@/components/back-header';
 import { Button } from '@/components/button';
-import { HelpCard } from '@/components/help-card';
 import { PressableScale } from '@/components/pressable-scale';
+import { RelayActions, RelayComposer, useRelayComposer } from '@/components/relay-composer';
 import { RewardReveal } from '@/components/room/reward-reveal';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { FunctionError, Functions, type JudgedBy, type JudgeResult } from '@/lib/functions';
-import { supabase } from '@/lib/supabase';
+import { uploadVerification } from '@/lib/verification';
 import { useSession } from '@/providers/session-provider';
-import type { Tables } from '@/types/database';
 import { preparePhoto } from '@/utils/prepare-photo';
 
 const MaxNote = 100;
-const MaxRelay = 60;
-type Relay = Pick<Tables<'relay_messages'>, 'id' | 'body' | 'status' | 'publish_at'>;
-
-function relayStatus(relay: Relay) {
-  if (relay.status === 'pending') return '검수를 기다리고 있어요. 아직 공개되지 않았어요.';
-  if (relay.status === 'rejected' || relay.status === 'crisis') return '이 한 줄은 공개되지 않았어요.';
-  if (relay.status === 'published') return '다음 사람에게 한 줄이 보이고 있어요.';
-  const minutes = Math.ceil((Date.parse(relay.publish_at) - Date.now()) / 60_000);
-  if (minutes <= 0) return '곧 다음 사람에게 보여요.';
-  return minutes >= 60
-    ? `약 ${Math.ceil(minutes / 60)}시간 뒤 다음 사람에게 보여요.`
-    : `약 ${minutes}분 뒤 다음 사람에게 보여요.`;
-}
 
 type Photo = { uri: string; bytes: Uint8Array };
 
@@ -67,54 +53,9 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
   const [result, setResult] = useState<JudgeResult | null>(null);
   // 가구를 받으면 결과 화면 위에 상자 열기를 한 번 보여 준다 (내 방 시안)
   const [revealDone, setRevealDone] = useState(false);
-  const [relayBody, setRelayBody] = useState('');
-  const [relay, setRelay] = useState<Relay | null>(null);
-  const [relayBusy, setRelayBusy] = useState(false);
-  const [relayNotice, setRelayNotice] = useState<string | null>(null);
-  const relaySending = useRef(false);
+  const relay = useRelayComposer(missionId, session?.user.id);
   const submitting = useRef(false);
   const uploadRequest = useRef<{ path: string; note: string; isPublic: boolean } | null>(null);
-
-  async function sendRelay() {
-    const body = relayBody.trim();
-    if (relaySending.current || !session || (!relay && (!body || body.length > MaxRelay))) return;
-    relaySending.current = true;
-    setRelayBusy(true);
-    setRelayNotice(null);
-    try {
-      let saved = relay;
-      if (!saved) {
-        const inserted = await supabase
-          .from('relay_messages')
-          .insert({ mission_id: missionId, body })
-          .select('id, body, status, publish_at')
-          .single();
-        if (inserted.error?.code === '23505') {
-          const existing = await supabase
-            .from('relay_messages')
-            .select('id, body, status, publish_at')
-            .eq('mission_id', missionId)
-            .eq('user_id', session.user.id)
-            .single();
-          if (existing.error) throw existing.error;
-          saved = existing.data;
-        } else {
-          if (inserted.error) throw inserted.error;
-          saved = inserted.data;
-        }
-        setRelay(saved);
-      }
-      if (saved.status === 'pending') {
-        const moderated = await Functions.moderateRelay(saved.id).catch(() => ({ status: 'pending' as const }));
-        setRelay({ ...saved, status: moderated.status });
-      }
-    } catch {
-      setRelayNotice('한 줄을 남기지 못했어요. 다시 눌러 볼까요?');
-    } finally {
-      relaySending.current = false;
-      setRelayBusy(false);
-    }
-  }
 
   async function pick(source: 'library' | 'camera') {
     setNotice(null);
@@ -159,25 +100,9 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
         if (!uploadRequest.current || uploadRequest.current.note !== text || uploadRequest.current.isPublic !== isPublic) {
           uploadRequest.current = { path: `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 12)}.jpg`, note: text, isPublic };
         }
-        const path = uploadRequest.current.path;
-        const upload = await supabase.storage
-          .from('verifications')
-          .upload(path, photo.bytes, { contentType: 'image/jpeg' });
-        if (upload.error) {
-          const existing = await supabase.storage.from('verifications').download(path);
-          if (existing.error || !existing.data) throw upload.error;
-        }
-        const { data, error } = await supabase
-          .from('verifications')
-          .insert({ user_mission_id: userMissionId, photo_path: path, text: text || null, is_public: isPublic })
-          .select('id')
-          .single();
-        if (error) {
-          const existing = await supabase.from('verifications').select('id, user_mission_id, text')
-            .eq('user_id', session.user.id).eq('photo_path', path).maybeSingle();
-          if (existing.error || !existing.data || existing.data.user_mission_id !== userMissionId || existing.data.text !== (text || null)) throw error;
-          verificationId = existing.data.id;
-        } else verificationId = data.id;
+        verificationId = await uploadVerification({
+          userId: session.user.id, userMissionId, path: uploadRequest.current.path, bytes: photo.bytes, text: text || null, isPublic,
+        });
         setPendingId(verificationId);
       }
 
@@ -209,22 +134,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
       <Screen
         footer={
           <View style={styles.footer}>
-            {relayNotice && (
-              <AppText variant="caption" color="steel" accessibilityRole="alert">
-                {relayNotice}
-              </AppText>
-            )}
-            {relay?.status === 'pending' && (
-              <Button label="검수 다시 요청" variant="secondary" onPress={sendRelay} loading={relayBusy} />
-            )}
-            {!relay && (
-              <Button label="건너뛰기" variant="ghost" onPress={() => router.dismissTo('/')} disabled={relayBusy} />
-            )}
-            {relay ? (
-              <Button label="홈으로" onPress={() => router.dismissTo('/')} disabled={relayBusy} />
-            ) : (
-              <Button label="남기기" onPress={sendRelay} disabled={!relayBody.trim()} loading={relayBusy} />
-            )}
+            <RelayActions {...relay} />
           </View>
         }>
         <BackHeader />
@@ -262,49 +172,7 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
             </AppText>
           )}
         </View>
-        <View style={styles.relaySection}>
-          <AppText variant="titleMd" accessibilityRole="header">
-            다음 사람에게 한 줄 남길까요?
-          </AppText>
-          {relay ? (
-            <>
-              <View style={[styles.relayItem, { backgroundColor: theme.surfaceSunken }]}>
-                <AppText variant="bodySm">{relay.body}</AppText>
-              </View>
-              <AppText variant="caption" color="steel" accessibilityLiveRegion="polite">
-                {relayStatus(relay)}
-              </AppText>
-              {relay.status === 'crisis' && <HelpCard subject="이 한 줄" />}
-            </>
-          ) : (
-            <>
-              <TextInput
-                accessibilityLabel="다음 사람에게 남길 한 줄"
-                accessibilityHint="60자까지 적을 수 있어요"
-                value={relayBody}
-                onChangeText={(text) => {
-                  setRelayBody(text.slice(0, MaxRelay));
-                  setRelayNotice(null);
-                }}
-                maxLength={MaxRelay}
-                editable={!relayBusy}
-                placeholder="오늘도 작은 한 걸음을 응원해요"
-                placeholderTextColor={theme.muted}
-                style={[
-                  styles.relayInput,
-                  Typography.bodyMd,
-                  { color: theme.ink, backgroundColor: theme.surface, borderColor: theme.hairlineStrong },
-                ]}
-              />
-              <AppText variant="caption" color="steel" style={styles.counter} tabular>
-                {relayBody.length}/{MaxRelay}
-              </AppText>
-              <AppText variant="caption" color="steel">
-                연락처나 만남 제안은 적지 않아요.
-              </AppText>
-            </>
-          )}
-        </View>
+        <RelayComposer {...relay} />
       </Screen>
     );
   }
@@ -440,9 +308,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.md,
   },
-  relaySection: { marginTop: Spacing.xxl, gap: Spacing.xs },
-  relayInput: { minHeight: 52, borderWidth: 1, borderRadius: Radius.md, paddingHorizontal: Spacing.sm },
-  relayItem: { borderRadius: Radius.md, padding: Spacing.sm },
   badge: {
     height: 24,
     paddingHorizontal: 10,
