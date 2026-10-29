@@ -30,6 +30,13 @@ colors:
   tint-neighborhood: "#dcecfa"
   tint-rhythm: "#f5efe3"
   tint-people: "#fce3ec"
+  dark-bar-walk: "#7cc99a"
+  dark-bar-food: "#eba26f"
+  dark-bar-culture: "#a993d6"
+  dark-bar-growth: "#e2bf55"
+  dark-bar-neighborhood: "#78aee0"
+  dark-bar-rhythm: "#c9ad7f"
+  dark-bar-people: "#e391ad"
   room-wall: "#eef0e6"
   room-floor: "#d9cfb8"
   dark-canvas: "#131614"
@@ -305,7 +312,7 @@ components:
 | `accent-soft` | `dark-accent-soft` #2e2a1c |
 | `success` / `error` | `dark-success` #6cc59a / `dark-error` #e8695e |
 | `help-soft` | `dark-help-soft` #1c2933 |
-| `mission-card` 틴트 배경 | `dark-surface` 배경 + 왼쪽 4px 막대(해당 `tint-*` 색) |
+| `mission-card` 틴트 배경 | `dark-surface` 배경 + 왼쪽 4px 곧은 막대(`dark-bar-*`: walk #7cc99a, food #eba26f, culture #a993d6, growth #e2bf55, neighborhood #78aee0, rhythm #c9ad7f, people #e391ad). 테두리가 아니라 카드 모서리에서 잘리는 막대로 그린다. 미션 상세 상단 카드도 같다 |
 | `room-wall` / `room-floor` | `dark-room-wall` #232822 / `dark-room-floor` #333a2c |
 
 ## 4. 타이포그래피
