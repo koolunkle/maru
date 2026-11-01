@@ -12,9 +12,9 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import type { FeedPost } from '@/hooks/use-feed';
 import { useTheme } from '@/hooks/use-theme';
 import { Functions } from '@/lib/functions';
-import { createMailboxRequestId } from '@/lib/mailbox';
 import { setReaction } from '@/lib/feed';
 import type { Enums } from '@/types/database';
+import { createRequestId } from '@/utils/request-id';
 
 type ReactionType = Enums<'reaction_type'>;
 
@@ -78,7 +78,7 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
     const body = draft.trim();
     if (!body || commentWorking.current) return;
     commentWorking.current = true;
-    if (commentRequest.current?.body !== body) commentRequest.current = { body, id: createMailboxRequestId() };
+    if (commentRequest.current?.body !== body) commentRequest.current = { body, id: createRequestId() };
     setSending(true);
     setNotice(null);
     const data = await Functions.submitComment(post.id, body, commentRequest.current.id).catch(() => null);

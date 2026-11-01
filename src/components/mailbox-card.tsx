@@ -12,7 +12,6 @@ import { PressableScale } from '@/components/pressable-scale';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import {
-  createMailboxRequestId,
   getReceivedMailboxMessages,
   getSentMailboxMessages,
   MailboxMaxLength,
@@ -23,6 +22,7 @@ import {
   type ReceivedMailboxMessage,
 } from '@/lib/mailbox';
 import { formatDateRange, kstDate } from '@/utils/date';
+import { createRequestId } from '@/utils/request-id';
 
 const DeliveryNotice = '검수를 거친 뒤 다른 사람에게 전달돼요. 이름이나 연락처는 함께 보내지 않아요.';
 
@@ -43,7 +43,7 @@ export function MailboxCard({ userId }: { userId: string }) {
   const [sent, setSent] = useState<MailboxMessage[] | null>(null);
   const [sentError, setSentError] = useState(false);
   const sending = useRef(false);
-  const requestId = useRef(createMailboxRequestId());
+  const requestId = useRef(createRequestId());
   const loadVersion = useRef(0);
   const opened = useRef(false);
   const unread = received.filter((message) => !message.read_at).length;
@@ -152,7 +152,7 @@ export function MailboxCard({ userId }: { userId: string }) {
       setSent((messages) => messages && [message, ...messages.filter((item) => item.id !== message.id)]);
       if (!retry) {
         setBody('');
-        requestId.current = createMailboxRequestId();
+        requestId.current = createRequestId();
       }
       setFocused(false);
     } catch {
@@ -214,7 +214,7 @@ export function MailboxCard({ userId }: { userId: string }) {
             {notice && <Button label="읽음 표시 다시 저장" variant="secondary" onPress={() => void read(selected)} loading={busy} />}
             <Button label="목록으로" variant="secondary" onPress={() => show('inbox')} disabled={busy} style={styles.button} />
           </> : mode === 'compose' ? <>
-            <TextInput accessibilityLabel="보낼 한 줄" accessibilityHint="60자까지 적을 수 있어요" placeholder="오늘의 작은 응원을 적어주세요" placeholderTextColor={theme.steel} value={body} onChangeText={(value) => { setBody(value.slice(0, MailboxMaxLength)); requestId.current = createMailboxRequestId(); setNotice(null); }} maxLength={MailboxMaxLength} multiline editable={!busy} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={[styles.input, Typography.bodyMd, { backgroundColor: theme.surface, color: theme.ink, borderColor: focused ? theme.primary : theme.hairlineStrong }]} />
+            <TextInput accessibilityLabel="보낼 한 줄" accessibilityHint="60자까지 적을 수 있어요" placeholder="오늘의 작은 응원을 적어주세요" placeholderTextColor={theme.steel} value={body} onChangeText={(value) => { setBody(value.slice(0, MailboxMaxLength)); requestId.current = createRequestId(); setNotice(null); }} maxLength={MailboxMaxLength} multiline editable={!busy} onFocus={() => setFocused(true)} onBlur={() => setFocused(false)} style={[styles.input, Typography.bodyMd, { backgroundColor: theme.surface, color: theme.ink, borderColor: focused ? theme.primary : theme.hairlineStrong }]} />
             <AppText color="steel" style={styles.counter}>{body.length}/{MailboxMaxLength}</AppText>
             <AppText variant="caption" color="steel">{DeliveryNotice} 연락처나 만남 제안은 적지 않아요.</AppText>
             <Button label="보내기" disabled={!body.trim() || !userId} loading={busy} onPress={() => void send()} style={styles.button} />
