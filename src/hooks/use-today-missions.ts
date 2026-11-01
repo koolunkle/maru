@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { FunctionError, Functions, type JudgedBy } from '@/lib/functions';
-import { supabase } from '@/lib/supabase';
+import { getSeedMissions, getTodayProgress } from '@/lib/missions';
 import { useSession } from '@/providers/session-provider';
 import type { Tables } from '@/types/database';
 import { kstDate, kstEndOfWeek } from '@/utils/date';
@@ -22,25 +22,11 @@ type TodayMissions = {
 };
 
 async function fetchSeedMissions(profile: Profile) {
-  const { data: seeds, error } = await supabase.from('missions').select('*').eq('source', 'seed');
-  if (error) throw error;
-  return pickSeedMissions(seeds, profile, kstDate(), kstDate(kstEndOfWeek()));
-}
-
-/** 오늘 시작했거나 아직 진행 중인 미션 (주간 미션은 날이 바뀌어도 이어진다) */
-async function fetchProgress(profileId: string) {
-  const { data, error } = await supabase
-    .from('user_missions')
-    .select('*, missions(*)')
-    .eq('user_id', profileId)
-    .or(`status.in.(in_progress,judging),started_at.gte.${kstDate()}T00:00:00+09:00`)
-    .order('started_at', { ascending: false });
-  if (error) throw error;
-  return data;
+  return pickSeedMissions(await getSeedMissions(), profile, kstDate(), kstDate(kstEndOfWeek()));
 }
 
 async function fetchToday(profile: Profile, refresh: boolean, requestId?: string): Promise<TodayMissions> {
-  const progressRows = await fetchProgress(profile.id);
+  const progressRows = await getTodayProgress(profile.id, kstDate());
   let picked: { daily: Mission[]; weekly: Mission | null };
   let source: JudgedBy;
   try {
