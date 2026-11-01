@@ -9,10 +9,9 @@ import { HelpCard } from '@/components/help-card';
 import { PressableScale } from '@/components/pressable-scale';
 import { CategoryLabel } from '@/constants/domain';
 import { Radius, Spacing, Typography } from '@/constants/theme';
-import type { FeedPost } from '@/hooks/use-feed';
 import { useTheme } from '@/hooks/use-theme';
 import { Functions } from '@/lib/functions';
-import { setReaction } from '@/lib/feed';
+import { setReaction, type FeedPost } from '@/lib/feed';
 import type { Enums } from '@/types/database';
 import { createRequestId } from '@/utils/request-id';
 

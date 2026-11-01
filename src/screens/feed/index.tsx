@@ -6,8 +6,9 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { Spacing } from '@/constants/theme';
-import { useFeed, type FeedPost } from '@/hooks/use-feed';
+import { useFeed } from '@/hooks/use-feed';
 import { useTheme } from '@/hooks/use-theme';
+import type { FeedPost } from '@/lib/feed';
 import { useSession } from '@/providers/session-provider';
 
 import { PostCard } from './post-card';

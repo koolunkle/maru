@@ -7,7 +7,7 @@ import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { supabase } from '@/lib/supabase';
+import { getMissionsStartedSince } from '@/lib/missions';
 import { useSession } from '@/providers/session-provider';
 import { formatDateRange, kstDate, kstWeekStart } from '@/utils/date';
 import { currentStreak } from '@/utils/streak';
@@ -25,12 +25,7 @@ async function fetchStats(userId: string, today: string): Promise<Stats> {
   const monthStart = `${today.slice(0, 8)}01`;
   const weekStart = kstWeekStart(today);
   const from = weekStart < monthStart ? weekStart : monthStart;
-  const { data, error } = await supabase
-    .from('user_missions')
-    .select('type, status, started_at, completed_at')
-    .eq('user_id', userId)
-    .gte('started_at', `${from}T00:00:00+09:00`);
-  if (error) throw error;
+  const data = await getMissionsStartedSince(userId, from);
 
   const week = data.filter((um) => um.type === 'daily' && kstDate(new Date(um.started_at)) >= weekStart);
   const weekDone = week.filter((um) => um.status === 'completed').length;
