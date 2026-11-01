@@ -2,7 +2,7 @@ import type { Enums } from '@/types/database';
 
 type Category = Enums<'mission_category'>;
 
-/** PRD F1 카테고리. 순서 = 온보딩 표시 순서 */
+/** spec onboarding 카테고리. 순서 = 온보딩 표시 순서 */
 export const Categories: { id: Category; label: string }[] = [
   { id: 'walk', label: '산책·운동' },
   { id: 'food', label: '요리·식사' },

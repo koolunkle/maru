@@ -12,12 +12,12 @@ export function kstWeekStart(today: string = kstDate()) {
   return new Date(date.getTime() - offset * 86_400_000).toISOString().slice(0, 10);
 }
 
-/** KST 기준 해당 날짜 23:59:59.999 의 UTC Date (PRD F3 일일 미션 마감) */
+/** KST 기준 해당 날짜 23:59:59.999 의 UTC Date (spec mission-lifecycle 일일 미션 마감) */
 export function kstEndOfDay(date: Date = new Date()) {
   return new Date(Date.parse(`${kstDate(date)}T23:59:59.999+09:00`));
 }
 
-/** KST 기준 이번 주 일요일 23:59:59.999 (주 시작 = 월요일, PRD F3 주간 미션 마감) */
+/** KST 기준 이번 주 일요일 23:59:59.999 (주 시작 = 월요일, spec mission-lifecycle 주간 미션 마감) */
 export function kstEndOfWeek(date: Date = new Date()) {
   const day = new Date(date.getTime() + KstOffsetMs).getUTCDay(); // 0 = 일요일
   const daysToSunday = (7 - day) % 7;

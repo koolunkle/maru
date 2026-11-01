@@ -12,7 +12,7 @@ type MissionCardProps = {
   mission: Pick<Tables<'missions'>, 'title' | 'category' | 'minutes'>;
   /** 이 미션의 내 진행 상태 (없으면 아직 시작 전) */
   status?: Enums<'user_mission_status'>;
-  /** 다음 보상까지 남은 조건 (PRD F8, reward-badge) */
+  /** 다음 보상까지 남은 조건 (spec personalization, reward-badge) */
   reward?: string | null;
   onPress?: () => void;
 };

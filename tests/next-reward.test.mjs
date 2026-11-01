@@ -36,7 +36,7 @@ test('처음이면 어떤 미션이든 화분', () => {
   assert.equal(nextReward(food, 'daily', furniture, progress({ owned: new Set() })), '완료하면 화분');
 });
 
-test('ROADMAP 완료 기준: 산책 3회 완료 계정의 산책 카드', () => {
+test('spec personalization 시나리오: 산책 3회 완료 계정의 산책 카드', () => {
   assert.equal(nextReward(walk, 'daily', furniture, progress({ completedByCategory: { walk: 3 } })), '2번 더 하면 운동화 선반');
   assert.equal(nextReward(walk, 'daily', furniture, progress({ completedByCategory: { walk: 4 } })), '완료하면 운동화 선반');
   assert.equal(nextReward(food, 'daily', furniture, progress({ completedByCategory: { walk: 4 } })), null);

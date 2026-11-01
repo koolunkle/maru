@@ -20,7 +20,7 @@ import { useBackgroundAudio } from '@/providers/background-audio';
 import { useSession } from '@/providers/session-provider';
 import { kstDate } from '@/utils/date';
 
-/** S10 마음 휴게소 (PRD F12·F14·F15·F16 / DESIGN.md §5.2). 위는 마음 보관함, 아래는 도움 안내와 배경음 */
+/** S10 마음 휴게소 (spec rest-area, mailbox, daily-note, time-capsule / DESIGN.md §5.2). 위는 마음 보관함, 아래는 도움 안내와 배경음 */
 export function Rest() {
   const theme = useTheme();
   const { profile } = useSession();

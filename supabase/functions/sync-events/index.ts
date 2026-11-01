@@ -1,4 +1,4 @@
-// 문화행사 동기화 (PRD §6.2 sync-events)
+// 문화행사 동기화 (spec culture-events)
 // pg_cron이 매일 05:00 KST에 호출한다. 서울 열린데이터광장 culturalEventInfo 전체를 받아
 // 앞으로 30일 안에 진행되는 행사를 events에 upsert → { fetched, upserted }
 // 호출 확인: x-sync-secret 헤더 = SYNC_EVENTS_SECRET (cron은 Vault의 값을 보낸다)

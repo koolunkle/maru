@@ -4,15 +4,19 @@
 
 10/20 제출본에 동료 프로토타입의 기능을 합쳤고, 지금은 기능 점검과 시연 준비 단계다(~11/8).
 
-| 문서 | 내용 |
+## 문서
+
+명세 중심 개발(SDD)을 [OpenSpec](https://github.com/Fission-AI/OpenSpec)으로 한다. **지금 앱이 어떻게 동작하는지는 `openspec/specs/`가 기준**이고, 동작을 바꾸는 작업은 `openspec/changes/`에 제안서부터 쓴다.
+
+| 문서 | 무엇을 답하나 |
 | --- | --- |
-| [PRD.md](./PRD.md) | 기능·데이터·문구 명세 |
-| [DESIGN.md](./DESIGN.md) | 디자인 토큰과 화면 구조 |
-| [docs/ROADMAP.md](./docs/ROADMAP.md) | 남은 작업과 담당, 끝난 작업의 PR |
-| [CONTRIBUTING.md](./CONTRIBUTING.md) | 권한 요청, 실행, 브랜치·커밋·PR, DB 변경 방법 |
-| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | 폴더 지도, 주요 흐름, 화면별 구현 상태, 알아 둘 점 |
-| [docs/ENV.md](./docs/ENV.md) | 환경 변수·함수 시크릿·운영 설정값, 신규 팀원에게 줄 권한 |
-| [docs/USER-FLOWS.md](./docs/USER-FLOWS.md) | 페르소나별 사용자 흐름(발표 기준) |
+| [docs/PRODUCT.md](./docs/PRODUCT.md) | 왜, 누구를 위해 만드나. 페르소나·범위·하지 않는 것 |
+| [openspec/specs/](./openspec/specs/) | 각 기능이 어떻게 동작해야 하나(요구사항 + 시나리오). 기능 ID F1~F16 표는 PRODUCT 3.1절 |
+| [openspec/changes/](./openspec/changes/) | 지금 진행 중인 작업. 작업마다 제안서·설계·할 일·명세 차이 |
+| [DESIGN.md](./DESIGN.md) | 어떻게 보이나. 디자인 토큰과 화면 구조 |
+| [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | 어디에 구현되어 있나. 폴더 지도·데이터 모델·함수·주요 흐름·설정값과 시크릿 |
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | 권한 요청, 실행·점검표, 작업 흐름(OpenSpec), 커밋·PR, DB 변경 |
+| [AGENTS.md](./AGENTS.md) | AI 코딩 도구에 주는 규칙 |
 
 ## 실행
 
@@ -21,6 +25,7 @@ npm install
 cp .env.example .env.local   # publishable 키가 들어 있다
 npm run web                  # 웹
 npm start                    # Expo Go (폰)
+npm run spec -- list         # 진행 중인 change 목록
 ```
 
 ## 이름과 식별자
@@ -38,7 +43,7 @@ npm start                    # Expo Go (폰)
 ## 배포
 
 - 운영 URL: https://seoul-challenge.expo.app
-- 명령과 절차: [CONTRIBUTING.md](./CONTRIBUTING.md) 3절(미리보기·운영 배포), AI 키·시연 모드 등 운영 설정: [docs/ENV.md](./docs/ENV.md)
+- 명령과 절차: [CONTRIBUTING.md](./CONTRIBUTING.md) 3절(미리보기·운영 배포), AI 키·시연 모드 등 운영 설정: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) 9절
 
 ## 데이터 출처·라이선스
 

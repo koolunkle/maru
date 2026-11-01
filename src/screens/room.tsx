@@ -44,7 +44,7 @@ function slotRect(slot: Slot, width: number, aspect: number) {
   return { left: a.x * unit - w / 2, top: a.align === 'bottom' ? a.y * unit - h : a.y * unit - h / 2, width: w, height: h };
 }
 
-/** S8 내 방 (PRD F7 / DESIGN.md §5.4) — 일러스트 방, 보기·꾸미기 분리, 도감, 내 기록이 남는 가구 */
+/** S8 내 방 (spec room-rewards / DESIGN.md §5.4) — 일러스트 방, 보기·꾸미기 분리, 도감, 내 기록이 남는 가구 */
 export function Room() {
   const theme = useTheme();
   const isDark = useIsDark();

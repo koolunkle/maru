@@ -19,7 +19,7 @@ import { endingNotice, formatDateRange, kstEndOfDay, kstEndOfWeek } from '@/util
 
 type MissionType = Enums<'mission_type'>;
 
-/** S4 미션 상세 (PRD F3, F9 / DESIGN.md §5.2) */
+/** S4 미션 상세 (spec mission-lifecycle, mission-together / DESIGN.md §5.2) */
 export function MissionDetail({ missionId, type }: { missionId: string; type: MissionType }) {
   const theme = useTheme();
   const isDark = useIsDark();

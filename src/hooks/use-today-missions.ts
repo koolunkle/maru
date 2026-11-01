@@ -61,7 +61,7 @@ async function fetchToday(profile: Profile, refresh: boolean, requestId?: string
   };
 }
 
-/** S3 홈: 오늘의 일일 3개 + 주간 1개 (PRD F2) */
+/** S3 홈: 오늘의 일일 3개 + 주간 1개 (spec mission-recommendation) */
 export function useTodayMissions() {
   const { profile } = useSession();
   const [data, setData] = useState<TodayMissions | null>(null);
