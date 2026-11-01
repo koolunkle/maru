@@ -47,7 +47,8 @@ Docs: https://docs.expo.dev/eas/index.md
 - 사용자가 겪는 동작을 바꾸는 작업은 코드보다 먼저 `openspec/changes/<이름>/`에 proposal·delta spec·tasks를 쓴다(`/opsx:propose`). spec대로 고치는 버그 수정과 리팩터링은 change 없이 한다. 기준은 `CONTRIBUTING.md` 3절.
 - 작성 규칙은 `openspec/config.yaml`: 본문은 한국어, `### Requirement:`·`#### Scenario:` 제목과 SHALL/MUST는 영어. spec에는 관찰 가능한 동작만 쓰고 테이블·함수 이름은 쓰지 않는다. 끝나면 `npm run spec:validate`.
 - 코드 주석의 기능 ID(F1~F16)는 spec Purpose와 `docs/PRODUCT.md` 3.1절 표로 찾는다.
-- 브랜치·커밋·PR·DB 변경 절차: `CONTRIBUTING.md`.
+- 브랜치·커밋·PR·DB 변경 절차: `CONTRIBUTING.md`. 대부분의 PR은 `main`으로, 큰 통합 작업만 `develop`으로 보낸다(3.3).
+- 운영 반영(`eas deploy --prod`, `supabase functions deploy`, `supabase db push`)은 사람이 요청할 때만, 최신 `main`에서 커밋하지 않은 변경 없이 한다. 함수는 바뀐 것만 이름을 붙여 배포한다(`CONTRIBUTING.md` 3.4).
 - 커밋: Conventional 헤더(한국어), 본문은 `-` 불릿. `Co-Authored-By`·`Session` 줄을 넣지 않는다.
 - 언어: TypeScript (strict). 앱 코드는 `src/`, 라우트는 `src/app/`, 화면 본문은 `src/screens/`.
 - SDK 58 import 경로: `Stack` ← `expo-router/stack`, `Tabs` ← `expo-router/js-tabs`, `Link` ← `expo-router/link`, `Redirect` ← `expo-router`.
