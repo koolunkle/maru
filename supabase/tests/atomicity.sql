@@ -3,6 +3,7 @@ begin;
 do $$ begin
   assert not has_function_privilege('authenticated', 'public.finish_verification(uuid,uuid,public.verification_result,text,text)', 'execute'), '인증 확정은 서버 전용';
   assert not has_function_privilege('authenticated', 'public.place_furniture(uuid,public.room_slot,text)', 'execute'), '가구 변경 함수는 서버 전용';
+  assert not has_function_privilege('authenticated', 'public.move_furniture(uuid,text,public.room_slot)', 'execute'), '가구 옮기기 함수는 서버 전용';
   assert not has_table_privilege('authenticated', 'public.verification_responses', 'select'), '판정 응답은 비공개';
 end $$;
 insert into auth.users (id) values ('10000000-0000-4000-8000-000000000091');
@@ -85,5 +86,30 @@ begin
     raise exception '잘못된 추천 허용';
   exception when invalid_text_representation then null; end;
   assert (select count(*) = before_count from public.missions where created_for = '10000000-0000-4000-8000-000000000091'), '추천 저장 실패 시 미션 롤백';
+end $$;
+do $$
+declare u uuid := '10000000-0000-4000-8000-000000000091';
+begin
+  insert into public.user_furniture (user_id, furniture_id) values (u, 'sofa'), (u, 'shoe_rack') on conflict do nothing;
+  perform public.place_furniture(u, 'floor-1', 'sofa');
+  perform public.place_furniture(u, 'floor-2', 'shoe_rack');
+  perform public.move_furniture(u, 'sofa', 'floor-2');
+  assert (select slot = 'floor-2' from public.user_furniture where user_id = u and furniture_id = 'sofa'), '옮긴 가구는 새 자리에';
+  assert (select slot = 'floor-1' from public.user_furniture where user_id = u and furniture_id = 'shoe_rack'), '원래 있던 가구는 옮긴 가구의 자리로';
+  perform public.move_furniture(u, 'sofa', 'floor-2');
+  assert (select slot = 'floor-2' from public.user_furniture where user_id = u and furniture_id = 'sofa'), '같은 자리로 옮기기는 그대로';
+  perform public.place_furniture(u, 'floor-1', null);
+  perform public.move_furniture(u, 'sofa', 'floor-1');
+  assert (select slot = 'floor-1' from public.user_furniture where user_id = u and furniture_id = 'sofa'), '빈 자리로 옮기기';
+  assert (select slot is null from public.user_furniture where user_id = u and furniture_id = 'shoe_rack'), '빈 자리로 옮기면 다른 가구는 그대로';
+  begin
+    perform public.move_furniture(u, 'sofa', 'window');
+    raise exception '맞지 않는 자리 허용';
+  exception when raise_exception then if sqlerrm <> 'invalid_placement' then raise; end if; end;
+  begin
+    perform public.move_furniture(u, 'lamp', 'desk');
+    raise exception '갖지 않은 가구 허용';
+  exception when raise_exception then if sqlerrm <> 'invalid_placement' then raise; end if; end;
+  assert (select slot = 'floor-1' from public.user_furniture where user_id = u and furniture_id = 'sofa'), '실패해도 기존 배치 유지';
 end $$;
 rollback;

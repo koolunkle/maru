@@ -137,14 +137,11 @@ export function Room() {
     load();
   }
 
-  /** 옮기기: 대상 자리에 다른 가구가 있으면 서로 자리를 바꾼다 */
+  /** 옮기기: 대상 자리에 다른 가구가 있으면 서버가 한 번에 서로 자리를 바꾼다 */
   async function moveTo(target: Slot) {
     if (!moving) return;
-    const from = owned.find((o) => o.furniture_id === moving)?.slot ?? null;
-    const occupant = owned.find((o) => o.slot === target && o.furniture_id !== moving);
     setBusy(true);
-    let ok = await place(target, moving);
-    if (ok && occupant && from) ok = await place(from, occupant.furniture_id);
+    const ok = await Functions.moveFurniture(moving, target).then(() => true, () => false);
     setBusy(false);
     setMoving(null);
     setNotice(ok ? `${SlotName[target]}에 옮겨 두었어요` : '옮기지 못했어요. 다시 시도해 주세요.');

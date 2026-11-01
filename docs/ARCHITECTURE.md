@@ -99,7 +99,7 @@ flowchart LR
 | 주간 리포트(F13) | `write-weekly-letter` 함수가 한 줄 기록·완료 미션으로 편지 생성(현재 Gemini일 때만 AI, 그 외 규칙 문구) |
 | 만료(F3) | cron `expire_due_missions`(10분) |
 
-DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nicknames`, `get_feed`, `get_relay_messages`, `save_daily_note`, `list_time_capsules`, `send_time_capsule`, `open_time_capsule`, `set_demo_mode`, `publish_due_comments`, `expire_due_missions`. 서버 전용(service_role): `finish_verification`, `save_recommendation`, `start_mission`, `place_furniture`, `submit_comment`, `receive_mailbox_message`. 트리거: `handle_new_user`, `prepare_comment`, `prepare_relay_message`, `check_mission_start`, `check_furniture_slot`, `stamp_mission_resolved`, `adjust_difficulty`, `weekly_letter_version`.
+DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nicknames`, `get_feed`, `get_relay_messages`, `save_daily_note`, `list_time_capsules`, `send_time_capsule`, `open_time_capsule`, `set_demo_mode`, `publish_due_comments`, `expire_due_missions`. 서버 전용(service_role): `finish_verification`, `save_recommendation`, `start_mission`, `place_furniture`, `move_furniture`, `submit_comment`, `receive_mailbox_message`. 트리거: `handle_new_user`, `prepare_comment`, `prepare_relay_message`, `check_mission_start`, `check_furniture_slot`, `stamp_mission_resolved`, `adjust_difficulty`, `weekly_letter_version`.
 
 
 ## 5. 알아 둘 점
@@ -194,7 +194,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 | `sync-events` | — | upsert 건수 | pg_cron 매일 05:00 KST. 서울 열린데이터광장 문화행사 중 30일 안에 진행되는 행사를 저장 |
 | `submit-comment` | verificationId, body, requestId | 댓글 행 | F6 댓글 저장(요청 ID로 중복 방지) |
 | `start-mission` | missionId, type, dueAt | 진행 중 미션 | F3 시작(동시 진행 상한 검사) |
-| `place-furniture` | slot, furnitureId(null이면 비우기) | — | F7 배치·옮기기 |
+| `place-furniture` | slot, furnitureId(null이면 비우기), move(true면 옮기기: 자리에 있던 가구와 한 트랜잭션으로 서로 바꿈) | — | F7 배치·옮기기 |
 
 `publish_due_comments()`는 `comments`와 `relay_messages`를 함께 공개한다.
 

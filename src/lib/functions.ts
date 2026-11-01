@@ -67,6 +67,9 @@ export const Functions = {
     invoke<{ id: string } | null>('start-mission', { missionId, type, dueAt }),
   /** F7 가구 놓기·비우기 */
   placeFurniture: (slot: Enums<'room_slot'>, furnitureId: string | null) => invoke<{ ok: boolean }>('place-furniture', { slot, furnitureId }),
+  /** F7 가구 옮기기. 그 자리에 다른 가구가 있으면 서버가 한 번에 서로 바꾼다 */
+  moveFurniture: (furnitureId: string, slot: Enums<'room_slot'>) =>
+    invoke<{ ok: boolean }>('place-furniture', { slot, furnitureId, move: true }),
   /** F6 댓글 남기기 (요청 ID로 중복 방지) */
   submitComment: (verificationId: string, body: string, requestId: string) =>
     invoke<Tables<'comments'> | null>('submit-comment', { verificationId, body, requestId }),
