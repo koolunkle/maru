@@ -20,7 +20,7 @@ const Titles: Record<EditableField, { title: string; hint: string }> = {
   minutes: { title: '하루 가능 시간', hint: '미션 길이를 고를 때 써요' },
 };
 
-/** S9 설정 > 카테고리·구·시간 재설정 (PRD F1) */
+/** S9 설정 > 카테고리·구·시간 재설정 (spec onboarding) */
 export function SettingsEdit({ field }: { field: EditableField }) {
   const { profile, updateProfile } = useSession();
   const [categories, setCategories] = useState<Category[]>(profile?.categories ?? []);

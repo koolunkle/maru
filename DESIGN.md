@@ -235,7 +235,7 @@ components:
 
 # DESIGN — MY서울루틴 (Maru)
 
-> 모든 값은 위 frontmatter 토큰이 단일 출처다. 기능·문구는 [PRD.md](./PRD.md).
+> 모든 값은 위 frontmatter 토큰이 단일 출처다. 기능 동작과 문구는 [openspec/specs/](./openspec/specs/)(문구 규칙은 copy-guidelines).
 
 ## 1. 컨셉 한 줄
 

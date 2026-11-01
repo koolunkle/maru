@@ -15,7 +15,7 @@ type SessionContextValue = {
   isReady: boolean;
   session: Session | null;
   profile: Profile | null;
-  /** S1 '시작하기' — 익명 계정 생성 (PRD F1) */
+  /** S1 '시작하기' — 익명 계정 생성 (spec onboarding) */
   signInAnonymously: () => Promise<void>;
   updateProfile: (values: EditableProfile) => Promise<void>;
   refreshProfile: () => Promise<void>;

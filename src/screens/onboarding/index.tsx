@@ -17,7 +17,7 @@ const Steps = [
   { question: '하루에 얼마나 낼 수 있어요?', hint: '나중에 언제든 바꿀 수 있어요' },
 ] as const;
 
-/** S2 온보딩 — 카테고리 → 구 → 하루 가능 시간 (PRD F1) */
+/** S2 온보딩 — 카테고리 → 구 → 하루 가능 시간 (spec onboarding) */
 export function Onboarding() {
   const { updateProfile } = useSession();
   const [step, setStep] = useState(0);

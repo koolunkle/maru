@@ -1,4 +1,4 @@
-// F2. AI 미션 추천 (PRD §6 F2)
+// F2. AI 미션 추천 (spec mission-recommendation)
 // POST { refresh?: boolean } → { daily: Mission[], weekly: Mission | null, source: 'ai' | 'rule' }
 // - 당일(KST) 추천이 있으면 그대로 반환, refresh는 하루 1회
 // - AI를 쓸 수 없으면 365 서울챌린지 시드에서 규칙대로 골라 저장한다(source: 'rule')
@@ -184,7 +184,7 @@ Deno.serve(
 
     const eventsById = new Map((events.data ?? []).map((e: { id: string; title: string }) => [e.id, e]));
     const rows = [...daily, weekly].map((m, i) => {
-      // 행사 연계는 주간 미션(마지막)만 허용한다. 난이도 4 = 행사 참여(PRD F2)
+      // 행사 연계는 주간 미션(마지막)만 허용한다. 난이도 4 = 행사 참여(spec mission-recommendation)
       const event = i === daily.length && m.event_id ? eventsById.get(m.event_id) : undefined;
       return {
         source: 'ai',

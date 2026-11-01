@@ -1,4 +1,4 @@
-/** PRD §7.2 금칙어 — AI가 만든 사용자 노출 문구에 들어가면 안 된다. */
+/** spec copy-guidelines 금칙어 — AI가 만든 사용자 노출 문구에 들어가면 안 된다. */
 export const BannedWords = ['외로움', '외로운', '고립', '은둔', '우울', '상담', '치료', '극복', '실패'];
 
 export function hasBannedWord(text: string) {

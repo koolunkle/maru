@@ -45,7 +45,7 @@ type PostCardProps = {
   onChange: (post: FeedPost) => void;
 };
 
-/** S6 게시물 카드 (DESIGN.md §5.2 S6, PRD F6) */
+/** S6 게시물 카드 (DESIGN.md §5.2 S6, spec feed) */
 export function PostCard({ post, userId, onChange }: PostCardProps) {
   const theme = useTheme();
   const [draft, setDraft] = useState('');

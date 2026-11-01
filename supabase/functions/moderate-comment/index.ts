@@ -1,4 +1,4 @@
-// F6 익명 댓글 검수 (PRD §6 F6)
+// F6 익명 댓글 검수 (spec content-moderation)
 // POST { comment_id } 또는 { relay_id } → { status, judged_by }
 // AI 검수에 실패하면 pending으로 남겨 공개하지 않는다
 // 클라이언트가 댓글 insert 직후 호출한다. 공개는 pg_cron(publish_due_comments)이 처리.
