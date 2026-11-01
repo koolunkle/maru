@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
-import { z } from 'zod/v4';
+import { z } from 'zod';
+import { loadSource } from './helpers/load-source.mjs';
 
 let endpoint;
 let verification;
@@ -23,8 +22,6 @@ const admin = {
   storage: { from: () => ({ download: async () => ({ data: new Blob(['photo']), error: null }) }) },
   async rpc(name, args) { rpcCalls.push({ name, args }); return { data: { result: 'pass' }, error: null }; },
 };
-const source = await readFile(new URL('../supabase/functions/verify-mission/index.ts', import.meta.url), 'utf8');
-const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
 class HttpError extends Error { constructor(status, code) { super(code); this.status = status; } }
 const imports = {
   'jsr:@supabase/functions-js/edge-runtime.d.ts': {},
@@ -36,9 +33,7 @@ const imports = {
   '../_shared/http.ts': { handler: (fn) => fn, HttpError, json: (body) => body },
   '../_shared/moderation-privacy.ts': { filterModerationText: (text) => ({ text, hasContact: false }) },
 };
-new Function('require', 'exports', 'Deno', outputText)((name) => {
-  assert.ok(name in imports, name); return imports[name];
-}, {}, { serve(fn) { endpoint = fn; } });
+await loadSource('../supabase/functions/verify-mission/index.ts', imports, { Deno: { serve(fn) { endpoint = fn; } } });
 function reset(result = null) {
   verification = { id: 'v', user_id: 'user', photo_path: 'photo', ai_result: result, user_missions: {
     id: 'm', status: 'in_progress', missions: { title: 'mission', verify_hint: 'hint' },

@@ -1,17 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { loadSource } from './helpers/load-source.mjs';
 
-async function loadModule(path) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', outputText)(() => { throw new Error('Unexpected dependency'); }, exports);
-  return exports;
-}
 
-const { nextReward } = await loadModule('../src/utils/next-reward.ts');
+const { nextReward } = await loadSource('../src/utils/next-reward.ts');
 
 // supabase/seed.sql의 가구 6종
 const furniture = [

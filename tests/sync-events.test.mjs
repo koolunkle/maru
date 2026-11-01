@@ -1,21 +1,11 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { loadSource } from './helpers/load-source.mjs';
 
-async function loadModule(path, require = () => { throw new Error('Unexpected dependency'); }) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', outputText)(require, exports);
-  return exports;
-}
 
-const kst = await loadModule('../supabase/functions/_shared/kst.ts');
-const events = await loadModule('../supabase/functions/_shared/seoul-events.ts', (name) => {
-  assert.equal(name, './kst.ts');
-  return kst;
-});
+const kst = await loadSource('../supabase/functions/_shared/kst.ts');
+const events = await loadSource('../supabase/functions/_shared/seoul-events.ts', { './kst.ts': kst });
 
 // 2026-10-28 서울 열린데이터광장 sample 응답에서 가져온 행
 const exhibition = {

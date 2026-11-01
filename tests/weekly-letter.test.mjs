@@ -1,27 +1,13 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { loadSource } from './helpers/load-source.mjs';
 
-async function loadModule(path, require = () => { throw new Error('Unexpected dependency'); }) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', outputText)(require, exports);
-  return exports;
-}
 
-const date = await loadModule('../src/utils/date.ts');
-const letter = await loadModule('../src/utils/weekly-letter.ts', (name) => {
-  assert.equal(name, './date', '시연용 리포트는 날짜 외에 API·개인 기록 의존성이 없다');
-  return date;
-});
-const kst = await loadModule('../supabase/functions/_shared/kst.ts');
-const privacy = await loadModule('../supabase/functions/_shared/moderation-privacy.ts');
-const server = await loadModule('../supabase/functions/_shared/weekly-letter.ts', (name) => {
-  assert.equal(name, './kst.ts');
-  return kst;
-});
+const date = await loadSource('../src/utils/date.ts');
+const letter = await loadSource('../src/utils/weekly-letter.ts', { './date': date });
+const kst = await loadSource('../supabase/functions/_shared/kst.ts');
+const privacy = await loadSource('../supabase/functions/_shared/moderation-privacy.ts');
+const server = await loadSource('../supabase/functions/_shared/weekly-letter.ts', { './kst.ts': kst });
 
 test('리포트에 보내는 기록만 가리고 원문과 기분은 유지한다', () => {
   const notes = [{ text: '010-1234-5678', mood: 3 }, { text: null, mood: 2 }];
