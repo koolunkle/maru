@@ -37,3 +37,20 @@ for (const provider of ['gemini', 'anthropic']) {
     }
   });
 }
+
+test('Gemini가 응답하지 않으면 제한 시간에 null을 반환해 대체 경로로 넘긴다', async () => {
+  class GoogleGenAI { interactions = { create: () => new Promise(() => {}) }; }
+  const imports = {
+    'npm:@google/genai@2.30.0': { GoogleGenAI },
+    'npm:@anthropic-ai/sdk@0.135.0': {},
+    'npm:@anthropic-ai/sdk@0.135.0/helpers/zod': {},
+    'npm:zod@4.6.7': { z },
+  };
+  const exports = {};
+  new Function('require', 'exports', 'Deno', outputText)((name) => imports[name], exports, {
+    env: { get: (name) => name === 'AI_PROVIDER' ? 'gemini' : name === 'GEMINI_API_KEY' ? 'test-key' : undefined },
+  });
+  const result = await exports.generateJson({ tier: 'light', system: 'system', text: 'text',
+    schema: z.object({ ok: z.boolean() }), timeoutMs: 20 });
+  assert.equal(result, null);
+});

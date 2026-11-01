@@ -8,7 +8,7 @@ const { outputText } = ts.transpileModule(source, { compilerOptions: { module: t
 const jpeg = new Blob([new Uint8Array([255, 216, 255, 1])]);
 const png = new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])]);
 
-function setup(rows, files = {}) {
+function setup(rows, files = {}, stall = false) {
   const downloads = [];
   const query = {
     select() { return query; }, eq(key, id) { assert.equal(key, 'mission_id'); assert.equal(id, 'target'); return query; },
@@ -21,7 +21,11 @@ function setup(rows, files = {}) {
       from(table) { assert.equal(table, 'mission_photos'); return query; },
       storage: { from(bucket) {
         assert.equal(bucket, 'mission-photos');
-        return { async download(path) { downloads.push(path); return { data: files[path], error: null }; } };
+        return { async download(path, _options, { signal }) {
+          downloads.push(path);
+          if (stall) return new Promise((resolve) => signal.addEventListener('abort', () => resolve({ data: null, error: signal.reason }), { once: true }));
+          return { data: files[path], error: null };
+        } };
       } },
     } },
     'jsr:@std/encoding@1/base64': { encodeBase64: (bytes) => Buffer.from(bytes).toString('base64') },
@@ -33,6 +37,15 @@ test('기준 사진이 없으면 저장소를 읽지 않는다', async () => {
   const { load, downloads } = setup([]);
   assert.deepEqual(await load(), []);
   assert.deepEqual(downloads, []);
+});
+
+test('기준 사진 다운로드가 응답하지 않으면 5초 제한으로 비교를 중단한다', async () => {
+  const keepAlive = setInterval(() => {}, 1000);
+  try {
+    await assert.rejects(setup([{ storage_path: 'stalled' }], {}, true).load(), /reference_photo_unavailable/);
+  } finally {
+    clearInterval(keepAlive);
+  }
 });
 test('JPEG와 PNG를 실제 바이트로 판별하고 힌트를 보존한다', async () => {
   const { load } = setup([{ storage_path: 'a', hint: 'a' }, { storage_path: 'b', hint: 'b' }], { a: jpeg, b: png });
