@@ -1,4 +1,4 @@
-// 생성: Supabase CLI, 운영 스키마 (직접 수정하지 말 것).
+// 생성: Supabase typegen, 로컬 마이그레이션 스키마 (직접 수정하지 말 것).
 export type Json =
   | string
   | number
@@ -18,15 +18,16 @@ export type Database = {
       app_config: {
         Row: {
           key: string
-          value: Json
+          value: NonNullable<Json>
         }
+        ComputedFields: never
         Insert: {
           key: string
-          value: Json
+          value: NonNullable<Json>
         }
         Update: {
           key?: string
-          value?: Json
+          value?: NonNullable<Json>
         }
         Relationships: []
       }
@@ -41,6 +42,7 @@ export type Database = {
           user_id: string
           verification_id: string
         }
+        ComputedFields: never
         Insert: {
           body: string
           created_at?: string
@@ -86,6 +88,7 @@ export type Database = {
           text: string
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           created_at?: string
           mood: number
@@ -119,6 +122,7 @@ export type Database = {
           user_id: string
           weekly_mission_id: string | null
         }
+        ComputedFields: never
         Insert: {
           created_at?: string
           daily_mission_ids: string[]
@@ -163,6 +167,7 @@ export type Database = {
           title: string
           url: string | null
         }
+        ComputedFields: never
         Insert: {
           district: string
           end_date: string
@@ -191,21 +196,22 @@ export type Database = {
           name: string
           slot_type: Database["public"]["Enums"]["furniture_slot_type"]
           sort: number
-          unlock_rule: Json
+          unlock_rule: NonNullable<Json>
         }
+        ComputedFields: never
         Insert: {
           id: string
           name: string
           slot_type: Database["public"]["Enums"]["furniture_slot_type"]
           sort: number
-          unlock_rule: Json
+          unlock_rule: NonNullable<Json>
         }
         Update: {
           id?: string
           name?: string
           slot_type?: Database["public"]["Enums"]["furniture_slot_type"]
           sort?: number
-          unlock_rule?: Json
+          unlock_rule?: NonNullable<Json>
         }
         Relationships: []
       }
@@ -221,6 +227,7 @@ export type Database = {
           status: Database["public"]["Enums"]["comment_status"]
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           body: string
           created_at?: string
@@ -266,6 +273,7 @@ export type Database = {
           mission_id: string
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           created_at?: string
           mission_id: string
@@ -293,6 +301,36 @@ export type Database = {
           },
         ]
       }
+      mission_photos: {
+        Row: {
+          hint: string
+          id: number
+          mission_id: string
+          storage_path: string
+        }
+        ComputedFields: never
+        Insert: {
+          hint?: string
+          id?: never
+          mission_id: string
+          storage_path: string
+        }
+        Update: {
+          hint?: string
+          id?: never
+          mission_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_photos_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       missions: {
         Row: {
           category: Database["public"]["Enums"]["mission_category"]
@@ -310,6 +348,7 @@ export type Database = {
           title: string
           verify_hint: string
         }
+        ComputedFields: never
         Insert: {
           category: Database["public"]["Enums"]["mission_category"]
           created_at?: string
@@ -371,10 +410,11 @@ export type Database = {
           last_attended: string | null
           nickname: string
           onboarded_at: string | null
-          preferences: Json
+          preferences: NonNullable<Json>
           rest_used_week: string | null
           streak: number
         }
+        ComputedFields: never
         Insert: {
           categories?: Database["public"]["Enums"]["mission_category"][]
           created_at?: string
@@ -386,7 +426,7 @@ export type Database = {
           last_attended?: string | null
           nickname: string
           onboarded_at?: string | null
-          preferences?: Json
+          preferences?: NonNullable<Json>
           rest_used_week?: string | null
           streak?: number
         }
@@ -401,7 +441,7 @@ export type Database = {
           last_attended?: string | null
           nickname?: string
           onboarded_at?: string | null
-          preferences?: Json
+          preferences?: NonNullable<Json>
           rest_used_week?: string | null
           streak?: number
         }
@@ -414,6 +454,7 @@ export type Database = {
           user_id: string
           verification_id: string
         }
+        ComputedFields: never
         Insert: {
           created_at?: string
           type: Database["public"]["Enums"]["reaction_type"]
@@ -448,21 +489,22 @@ export type Database = {
           rec_date: string
           refresh: boolean
           request_id: string
-          response: Json
+          response: NonNullable<Json>
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           rec_date: string
           refresh: boolean
           request_id: string
-          response: Json
+          response: NonNullable<Json>
           user_id: string
         }
         Update: {
           rec_date?: string
           refresh?: boolean
           request_id?: string
-          response?: Json
+          response?: NonNullable<Json>
           user_id?: string
         }
         Relationships: [
@@ -486,6 +528,7 @@ export type Database = {
           status: Database["public"]["Enums"]["comment_status"]
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           body: string
           category?: Database["public"]["Enums"]["mission_category"]
@@ -533,6 +576,7 @@ export type Database = {
           request_id: string
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           body: string
           created_at?: string
@@ -568,6 +612,7 @@ export type Database = {
           slot: Database["public"]["Enums"]["room_slot"] | null
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           acquired_at?: string
           furniture_id: string
@@ -609,6 +654,7 @@ export type Database = {
           type: Database["public"]["Enums"]["mission_type"]
           user_id: string
         }
+        ComputedFields: never
         Insert: {
           completed_at?: string | null
           due_at: string
@@ -650,15 +696,16 @@ export type Database = {
       }
       verification_responses: {
         Row: {
-          response: Json
+          response: NonNullable<Json>
           verification_id: string
         }
+        ComputedFields: never
         Insert: {
-          response: Json
+          response: NonNullable<Json>
           verification_id: string
         }
         Update: {
-          response?: Json
+          response?: NonNullable<Json>
           verification_id?: string
         }
         Relationships: [
@@ -683,6 +730,7 @@ export type Database = {
           user_id: string
           user_mission_id: string
         }
+        ComputedFields: never
         Insert: {
           ai_message?: string | null
           ai_result?: Database["public"]["Enums"]["verification_result"] | null
@@ -732,6 +780,7 @@ export type Database = {
           user_id: string
           week_start: string
         }
+        ComputedFields: never
         Insert: {
           body: string
           finalized?: boolean
@@ -765,7 +814,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      expire_due_missions: { Args: never; Returns: number }
+      expire_due_missions: { Args: Record<PropertyKey, never>; Returns: number }
       finish_verification: {
         Args: {
           p_judged_by: string
@@ -817,7 +866,7 @@ export type Database = {
         }[]
       }
       list_time_capsules: {
-        Args: never
+        Args: Record<PropertyKey, never>
         Returns: {
           body: string
           created_at: string
@@ -837,7 +886,10 @@ export type Database = {
         }
         Returns: undefined
       }
-      publish_due_comments: { Args: never; Returns: number }
+      publish_due_comments: {
+        Args: Record<PropertyKey, never>
+        Returns: number
+      }
       receive_mailbox_message: {
         Args: { recipient: string }
         Returns: undefined
@@ -902,11 +954,7 @@ export type Database = {
     }
     Enums: {
       comment_status:
-        | "pending"
-        | "approved"
-        | "rejected"
-        | "crisis"
-        | "published"
+        "pending" | "approved" | "rejected" | "crisis" | "published"
       furniture_slot_type: "floor" | "wall" | "window" | "desk"
       mission_category:
         | "walk"
@@ -965,8 +1013,7 @@ export type Tables<
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -990,8 +1037,7 @@ export type TablesInsert<
 
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Tables"] | { schema: keyof DatabaseWithoutInternals },
   TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
@@ -1015,8 +1061,7 @@ export type TablesUpdate<
 
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof DatabaseWithoutInternals },
+    keyof DefaultSchema["Enums"] | { schema: keyof DatabaseWithoutInternals },
   EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }

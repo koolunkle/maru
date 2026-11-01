@@ -11,6 +11,7 @@ import { admin, requireUserId } from '../_shared/clients.ts';
 import { CopyRules, hasBannedWord } from '../_shared/copy.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
 import { filterModerationText } from '../_shared/moderation-privacy.ts';
+import { loadMissionPhotos } from '../_shared/mission-photos.ts';
 
 const JudgeSchema = z.object({
   result: z.enum(['pass', 'retry', 'privacy']),
@@ -44,7 +45,7 @@ Deno.serve(
 
     const { data: v } = await admin
       .from('verifications')
-      .select('id, user_id, photo_path, text, ai_result, user_mission_id, user_missions(id, status, type, missions(title, verify_hint, category, event_id))')
+      .select('id, user_id, photo_path, text, ai_result, user_mission_id, user_missions(id, mission_id, status, type, missions(title, verify_hint, category, event_id))')
       .eq('id', verification_id)
       .single();
     if (!v || v.user_id !== userId) throw new HttpError(404, 'not_found');
@@ -64,14 +65,21 @@ Deno.serve(
     const { error: judgingError } = await admin.from('user_missions').update({ status: 'judging' }).eq('id', um.id).eq('status', 'in_progress');
     if (judgingError) throw judgingError;
 
-    let judged = await generateJson({
-      tier: 'main',
-      system: System,
-      text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, user_note: filterModerationText(v.text ?? '').text }),
-      image,
-      schema: JudgeSchema,
-      timeoutMs: 20_000,
-    });
+    let judged: z.infer<typeof JudgeSchema> | null = null;
+    try {
+      const photos = await loadMissionPhotos(um.mission_id);
+      judged = await generateJson({
+        tier: 'main',
+        system: System + (photos.length ? '\n첫 번째 이미지는 제출 사진이고 나머지는 해당 미션의 기준 사진입니다. 기준 사진은 장소 비교에만 사용하세요. 조명·각도가 달라도 같은 장소일 수 있고 불확실하면 기존의 관대한 기준을 따르세요. 직접 촬영 여부와 개인정보는 제출 사진만 판정하세요.' : ''),
+        text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, reference_hints: photos.map((p) => p.hint), user_note: filterModerationText(v.text ?? '').text }),
+        image,
+        referenceImages: photos.map((p) => p.image),
+        schema: JudgeSchema,
+        timeoutMs: 20_000,
+      });
+    } catch {
+      console.error('reference photos unavailable');
+    }
     let judgedBy: 'ai' | 'rule' = 'ai';
     if (!judged) {
       const { data: config } = await admin.from('app_config').select('value').eq('key', 'verify_fallback').maybeSingle();

@@ -4,6 +4,7 @@ import Anthropic from 'npm:@anthropic-ai/sdk@0.135.0';
 import { zodOutputFormat } from 'npm:@anthropic-ai/sdk@0.135.0/helpers/zod';
 import { GoogleGenAI } from 'npm:@google/genai@2.30.0';
 import { z } from 'npm:zod@4.6.7';
+import type { MissionImage } from './mission-photos.ts';
 
 type Tier = 'main' | 'light';
 
@@ -49,6 +50,8 @@ type Request<S extends z.ZodType> = {
   text: string;
   /** base64 JPEG */
   image?: string;
+  /** 제출 사진 뒤에 비교할 기준 사진을 순서대로 전달한다. */
+  referenceImages?: MissionImage[];
   schema: S;
   timeoutMs: number;
 };
@@ -115,6 +118,7 @@ async function geminiOnce<S extends z.ZodType>(
       input: [
         { type: 'text', text: req.text },
         ...(req.image ? [{ type: 'image' as const, data: req.image, mime_type: 'image/jpeg' }] : []),
+        ...(req.referenceImages ?? []).map((image) => ({ type: 'image' as const, data: image.data, mime_type: image.mimeType })),
       ],
       response_format: { type: 'text', mime_type: 'application/json', schema },
       generation_config: { thinking_level: thinking },
@@ -143,6 +147,7 @@ async function viaAnthropic<S extends z.ZodType>(req: Request<S>): Promise<unkno
           role: 'user',
           content: [
             ...(req.image ? [{ type: 'image' as const, source: { type: 'base64' as const, media_type: 'image/jpeg' as const, data: req.image } }] : []),
+            ...(req.referenceImages ?? []).map((image) => ({ type: 'image' as const, source: { type: 'base64' as const, media_type: image.mimeType, data: image.data } })),
             { type: 'text' as const, text: req.text },
           ],
         },
