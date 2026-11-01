@@ -38,7 +38,7 @@ function ResultMessage({ text, judgedBy }: { text: string; judgedBy: JudgedBy })
   );
 }
 
-/** S5 인증 (PRD F4 / DESIGN.md §5.2) */
+/** S5 인증 (spec photo-verification / DESIGN.md §5.2) */
 export function Verify({ missionId, userMissionId }: { missionId: string; userMissionId: string }) {
   const theme = useTheme();
   const { session } = useSession();

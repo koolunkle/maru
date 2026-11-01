@@ -45,7 +45,7 @@ type GrowthCardProps = {
   completedCount: number;
 };
 
-/** F11 성장 화분 (PRD F11 / DESIGN.md §5.2, §5.3, §6) */
+/** F11 성장 화분 (spec growth-plant / DESIGN.md §5.2, §5.3, §6) */
 export function GrowthCard({ completedCount }: GrowthCardProps) {
   const theme = useTheme();
   const reduceMotion = useReduceMotion();

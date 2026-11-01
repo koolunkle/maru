@@ -1,0 +1,41 @@
+schema: spec-driven
+
+context: |
+  Language: Korean
+  All artifacts must be written in Korean.
+  Keep OpenSpec structural headings and SHALL/MUST keywords in English.
+  Keep code identifiers, file paths, API names, and product names (Expo, Supabase, Gemini) in English.
+
+  ## 제품
+  MY서울루틴 (Maru). 서울 청년(19~39세, 핵심 세그먼트 청년 남성)을 위한 하루 5분 일상 챌린지.
+  AI가 미션을 추천하고, 사진으로 인증하면 가구 보상과 익명 응원이 쌓인다.
+  배경·문제·페르소나·범위는 docs/PRODUCT.md, 시각 명세와 토큰은 DESIGN.md.
+  현재 동작의 기준은 openspec/specs/ 이다. 기능 ID(F1~F16)는 각 spec의 Purpose에 적혀 있고 코드 주석이 이 ID를 쓴다.
+
+  ## 스택
+  - Expo SDK 58 (React Native, Expo Router), TypeScript strict. 웹(EAS Hosting)이 주력, Expo Go로 모바일 시연.
+  - Supabase 하나(ref jpipzrmspryzvjykxefm): Postgres + RLS, 익명 Auth, Storage, Edge Functions(Deno), pg_cron.
+  - AI(Gemini 기본, Claude 전환 가능)는 Edge Function의 supabase/functions/_shared/ai.ts generateJson으로만 부른다.
+  - 모든 날짜 경계는 Asia/Seoul(KST), 주 시작은 월요일.
+
+  ## 제약
+  - 필수 기능은 웹에서 동작해야 한다. Alert.alert처럼 웹에서 안 되는 API를 필수 흐름에 쓰지 않는다.
+  - 앱은 publishable 키로 RLS가 허용한 범위만 다룬다. 상태 전환(완료, 판정, 검수, 보상, 공개)은 Edge Function이나 DB 함수·트리거만 한다.
+  - AI를 쓸 수 없어도 앱은 계속 동작해야 하고, 규칙 대체 결과는 AI 결과처럼 보이면 안 된다.
+  - 사용자 문구는 해요체·제안형. 금칙어(외로움·고립·은둔·우울·상담·치료·극복·실패·미달성)는 copy-guidelines spec을 따른다.
+  - DB는 운영 프로젝트 하나를 함께 쓴다. 적용된 마이그레이션은 고치지 않고 새 파일을 만든다.
+
+rules:
+  proposal:
+    - "Why에는 docs/PRODUCT.md의 어느 문제(1.2절 번호)나 페르소나를 위한 변경인지 한 줄로 적는다."
+    - "범위에서 뺀 것을 What Changes 끝에 '하지 않는 것'으로 적는다."
+    - "Impact에 DB 마이그레이션, Edge Function 재배포, 운영 설정값(app_config) 변경 여부를 적는다."
+  specs:
+    - "spec은 사용자나 외부에서 관찰할 수 있는 동작만 쓴다. 테이블·컬럼·함수 이름 같은 구현은 design.md나 docs/ARCHITECTURE.md에 둔다."
+    - "사용자에게 보이는 고정 문구는 따옴표로 정확히 적는다."
+    - "AI가 관여하는 요구사항에는 AI를 쓸 수 없을 때의 Scenario를 반드시 둔다."
+  design:
+    - "DB 변경은 테이블·RLS 정책·서버 전용 컬럼을 적는다."
+  tasks:
+    - "마지막 그룹은 검증이다: npm run typecheck, npm run lint, npm test, 미리보기 배포 URL에서 각 Scenario 확인."
+    - "DB 변경이 있으면 마이그레이션 적용과 src/types/database.ts 재생성을 별도 작업으로 둔다."

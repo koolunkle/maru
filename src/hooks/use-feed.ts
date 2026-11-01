@@ -55,7 +55,7 @@ async function fetchFeed(userId: string, before?: string): Promise<FeedPost[]> {
   });
 }
 
-/** S6 피드: 공개 인증 최신순, 20개씩 (PRD §5.2) */
+/** S6 피드: 공개 인증 최신순, 20개씩 (spec feed) */
 export function useFeed(userId: string | undefined) {
   const [posts, setPosts] = useState<FeedPost[] | null>(null);
   const [error, setError] = useState<Error | null>(null);

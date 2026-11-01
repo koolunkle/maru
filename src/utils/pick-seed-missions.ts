@@ -39,7 +39,7 @@ function rank(pool: Mission[], categories: Profile['categories'], seed: number) 
 }
 
 /**
- * AI 추천이 없을 때의 규칙 기반 대체 (PRD F2: "AI 실패 시 시드 미션으로 대체").
+ * AI 추천이 없을 때의 규칙 기반 대체 (spec mission-recommendation "AI를 쓸 수 없을 때 시드로 대체").
  * - 일일: 난이도 ≤ 프로필+1, 소요 시간 ≤ 하루 가능 시간. 부족하면 소요 시간 조건을 푼다.
  * - 주간: 난이도 = 프로필+1 이상인 미션 중 1개. 같은 주(weekKey) 동안 유지된다.
  */

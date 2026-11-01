@@ -19,7 +19,7 @@ type Rule =
   | { type: 'event_mission' };
 
 /**
- * 이 미션을 하면 가까워지는 미획득 가구 중 가장 가까운 것 하나 (PRD F8 reward-badge).
+ * 이 미션을 하면 가까워지는 미획득 가구 중 가장 가까운 것 하나 (spec personalization reward-badge).
  * 조건은 서버 finish_verification의 가구 지급 규칙과 같다. 남은 횟수가 같으면 가구 순서(sort)가 앞선 것.
  */
 export function nextReward(

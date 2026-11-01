@@ -1,4 +1,4 @@
-// F4 사진 인증 판정 + F5 출석 + F7 가구 보상 (PRD §6)
+// F4 사진 인증 판정 + F5 출석 + F7 가구 보상 (spec photo-verification, attendance-streak, room-rewards)
 // POST { verification_id } → { result, message, streak, rewards: Furniture[], judged_by: 'ai' | 'rule' }
 // AI를 쓸 수 없으면 app_config.verify_fallback에 따라 통과('pass') 또는 재시도 안내('retry_later')
 // 클라이언트가 사진 업로드 → verifications insert(ai_result null) 후 호출한다.
@@ -81,7 +81,7 @@ Deno.serve(
         if (error) throw error;
         throw new HttpError(503, 'ai_unavailable');
       }
-      // PRD F4 '관대한 판정' 원칙에 따라 통과 처리
+      // spec photo-verification의 '애매하면 통과' 원칙에 따라 통과 처리
       judged = { result: 'pass', message: FallbackMessage.pass };
       judgedBy = 'rule';
     }

@@ -19,6 +19,7 @@ npx expo lint               # lint
 npx tsc --noEmit            # typecheck
 npx expo-doctor             # diagnose dependency and config issues
 npx expo install --fix      # fix incompatible package versions
+npm run spec:validate       # validate OpenSpec specs and changes
 ```
 
 Run lint and typecheck before declaring any task done.
@@ -42,8 +43,11 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## 이 프로젝트 (MY서울루틴, Maru)
 
-- 기능·문구 명세: `PRD.md`, 시각 명세·토큰: `DESIGN.md` — 구현은 이 두 문서를 단일 출처로 따른다. 토큰은 `src/constants/theme.ts`에 DESIGN.md와 같은 값으로 둔다.
-- 통합 작업 목록과 완료 기준: `docs/ROADMAP.md`. 브랜치·커밋·PR·DB 변경 절차: `CONTRIBUTING.md`.
+- **명세 중심 개발(OpenSpec).** 지금 동작의 기준은 `openspec/specs/<capability>/spec.md`, 시각 명세·토큰은 `DESIGN.md`. 토큰은 `src/constants/theme.ts`에 DESIGN.md와 같은 값으로 둔다. 제품 배경·페르소나·범위는 `docs/PRODUCT.md`, 구현 지도는 `docs/ARCHITECTURE.md`.
+- 사용자가 겪는 동작을 바꾸는 작업은 코드보다 먼저 `openspec/changes/<이름>/`에 proposal·delta spec·tasks를 쓴다(`/opsx:propose`). spec대로 고치는 버그 수정과 리팩터링은 change 없이 한다. 기준은 `CONTRIBUTING.md` 3절.
+- 작성 규칙은 `openspec/config.yaml`: 본문은 한국어, `### Requirement:`·`#### Scenario:` 제목과 SHALL/MUST는 영어. spec에는 관찰 가능한 동작만 쓰고 테이블·함수 이름은 쓰지 않는다. 끝나면 `npm run spec:validate`.
+- 코드 주석의 기능 ID(F1~F16)는 spec Purpose와 `docs/PRODUCT.md` 3.1절 표로 찾는다.
+- 브랜치·커밋·PR·DB 변경 절차: `CONTRIBUTING.md`.
 - 커밋: Conventional 헤더(한국어), 본문은 `-` 불릿. `Co-Authored-By`·`Session` 줄을 넣지 않는다.
 - 언어: TypeScript (strict). 앱 코드는 `src/`, 라우트는 `src/app/`, 화면 본문은 `src/screens/`.
 - SDK 58 import 경로: `Stack` ← `expo-router/stack`, `Tabs` ← `expo-router/js-tabs`, `Link` ← `expo-router/link`, `Redirect` ← `expo-router`.

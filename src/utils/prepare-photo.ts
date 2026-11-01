@@ -2,7 +2,7 @@ import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 
 const MaxSide = 1024;
 
-/** PRD F4: 업로드 전 긴 변 1024px, JPEG 품질 0.8로 변환한다. */
+/** spec photo-verification: 업로드 전 긴 변 1024px, JPEG 품질 0.8로 변환한다. */
 export async function preparePhoto(uri: string, width: number, height: number) {
   const context = ImageManipulator.manipulate(uri);
   if (Math.max(width, height) > MaxSide) {
