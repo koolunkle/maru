@@ -46,7 +46,8 @@ flowchart LR
 | `src/components/` | 공용 UI(`bottom-sheet`(모든 시트), `mission-card`, `ai-card`, `help-card`, `growth-card`, `mailbox-card`, `daily-note-card`, `capsule-card` 등). DESIGN.md §5.3 이름과 맞춘다 |
 | `src/hooks/` | `use-today-missions`(홈 추천·진행), `use-reward-progress`(다음 보상), `use-feed`(피드), `use-theme` |
 | `src/providers/session-provider.tsx` | 익명 세션과 `profiles` 행 로드, 삭제된 계정 세션 정리 |
-| `src/lib/supabase.ts` | Supabase 클라이언트(환경 변수 읽는 유일한 곳) |
+| `src/lib/supabase.ts` | Supabase 클라이언트와 앱 공개 환경 변수 |
+| `src/lib/admin-missions.ts` | 비밀번호를 메모리에서 전달하는 관리자 전용 HTTP 호출. 세션 JWT 대신 서버 비밀번호 검사를 사용 |
 | `src/lib/functions.ts` | Edge Function 호출 래퍼 `Functions.*`와 응답 타입. 새 함수는 여기에 추가 |
 | `src/lib/mailbox.ts`, `daily-note.ts`, `capsule.ts`, `missions.ts`, `relay.ts`, `verification.ts`, `feed.ts`, `room.ts` | 화면별 테이블·Storage 호출. 화면은 `supabase`를 직접 부르지 않고 이 파일과 `Functions.*`를 쓴다 |
 | `src/constants/theme.ts` | 디자인 토큰(DESIGN.md와 같은 값) |
@@ -82,8 +83,10 @@ flowchart LR
 | S11 | `/letter/[week]` | `screens/letter.tsx` | weekly-letter |
 | S12 | `/capsule`, 휴게소 시트 | `screens/capsule.tsx` | time-capsule |
 | S13 | 휴게소 시트 | `components/daily-note-card.tsx` | daily-note. 별도 경로 없음 |
+| 관리 | `/admin` | `screens/admin.tsx` | admin-mission-management. 앱 로그인·온보딩과 독립 |
 
 새 Stack 화면은 `src/app/_layout.tsx`의 로그인·온보딩 완료 `Stack.Protected` 블록에 `Stack.Screen`을 추가해야 접근된다.
+관리 화면은 이 블록 밖에 있으며 모든 관리 데이터 접근은 서버가 별도로 인증한다. 사용법은 [ADMIN.md](./ADMIN.md).
 
 ## 4. 주요 흐름
 
@@ -139,6 +142,7 @@ DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nick
 | `profiles` | id(=auth.uid), nickname, categories enum[], district, daily_minutes, difficulty, difficulty_changed_at, preferences, streak, last_attended, rest_used_week, onboarded_at |
 | `missions` | id, source(`seed`/`ai`/`event`), seed_no, official_title, official_level, title, category, difficulty, minutes, verify_hint, reason, event_id, created_for(ai 미션 대상자), start_date, end_date(빈 날짜는 제한 없음, KST 양 끝 포함) |
 | `mission_photos` | id, mission_id(UUID), storage_path, hint(원본 비교 힌트). RLS 활성화, service_role만 접근 |
+| `admin_login_attempts` | 비밀번호와 주소를 함께 해시한 제한 키, 오류 횟수, 제한 시작 시각. RLS 활성화, service_role만 접근. 1일 지난 항목은 다음 검사 시 정리 |
 | `daily_recommendations` | (user_id, rec_date) PK, daily_mission_ids, weekly_mission_id, refresh_count(0~1) |
 | `user_missions` | id, user_id, mission_id, type(`daily`/`weekly`), status(`in_progress`/`judging`/`completed`/`expired`), due_at, started_at, completed_at, resolved_at(결과 확정 시각) |
 | `verifications` | id, user_mission_id, user_id, photo_path, text, ai_result(`pass`/`retry`/`privacy`), ai_message, is_public |
@@ -182,6 +186,8 @@ RPC(읽기 전용, 필요한 컬럼만 노출): `get_nicknames`, `get_participan
 Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, 본인 또는 공개 통과건 읽기.
 
 ## 8. Edge Functions
+
+`admin-missions`는 공유 비밀번호로 공용 미션과 기준 사진을 관리한다. 비밀번호는 `ADMIN_PASSWORD` 서버 시크릿으로만 설정하며 요청마다 고정 길이 해시를 비교한다. 틀린 입력은 주소별 5회·전체 100회 후 10분 제한한다. 응답은 `no-store`, 사진 미리보기는 5분 서명 URL이다. 이 함수만 `--no-verify-jwt`로 배포하며 기존 사용자 함수의 JWT 검증은 유지한다. `check_admin_attempt`, `admin_delete_mission`, `admin_attach_photo` RPC는 서버 전용이다. 삭제와 4장 제한은 미션 행 잠금 안에서 검사하며 사용자 기록·참여·릴레이·사진이 연결된 미션 삭제를 막는다.
 
 모든 AI 호출은 `_shared/ai.ts`의 `generateJson()`을 거친다. 제공자(`AI_PROVIDER`), 모델 등급(`main`: 추천·판정·편지 / `light`: 검수), 시간 제한, 실패 시 `null` 반환 규칙이 여기 있다. 시간 제한: 추천 25초, 판정 20초, 검수 10초, 편지 25초.
 
@@ -253,6 +259,7 @@ AI 호출은 앱이 아니라 Edge Function(`supabase/functions/`)이 한다. �
 | `AI_PROVIDER` | 선택 | `gemini` 또는 `anthropic`으로 강제 선택 | `_shared/ai.ts` |
 | `SEOUL_OPEN_API_KEY` | 행사 동기화 시 | 서울 열린데이터광장 일반 인증키. 주소 경로에 들어가므로 로그에 주소를 남기지 않는다 | `sync-events` |
 | `SYNC_EVENTS_SECRET` | 행사 동기화 시 | cron만 `sync-events`를 부를 수 있게 하는 비밀값. Vault `sync_events_secret`과 같은 값 | `sync-events` |
+| `ADMIN_PASSWORD` | 관리자 웹 사용 시 | 16자 이상 공유 관리자 비밀번호. 앱 환경 변수로 만들지 않는다 | `admin-missions` |
 
 - **자동** 항목은 Supabase가 모든 함수에 넣어 준다. 직접 설정하지 않는다(`SUPABASE_` 접두사는 예약어라 설정도 안 된다).
 - 제공자 선택 규칙: `AI_PROVIDER=anthropic` → Claude / `AI_PROVIDER=gemini` → Gemini / 비어 있으면 `GEMINI_API_KEY`가 있을 때 Gemini, 없으면 Claude.
