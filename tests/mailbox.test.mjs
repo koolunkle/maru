@@ -1,24 +1,8 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { beforeEach, test } from 'node:test';
-import ts from 'typescript';
-import { z } from 'zod/v4';
+import { z } from 'zod';
+import { loadSource } from './helpers/load-source.mjs';
 
-// Expo/Deno 대신 경계 모듈만 주입하고 실제 소스를 실행한다.
-async function loadSource(path, imports, globals = {}) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', ...Object.keys(globals), outputText)(
-    (name) => {
-      assert.ok(name in imports, `Unexpected import: ${name}`);
-      return imports[name];
-    },
-    exports,
-    ...Object.values(globals),
-  );
-  return exports;
-}
 let response;
 const calls = [];
 const mailbox = await loadSource('../src/lib/mailbox.ts', {

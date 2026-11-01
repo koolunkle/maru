@@ -1,23 +1,8 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { beforeEach, test } from 'node:test';
-import ts from 'typescript';
-import { z } from 'zod/v4';
+import { z } from 'zod';
+import { loadSource } from './helpers/load-source.mjs';
 
-async function load(path, imports, globals = {}) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', ...Object.keys(globals), outputText)(
-    (name) => {
-      assert.ok(name in imports, `Unexpected import: ${name}`);
-      return imports[name];
-    },
-    exports,
-    ...Object.values(globals),
-  );
-  return exports;
-}
 
 let endpoint;
 let aiResult;
@@ -56,8 +41,8 @@ const admin = {
     return query;
   },
 };
-const { handler, HttpError, json } = await load('../supabase/functions/_shared/http.ts', {});
-const privacy = await load('../supabase/functions/_shared/moderation-privacy.ts', {});
+const { handler, HttpError, json } = await loadSource('../supabase/functions/_shared/http.ts', {});
+const privacy = await loadSource('../supabase/functions/_shared/moderation-privacy.ts', {});
 test('연락처와 명시된 이름·주소를 가리고 일반 문장은 보존한다', () => {
   for (const value of ['01012345678', '02-123-4567', '+82 10 1234 5678', 'a.b@example.com', '이름: 홍길동', '홍길동님', '서울시 강남구 테헤란로 123']) {
     assert.notEqual(privacy.filterModerationText(value).text, value);
@@ -93,7 +78,7 @@ test('일상 문장과 기분 표현은 가리지 않는다', () => {
     assert.equal(privacy.filterModerationText(value).text, value, value);
   }
 });
-const moderation = await load('../supabase/functions/_shared/moderation.ts', {
+const moderation = await loadSource('../supabase/functions/_shared/moderation.ts', {
   'npm:zod@4.6.7': { z },
   './ai.ts': {
     async generateJson(req) {
@@ -105,7 +90,7 @@ const moderation = await load('../supabase/functions/_shared/moderation.ts', {
   },
   './moderation-privacy.ts': privacy,
 });
-await load(
+await loadSource(
   '../supabase/functions/moderate-comment/index.ts',
   {
     'jsr:@supabase/functions-js/edge-runtime.d.ts': {},
