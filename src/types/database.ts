@@ -337,6 +337,7 @@ export type Database = {
           created_at: string
           created_for: string | null
           difficulty: number
+          end_date: string | null
           event_id: string | null
           id: string
           minutes: number
@@ -345,6 +346,7 @@ export type Database = {
           reason: string | null
           seed_no: number | null
           source: Database["public"]["Enums"]["mission_source"]
+          start_date: string | null
           title: string
           verify_hint: string
         }
@@ -354,6 +356,7 @@ export type Database = {
           created_at?: string
           created_for?: string | null
           difficulty: number
+          end_date?: string | null
           event_id?: string | null
           id?: string
           minutes: number
@@ -362,6 +365,7 @@ export type Database = {
           reason?: string | null
           seed_no?: number | null
           source: Database["public"]["Enums"]["mission_source"]
+          start_date?: string | null
           title: string
           verify_hint: string
         }
@@ -370,6 +374,7 @@ export type Database = {
           created_at?: string
           created_for?: string | null
           difficulty?: number
+          end_date?: string | null
           event_id?: string | null
           id?: string
           minutes?: number
@@ -378,6 +383,7 @@ export type Database = {
           reason?: string | null
           seed_no?: number | null
           source?: Database["public"]["Enums"]["mission_source"]
+          start_date?: string | null
           title?: string
           verify_hint?: string
         }

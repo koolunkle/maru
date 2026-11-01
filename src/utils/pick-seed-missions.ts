@@ -44,6 +44,7 @@ function rank(pool: Mission[], categories: Profile['categories'], seed: number) 
  * - 주간: 난이도 = 프로필+1 이상인 미션 중 1개. 같은 주(weekKey) 동안 유지된다.
  */
 export function pickSeedMissions(seeds: Mission[], profile: Profile, date: string, weekKey: string) {
+  seeds = seeds.filter((m) => (!m.start_date || m.start_date <= date) && (!m.end_date || m.end_date >= date));
   const seed = hash(`${profile.id}:${date}`);
   const weekSeed = hash(`${profile.id}:${weekKey}`);
   const maxDifficulty = profile.difficulty + 1;
