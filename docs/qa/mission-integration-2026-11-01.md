@@ -40,4 +40,4 @@
 - 실제 제공자 장애·20초 시간 초과 환경의 종단 간 검증.
 - Expo Go의 실기기 확인.
 
-기존 GeminiPicture 관리자 페이지를 Maru DB용으로 통합하는 작업은 PR #83에 포함하지 않았다. OpenSpec change의 archive와 PR의 검토 준비 전환은 남은 검증 범위를 확정한 뒤 진행한다.
+기존 GeminiPicture 관리자 페이지를 Maru DB용으로 통합하는 작업은 PR #83에 포함하지 않았다. 사용자가 사진 작업을 나중으로 미뤄 남은 검증은 `validate-mission-photo-quality` change의 미완료 작업으로 이전했다. 구현된 두 change는 기준 spec에 반영하고 PR은 검토 준비 상태로 전환한다. 실제 사진 품질과 실기기 검증의 통과를 뜻하지 않는다.
