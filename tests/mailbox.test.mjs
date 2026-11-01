@@ -82,6 +82,7 @@ let user = '10000000-0000-4000-8000-000000000001';
 let aiResult = null;
 let aiCalls = 0;
 let aiText;
+let aiSystem;
 const operations = [];
 let results = [];
 const admin = {
@@ -131,18 +132,24 @@ const admin = {
 };
 const { handler, HttpError, json } = await loadSource('../supabase/functions/_shared/http.ts', {});
 const privacy = await loadSource('../supabase/functions/_shared/moderation-privacy.ts', {});
+const moderation = await loadSource('../supabase/functions/_shared/moderation.ts', {
+  'npm:zod@4.6.7': { z },
+  './ai.ts': {
+    async generateJson(req) {
+      aiCalls++;
+      aiText = req.text;
+      aiSystem = req.system;
+      return aiResult;
+    },
+  },
+  './moderation-privacy.ts': privacy,
+});
 await loadSource(
   '../supabase/functions/mailbox/index.ts',
   {
     'jsr:@supabase/functions-js/edge-runtime.d.ts': {},
     'npm:zod@4.6.7': { z },
-    '../_shared/ai.ts': {
-      async generateJson(req) {
-        aiCalls++;
-        aiText = req.text;
-        return aiResult;
-      },
-    },
+    '../_shared/moderation.ts': moderation,
     '../_shared/clients.ts': {
       admin,
       async requireUserId() {
@@ -151,7 +158,6 @@ await loadSource(
       },
     },
     '../_shared/http.ts': { handler, HttpError, json },
-    '../_shared/moderation-privacy.ts': privacy,
   },
   {
     Deno: {
@@ -232,4 +238,11 @@ test('우체통 검수에서 개인정보를 가리고 위기 판정을 우선�
     assert.doesNotMatch(aiText, /홍길동|test@example.com/);
     assert.deepEqual(operations.at(-1).update, { status: expected });
   }
+});
+test('우체통 검수는 댓글·릴레이와 같은 공통 규칙을 쓴다', async () => {
+  const saved = { id: 'saved', request_id: 'request-00000001', body: '응원해요', status: 'pending' };
+  aiResult = { status: 'approved' };
+  results = [{ error: null }, { data: saved }, { data: { ...saved, status: 'approved' } }];
+  await request({ action: 'send', requestId: saved.request_id, body: saved.body });
+  assert.equal(aiSystem, moderation.ModerationSystem);
 });

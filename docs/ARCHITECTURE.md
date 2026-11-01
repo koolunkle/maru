@@ -57,7 +57,7 @@ flowchart LR
 | `src/utils/` | KST 날짜(`date.ts`), 시드 미션 고르기, 사진 리사이즈 |
 | `src/types/database.ts` | `supabase gen types`로 생성. 직접 수정 금지 |
 | `supabase/migrations/` | 스키마·RLS·트리거·RPC·cron. 적용된 파일은 고치지 않는다 |
-| `supabase/functions/` | Edge Functions(Deno). `_shared/`: `ai.ts`(AI 호출), `clients.ts`(서버 클라이언트·호출자 확인), `copy.ts`(금칙어), `fallback.ts`, `http.ts`, `kst.ts`, `weekly-letter.ts` |
+| `supabase/functions/` | Edge Functions(Deno). `_shared/`: `ai.ts`(AI 호출), `clients.ts`(서버 클라이언트·호출자 확인), `copy.ts`(금칙어), `moderation.ts`(댓글·릴레이·우체통 공통 검수), `moderation-privacy.ts`(AI에 보내기 전 개인정보 가리기), `fallback.ts`, `http.ts`, `kst.ts`, `weekly-letter.ts` |
 | `supabase/tests/`, `tests/` | SQL 시나리오 테스트(로컬 DB용), node 테스트(전체 `npm test`, 하나만 `npm run test:mailbox` 등) |
 | `supabase/seed.sql` | 시드(365 서울챌린지 36개 + 가구 6종). `npm run seed:build`로 생성 |
 | `data/`, `scripts/build-seed.py` | 시드 원본 JSON과 변환 스크립트 |
