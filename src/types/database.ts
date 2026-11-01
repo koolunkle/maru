@@ -15,6 +15,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_login_attempts: {
+        Row: {
+          failures: number
+          key_hash: string
+          window_start: string
+        }
+        Insert: {
+          failures?: number
+          key_hash: string
+          window_start?: string
+        }
+        Update: {
+          failures?: number
+          key_hash?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           key: string
@@ -800,6 +818,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_attach_photo: {
+        Args: { p_hint: string; p_mission_id: string; p_storage_path: string }
+        Returns: number
+      }
+      admin_delete_mission: {
+        Args: { p_mission_id: string }
+        Returns: undefined
+      }
+      check_admin_attempt: {
+        Args: { p_key_hash: string; p_limit?: number; p_valid: boolean }
+        Returns: boolean
+      }
       expire_due_missions: { Args: never; Returns: number }
       finish_verification: {
         Args: {
