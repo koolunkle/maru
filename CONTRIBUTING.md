@@ -71,7 +71,7 @@ spec이 틀렸다는 걸 발견했는데 지금 동작이 맞다면, 그것도 �
 
 OpenSpec CLI는 개발 의존성으로 들어 있다(`npm run spec -- <명령>`). Claude Code의 `/opsx:*` 명령은 터미널에서 `openspec`을 바로 부르므로, 쓰려면 한 번 `npm i -g @fission-ai/openspec@1.16.0`을 한다.
 
-1. **제안**: main에서 브랜치를 만들고(`feat/add-heavy-mood-notice`처럼 change 이름 그대로) `/opsx:propose "하고 싶은 것"`을 실행하거나 `npm run spec -- new change <이름>`으로 폴더를 만든다. `openspec/changes/<이름>/`에 아래를 쓴다.
+1. **제안**: main에서 브랜치를 만들고(`feat/add-mission-share`처럼 change 이름 그대로) `/opsx:propose "하고 싶은 것"`을 실행하거나 `npm run spec -- new change <이름>`으로 폴더를 만든다. `openspec/changes/<이름>/`에 아래를 쓴다.
    - `proposal.md` — 이 작업의 PRD. 왜(PRODUCT의 어느 문제·페르소나), 무엇이 바뀌나, 하지 않는 것, 영향(DB·함수·운영 설정)
    - `specs/<capability>/spec.md` — 기존 spec과의 차이. `## ADDED` / `## MODIFIED`(바뀐 Requirement 전체) / `## REMOVED`(이유 포함) Requirements
    - `design.md` — 기술 결정이 있을 때만(테이블·RLS·함수, 고른 방법과 버린 방법)
