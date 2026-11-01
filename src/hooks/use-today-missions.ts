@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { FunctionError, Functions, type JudgedBy } from '@/lib/functions';
-import { createMailboxRequestId } from '@/lib/mailbox';
 import { supabase } from '@/lib/supabase';
 import { useSession } from '@/providers/session-provider';
 import type { Tables } from '@/types/database';
 import { kstDate, kstEndOfWeek } from '@/utils/date';
 import { pickSeedMissions } from '@/utils/pick-seed-missions';
+import { createRequestId } from '@/utils/request-id';
 
 type Mission = Tables<'missions'>;
 type Profile = Tables<'profiles'>;
@@ -101,7 +101,7 @@ export function useTodayMissions() {
   const refresh = useCallback(async (): Promise<'ok' | 'limit' | 'failed'> => {
     if (!profile || refreshWorking.current) return 'failed';
     refreshWorking.current = true;
-    refreshRequest.current ??= createMailboxRequestId();
+    refreshRequest.current ??= createRequestId();
     setRefreshing(true);
     try {
       setData(await fetchToday(profile, true, refreshRequest.current));

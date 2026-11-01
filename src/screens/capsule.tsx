@@ -13,9 +13,9 @@ import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { listCapsules, openCapsule, sendCapsule, type Capsule } from '@/lib/capsule';
 import { clearDraft, readDraft, writeDraft } from '@/lib/drafts';
-import { createMailboxRequestId } from '@/lib/mailbox';
 import { useSession } from '@/providers/session-provider';
 import { addKstDays, formatDateRange, kstDate } from '@/utils/date';
+import { createRequestId } from '@/utils/request-id';
 
 const dayLabel = (day: string) => formatDateRange(day, day);
 
@@ -44,7 +44,7 @@ export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; a
   const [selected, setSelected] = useState<string | null>(null);
   const [pending, setPending] = useState(draft?.pending ?? false);
   const working = useRef(false);
-  const requestId = useRef(draft?.requestId ?? createMailboxRequestId());
+  const requestId = useRef(draft?.requestId ?? createRequestId());
   const keep = (next: Partial<CapsuleDraft>) =>
     writeDraft<CapsuleDraft>(key, { body, days, requestId: requestId.current, pending, ...next });
   const autoOpened = useRef(false);
@@ -71,7 +71,7 @@ export function CapsuleScreen({ sheet = false, arrivalId }: { sheet?: boolean; a
     working.current = true; setBusy(true); setError(''); setSentNotice('');
     try {
       await sendCapsule(body.trim(), days, requestId.current);
-      requestId.current = createMailboxRequestId(); setPending(false); setBody(''); clearDraft(key);
+      requestId.current = createRequestId(); setPending(false); setBody(''); clearDraft(key);
       setSentNotice(`캡슐을 보냈어요. ${dayLabel(addKstDays(kstDate(), days))}에 열려요.`);
       await load();
     } catch (cause) {

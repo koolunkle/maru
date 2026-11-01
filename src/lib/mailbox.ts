@@ -25,10 +25,6 @@ export const MailboxStatus: Record<MailboxMessage['status'], string> = {
   crisis: '이 한 줄은 전달되지 않았어요. 이야기를 들어줄 곳이 있어요.',
 };
 
-export function createMailboxRequestId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 12).padEnd(10, '0')}`;
-}
-
 async function invokeMailbox<T>(body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>('mailbox', { body });
   if (error) throw error;
