@@ -187,6 +187,12 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 
 기준 사진 비교는 GeminiPicture의 방식을 기존 판정에 통합했다. `_shared/mission-photos.ts`가 비공개 `mission-photos` 버킷에서 해당 미션의 사진만 읽는다. 최대 4장·각 2 MiB(JPEG·PNG·WebP), 읽기 제한 5초. 제출 사진을 첫 번째로 보내고 나머지를 장소 비교에 사용한다. 사진 없음은 기존 판정, 일부라도 누락·초과·형식 오류가 있으면 `verify_fallback`을 따른다. 경로 조회와 업로드는 서버 관리 권한으로만 하며 앱에는 키나 경로를 공개하지 않는다. 테스트 미션은 이관하지 않는다.
 
+2026-11-01 사용자 승인 후 운영 프로젝트 `jpipzrmspryzvjykxefm`에 `20261101090000_mission_photos`·`20261101091000_mission_schedule`를 적용했다. 기존 이력과 일치함을 확인하고 `verify-mission`, `recommend-missions`, `moderate-comment`, `mailbox`, `write-weekly-letter`를 배포했다. 기존 미션 96개와 기존 진행 미션의 상태·기한은 유지됐고, 사진 테이블의 RLS·서버 전용 권한 및 비공개 버킷을 확인했다. DB 타입은 적용 후 운영 스키마에서 재생성했다.
+
+적용 후 운영 SQL 트랜잭션에서 날짜 경계·기간 보정·동일 요청·새로고침 제한·진행 보존을 검증하고 롤백했다. 임시 익명 계정으로 배포 함수의 동시 HTTP 캐시 조회·새로고침 재시도·운영자 기간 변경 후 보정·사진 경로 접근 차단·존재하지 않는 인증의 404를 확인한 뒤 계정과 관련 데이터를 삭제했다. 실제 사진 판정의 정확도·지연·비용과 미리보기 화면 확인은 change의 남은 검증 항목이다.
+
+문제가 생겨 이전 동작으로 되돌릴 때는 배포 전 커밋 `0687a17`의 해당 Edge Functions를 별도 작업 디렉터리에서 다시 배포하고, 기존 `20261028123000_atomic_recommendations.sql`의 `save_recommendation` 정의만 새 롤백 마이그레이션에서 `CREATE OR REPLACE FUNCTION`으로 복구한다. 새 컬럼·사진 테이블·버킷과 이력은 유지해 등록 데이터를 보존한다. 적용된 마이그레이션을 수정하거나 테이블·버킷을 삭제하지 않는다.
+
 | 함수 | 입력 | 출력 | 호출 시점 |
 | --- | --- | --- | --- |
 | `recommend-missions` | user_id | 미션 4개 | F2 |
