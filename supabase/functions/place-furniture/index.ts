@@ -13,15 +13,25 @@ const request = z.object({
   move: z.boolean().optional(),
 });
 
-Deno.serve(handler(async (req) => {
-  const userId = await requireUserId(req);
-  const input = request.safeParse(await req.json().catch(() => null));
-  if (!input.success) throw new HttpError(400, 'invalid_placement');
-  const { slot, furnitureId, move } = input.data;
-  if (move && !furnitureId) throw new HttpError(400, 'invalid_placement');
-  const { error } = move
-    ? await admin.rpc('move_furniture', { p_user_id: userId, p_furniture_id: furnitureId!, p_slot: slot })
-    : await admin.rpc('place_furniture', { p_user_id: userId, p_slot: slot, p_furniture_id: furnitureId });
-  if (error) throw error;
-  return json({ ok: true });
-}));
+Deno.serve(
+  handler(async (req) => {
+    const userId = await requireUserId(req);
+    const input = request.safeParse(await req.json().catch(() => null));
+    if (!input.success) throw new HttpError(400, 'invalid_placement');
+    const { slot, furnitureId, move } = input.data;
+    if (move && !furnitureId) throw new HttpError(400, 'invalid_placement');
+    const { error } = move
+      ? await admin.rpc('move_furniture', {
+          p_user_id: userId,
+          p_furniture_id: furnitureId!,
+          p_slot: slot,
+        })
+      : await admin.rpc('place_furniture', {
+          p_user_id: userId,
+          p_slot: slot,
+          p_furniture_id: furnitureId,
+        });
+    if (error) throw error;
+    return json({ ok: true });
+  }),
+);

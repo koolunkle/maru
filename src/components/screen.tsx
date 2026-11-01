@@ -14,7 +14,12 @@ type ScreenProps = {
   edges?: ('top' | 'bottom')[];
 };
 
-export function Screen({ children, footer, scroll = true, edges = ['top', 'bottom'] }: ScreenProps) {
+export function Screen({
+  children,
+  footer,
+  scroll = true,
+  edges = ['top', 'bottom'],
+}: ScreenProps) {
   const theme = useTheme();
   const Body = scroll ? ScrollView : View;
 
@@ -24,7 +29,8 @@ export function Screen({ children, footer, scroll = true, edges = ['top', 'botto
         style={styles.body}
         {...(scroll
           ? { contentContainerStyle: styles.content, keyboardShouldPersistTaps: 'handled' as const }
-          : { style: [styles.body, styles.content] })}>
+          : { style: [styles.body, styles.content] })}
+      >
         {children}
       </Body>
       {footer && (
@@ -32,7 +38,8 @@ export function Screen({ children, footer, scroll = true, edges = ['top', 'botto
           style={[
             styles.footer,
             { backgroundColor: theme.canvas, boxShadow: '0 -2px 8px rgba(35,40,34,0.06)' },
-          ]}>
+          ]}
+        >
           {footer}
         </View>
       )}

@@ -11,7 +11,13 @@ import { MinuteOption } from './minute-option';
 export type Category = Enums<'mission_category'>;
 
 /** 관심 카테고리 최대 3개 (S2 1단계, S9 재설정) */
-export function CategoryPicker({ value, onChange }: { value: Category[]; onChange: (next: Category[]) => void }) {
+export function CategoryPicker({
+  value,
+  onChange,
+}: {
+  value: Category[];
+  onChange: (next: Category[]) => void;
+}) {
   function toggle(id: Category) {
     onChange(value.includes(id) ? value.filter((c) => c !== id) : [...value, id]);
   }
@@ -34,7 +40,13 @@ export function CategoryPicker({ value, onChange }: { value: Category[]; onChang
 }
 
 /** 생활권 자치구 (S2 2단계, S9 재설정) */
-export function DistrictPicker({ value, onChange }: { value: string | null; onChange: (next: string) => void }) {
+export function DistrictPicker({
+  value,
+  onChange,
+}: {
+  value: string | null;
+  onChange: (next: string) => void;
+}) {
   return (
     <View style={styles.list}>
       {/* 목록 아래쪽 구를 골랐을 때도 무엇을 골랐는지 보이게 한다 */}
@@ -45,7 +57,14 @@ export function DistrictPicker({ value, onChange }: { value: string | null; onCh
       )}
       <View accessibilityRole="radiogroup" accessibilityLabel="동네" style={styles.grid}>
         {Districts.map((d) => (
-          <Chip key={d} label={d} role="radio" selected={value === d} onPress={() => onChange(d)} style={styles.gridItem} />
+          <Chip
+            key={d}
+            label={d}
+            role="radio"
+            selected={value === d}
+            onPress={() => onChange(d)}
+            style={styles.gridItem}
+          />
         ))}
       </View>
     </View>
@@ -53,7 +72,13 @@ export function DistrictPicker({ value, onChange }: { value: string | null; onCh
 }
 
 /** 하루 가능 시간 (S2 3단계, S9 재설정) */
-export function MinutePicker({ value, onChange }: { value: number | null; onChange: (next: number) => void }) {
+export function MinutePicker({
+  value,
+  onChange,
+}: {
+  value: number | null;
+  onChange: (next: number) => void;
+}) {
   return (
     <View accessibilityRole="radiogroup" accessibilityLabel="하루 가능 시간" style={styles.list}>
       {DailyMinuteOptions.map((o) => (

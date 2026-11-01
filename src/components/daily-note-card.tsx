@@ -7,7 +7,13 @@ import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
-import { DailyNoteMaxLength, deleteDailyNote, getDailyNote, saveDailyNote, type DailyNote } from '@/lib/daily-note';
+import {
+  DailyNoteMaxLength,
+  deleteDailyNote,
+  getDailyNote,
+  saveDailyNote,
+  type DailyNote,
+} from '@/lib/daily-note';
 import { clearDraft, readDraft, writeDraft } from '@/lib/drafts';
 import { kstDate } from '@/utils/date';
 
@@ -63,7 +69,9 @@ export function DailyNoteCard({ userId }: { userId: string }) {
         if (loadedDay.current !== today) {
           setDayChanged(true);
           setConfirmDelete(false);
-          setNotice('날짜가 바뀌었어요. 작성 중인 내용을 복사한 뒤 오늘 기록을 다시 불러와 주세요.');
+          setNotice(
+            '날짜가 바뀌었어요. 작성 중인 내용을 복사한 뒤 오늘 기록을 다시 불러와 주세요.',
+          );
         }
         return;
       }
@@ -186,14 +194,22 @@ export function DailyNoteCard({ userId }: { userId: string }) {
             오늘의 기록을 불러오지 못했어요.
           </AppText>
           {/* 작성 중인 내용은 지우지 않고 다시 불러온다 (#48) */}
-          <Button label="다시 불러오기" variant="secondary" onPress={() => setReload((value) => value + 1)} />
+          <Button
+            label="다시 불러오기"
+            variant="secondary"
+            onPress={() => setReload((value) => value + 1)}
+          />
         </>
       ) : (
         <>
           <AppText variant="bodySm" color="slate">
             오늘 마음은 어떤가요? 이 기록은 나만 볼 수 있어요.
           </AppText>
-          <View accessibilityRole="radiogroup" accessibilityLabel="오늘의 기분" style={styles.moods}>
+          <View
+            accessibilityRole="radiogroup"
+            accessibilityLabel="오늘의 기분"
+            style={styles.moods}
+          >
             {Moods.map((item) => (
               <Chip
                 key={item.value}
@@ -205,7 +221,11 @@ export function DailyNoteCard({ userId }: { userId: string }) {
                 onPress={() => {
                   dirty.current = true;
                   setMood(item.value);
-                  writeDraft<NoteDraft>(draftKey(userId), { day: loadedDay.current, mood: item.value, text });
+                  writeDraft<NoteDraft>(draftKey(userId), {
+                    day: loadedDay.current,
+                    mood: item.value,
+                    text,
+                  });
                   if (!dayChanged) setNotice(null);
                   setConfirmDelete(false);
                 }}
@@ -219,7 +239,11 @@ export function DailyNoteCard({ userId }: { userId: string }) {
             onChangeText={(value) => {
               dirty.current = true;
               setText(value.slice(0, DailyNoteMaxLength));
-              writeDraft<NoteDraft>(draftKey(userId), { day: loadedDay.current, mood, text: value.slice(0, DailyNoteMaxLength) });
+              writeDraft<NoteDraft>(draftKey(userId), {
+                day: loadedDay.current,
+                mood,
+                text: value.slice(0, DailyNoteMaxLength),
+              });
               if (!dayChanged) setNotice(null);
               setConfirmDelete(false);
             }}
@@ -250,7 +274,11 @@ export function DailyNoteCard({ userId }: { userId: string }) {
             </AppText>
           )}
           {dayChanged ? (
-            <Button label="오늘 기록 다시 불러오기" variant="secondary" onPress={discardAndReload} />
+            <Button
+              label="오늘 기록 다시 불러오기"
+              variant="secondary"
+              onPress={discardAndReload}
+            />
           ) : (
             <Button label="저장하기" onPress={save} disabled={mood === null} loading={busy} />
           )}
@@ -262,10 +290,20 @@ export function DailyNoteCard({ userId }: { userId: string }) {
                   저장한 기록과 작성 중인 내용을 지울까요?
                 </AppText>
                 <Button label="기록 삭제" variant="secondary" onPress={remove} loading={busy} />
-                <Button label="취소" variant="ghost" onPress={() => setConfirmDelete(false)} disabled={busy} />
+                <Button
+                  label="취소"
+                  variant="ghost"
+                  onPress={() => setConfirmDelete(false)}
+                  disabled={busy}
+                />
               </>
             ) : (
-              <Button label="오늘 기록 삭제" variant="ghost" onPress={() => setConfirmDelete(true)} disabled={busy} />
+              <Button
+                label="오늘 기록 삭제"
+                variant="ghost"
+                onPress={() => setConfirmDelete(true)}
+                disabled={busy}
+              />
             ))}
         </>
       )}

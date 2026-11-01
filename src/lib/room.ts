@@ -17,7 +17,10 @@ export async function getRoom(userId: string) {
   ]);
   if (furniture.error) throw furniture.error;
   if (owned.error) throw owned.error;
-  return { furniture: furniture.data as Tables<'furniture'>[], owned: owned.data as Tables<'user_furniture'>[] };
+  return {
+    furniture: furniture.data as Tables<'furniture'>[],
+    owned: owned.data as Tables<'user_furniture'>[],
+  };
 }
 
 /**
@@ -26,7 +29,11 @@ export async function getRoom(userId: string) {
  */
 export async function getRoomProgress(userId: string) {
   const [done, event] = await Promise.all([
-    supabase.from('user_missions').select('type, missions!inner(category)').eq('user_id', userId).eq('status', 'completed'),
+    supabase
+      .from('user_missions')
+      .select('type, missions!inner(category)')
+      .eq('user_id', userId)
+      .eq('status', 'completed'),
     supabase
       .from('user_missions')
       .select('completed_at, missions!inner(event_id, events(title))')
@@ -53,7 +60,11 @@ export async function getRewardProgress(userId: string): Promise<{
   const [furniture, owned, completed] = await Promise.all([
     supabase.from('furniture').select('id, name, unlock_rule, sort').order('sort'),
     supabase.from('user_furniture').select('furniture_id').eq('user_id', userId),
-    supabase.from('user_missions').select('missions!inner(category)').eq('user_id', userId).eq('status', 'completed'),
+    supabase
+      .from('user_missions')
+      .select('missions!inner(category)')
+      .eq('user_id', userId)
+      .eq('status', 'completed'),
   ]);
   if (furniture.error) throw furniture.error;
   if (owned.error) throw owned.error;

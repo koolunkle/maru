@@ -42,30 +42,48 @@ export function Rest() {
   return (
     <Screen edges={['top']}>
       <View style={styles.header}>
-        <AppText variant="titleLg" accessibilityRole="header">마음 휴게소</AppText>
+        <AppText variant="titleLg" accessibilityRole="header">
+          마음 휴게소
+        </AppText>
       </View>
-      <AppText variant="bodySm" color="slate">언제든 쉬어 갈 수 있는 곳이에요</AppText>
+      <AppText variant="bodySm" color="slate">
+        언제든 쉬어 갈 수 있는 곳이에요
+      </AppText>
 
       {profile && (
         <>
-          <AppText variant="titleMd" accessibilityRole="header" style={styles.firstSection}>마음 보관함</AppText>
+          <AppText variant="titleMd" accessibilityRole="header" style={styles.firstSection}>
+            마음 보관함
+          </AppText>
           <MailboxCard key={profile.id} userId={profile.id} />
           <PressableScale
             accessibilityRole="button"
             accessibilityLabel="한 줄 기록 작성하기"
             onPress={() => setNoteOpen(true)}
-            style={[styles.noteMenu, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+            style={[
+              styles.noteMenu,
+              { backgroundColor: theme.surface, borderColor: theme.hairline },
+            ]}
+          >
             <Feather aria-hidden name="edit-3" size={20} color={theme.accent} />
             <View style={styles.rowText}>
               <AppText variant="titleMd">한 줄 기록</AppText>
               <AppText variant="caption" color="steel">
-                {todayMood ? `오늘 기록했어요 · ${MoodLabels[todayMood - 1]}` : '오늘의 기분과 한 줄을 남겨요'}
+                {todayMood
+                  ? `오늘 기록했어요 · ${MoodLabels[todayMood - 1]}`
+                  : '오늘의 기분과 한 줄을 남겨요'}
               </AppText>
             </View>
             <Feather aria-hidden name="chevron-right" size={20} color={theme.steel} />
           </PressableScale>
           {noteOpen && (
-            <BottomSheet title="한 줄 기록" onClose={() => { setNoteOpen(false); loadTodayNote(); }}>
+            <BottomSheet
+              title="한 줄 기록"
+              onClose={() => {
+                setNoteOpen(false);
+                loadTodayNote();
+              }}
+            >
               <DailyNoteCard userId={profile.id} />
             </BottomSheet>
           )}
@@ -73,7 +91,9 @@ export function Rest() {
         </>
       )}
 
-      <AppText variant="titleMd" accessibilityRole="header" style={styles.sectionTitle}>도움받을 수 있는 곳</AppText>
+      <AppText variant="titleMd" accessibilityRole="header" style={styles.sectionTitle}>
+        도움받을 수 있는 곳
+      </AppText>
       <View style={styles.list}>
         {HelpPlaces.map((place) => (
           <PressableScale
@@ -81,18 +101,23 @@ export function Rest() {
             accessibilityRole="link"
             accessibilityLabel={`${place.name}, ${place.description}`}
             onPress={() => Linking.openURL(place.url)}
-            style={[styles.row, { borderBottomColor: theme.hairline }]}>
+            style={[styles.row, { borderBottomColor: theme.hairline }]}
+          >
             <Feather aria-hidden name={place.icon} size={24} color={theme.ink} />
             <View style={styles.rowText}>
               <AppText>{place.name}</AppText>
-              <AppText variant="caption" color="steel">{place.description}</AppText>
+              <AppText variant="caption" color="steel">
+                {place.description}
+              </AppText>
             </View>
             <Feather aria-hidden name="chevron-right" size={20} color={theme.steel} />
           </PressableScale>
         ))}
       </View>
 
-      <AppText variant="titleMd" accessibilityRole="header" style={styles.sectionTitle}>배경음</AppText>
+      <AppText variant="titleMd" accessibilityRole="header" style={styles.sectionTitle}>
+        배경음
+      </AppText>
       <View style={[styles.row, { borderBottomColor: theme.hairline }]}>
         <Feather aria-hidden name="cloud-rain" size={24} color={theme.ink} />
         <AppText style={styles.rowText}>빗소리 틀어 두기</AppText>
@@ -110,7 +135,9 @@ export function Rest() {
             value={volume}
             onValueChange={setVolume}
           />
-          <AppText variant="bodySm" color="slate" tabular>{Math.round(volume * 100)}%</AppText>
+          <AppText variant="bodySm" color="slate" tabular>
+            {Math.round(volume * 100)}%
+          </AppText>
         </View>
       )}
     </Screen>

@@ -26,7 +26,8 @@ function Row({ label, value, chevron, onPress }: RowProps) {
       disabled={!onPress}
       onPress={onPress}
       accessibilityRole={onPress ? 'link' : undefined}
-      style={[styles.row, { borderBottomColor: theme.hairline }]}>
+      style={[styles.row, { borderBottomColor: theme.hairline }]}
+    >
       <AppText style={styles.rowLabel}>{label}</AppText>
       {value && (
         <AppText variant="bodySm" color="slate">
@@ -61,11 +62,17 @@ export function Settings() {
           chevron
           onPress={() => router.push('/settings/district')}
         />
-        <Row label="하루 가능 시간" value={minutes} chevron onPress={() => router.push('/settings/minutes')} />
+        <Row
+          label="하루 가능 시간"
+          value={minutes}
+          chevron
+          onPress={() => router.push('/settings/minutes')}
+        />
       </View>
 
       <AppText variant="caption" color="steel" style={styles.credits}>
-        미션 출처: 365 서울챌린지(서울특별시), 서울 열린데이터광장{'\n'}글꼴: Pretendard (SIL Open Font License){'\n'}배경음: DesiFreeMusic, Pixabay Content License
+        미션 출처: 365 서울챌린지(서울특별시), 서울 열린데이터광장{'\n'}글꼴: Pretendard (SIL Open
+        Font License){'\n'}배경음: DesiFreeMusic, Pixabay Content License
       </AppText>
     </Screen>
   );

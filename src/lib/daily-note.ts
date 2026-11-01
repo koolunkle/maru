@@ -3,7 +3,13 @@ import type { Tables } from '../types/database';
 
 export const DailyNoteMaxLength = 60;
 /** 기분 저장 값 1~5의 문구 (spec daily-note) */
-export const MoodLabels = ['마음이 가벼워요', '조금 가벼워요', '보통이에요', '조금 무거워요', '마음이 무거워요'] as const;
+export const MoodLabels = [
+  '마음이 가벼워요',
+  '조금 가벼워요',
+  '보통이에요',
+  '조금 무거워요',
+  '마음이 무거워요',
+] as const;
 export type DailyNote = Pick<Tables<'daily_notes'>, 'note_date' | 'mood' | 'text'>;
 
 export async function getDailyNote(userId: string, date: string): Promise<DailyNote | null> {
@@ -17,8 +23,19 @@ export async function getDailyNote(userId: string, date: string): Promise<DailyN
   return data;
 }
 
-export async function saveDailyNote(userId: string, date: string, mood: number, text: string): Promise<DailyNote> {
-  if (!userId || !Number.isInteger(mood) || mood < 1 || mood > 5 || text.length > DailyNoteMaxLength) {
+export async function saveDailyNote(
+  userId: string,
+  date: string,
+  mood: number,
+  text: string,
+): Promise<DailyNote> {
+  if (
+    !userId ||
+    !Number.isInteger(mood) ||
+    mood < 1 ||
+    mood > 5 ||
+    text.length > DailyNoteMaxLength
+  ) {
     throw new Error('기분과 한 줄을 확인해 주세요');
   }
   const { data, error } = await supabase
@@ -35,6 +52,10 @@ export async function saveDailyNote(userId: string, date: string, mood: number, 
 }
 
 export async function deleteDailyNote(userId: string, date: string): Promise<void> {
-  const { error } = await supabase.from('daily_notes').delete().eq('user_id', userId).eq('note_date', date);
+  const { error } = await supabase
+    .from('daily_notes')
+    .delete()
+    .eq('user_id', userId)
+    .eq('note_date', date);
   if (error) throw error;
 }

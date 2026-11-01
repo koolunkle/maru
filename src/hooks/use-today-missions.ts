@@ -25,7 +25,11 @@ async function fetchSeedMissions(profile: Profile) {
   return pickSeedMissions(await getSeedMissions(), profile, kstDate(), kstDate(kstEndOfWeek()));
 }
 
-async function fetchToday(profile: Profile, refresh: boolean, requestId?: string): Promise<TodayMissions> {
+async function fetchToday(
+  profile: Profile,
+  refresh: boolean,
+  requestId?: string,
+): Promise<TodayMissions> {
   const progressRows = await getTodayProgress(profile.id, kstDate());
   let picked: { daily: Mission[]; weekly: Mission | null };
   let source: JudgedBy;
@@ -43,7 +47,9 @@ async function fetchToday(profile: Profile, refresh: boolean, requestId?: string
     daily: picked.daily,
     weekly: activeWeekly?.missions ?? picked.weekly,
     source,
-    progress: Object.fromEntries(progressRows.map(({ missions: _m, ...um }) => [um.mission_id, um])),
+    progress: Object.fromEntries(
+      progressRows.map(({ missions: _m, ...um }) => [um.mission_id, um]),
+    ),
   };
 }
 
@@ -63,7 +69,9 @@ export function useTodayMissions() {
   });
   const profileId = profile?.id;
 
-  useEffect(() => { refreshRequest.current = null; }, [profileId]);
+  useEffect(() => {
+    refreshRequest.current = null;
+  }, [profileId]);
 
   useEffect(() => {
     const current = profileRef.current;
@@ -94,7 +102,10 @@ export function useTodayMissions() {
       refreshRequest.current = null;
       return 'ok';
     } catch (e) {
-      if (e instanceof FunctionError && e.code === 'refresh_limit') { refreshRequest.current = null; return 'limit'; }
+      if (e instanceof FunctionError && e.code === 'refresh_limit') {
+        refreshRequest.current = null;
+        return 'limit';
+      }
       return 'failed';
     } finally {
       setRefreshing(false);

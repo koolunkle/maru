@@ -3,7 +3,6 @@ import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
 import { loadSource } from './helpers/load-source.mjs';
 
-
 const drafts = await loadSource('../src/lib/drafts.ts');
 
 test('작성 중인 입력은 지울 때까지 키별로 남는다', () => {
