@@ -97,6 +97,21 @@ const admin = {
         operation.filters.push([column, value]);
         return query;
       },
+      neq(column, value) {
+        operation.filters.push([column, value]);
+        return query;
+      },
+      in(column, value) {
+        operation.filters.push([column, value]);
+        return query;
+      },
+      gte(column, value) {
+        operation.filters.push([column, value]);
+        return query;
+      },
+      limit() {
+        return query;
+      },
       order() {
         return query;
       },
@@ -211,7 +226,7 @@ test('AI 장애면 저장된 글은 pending으로 남고 공개하지 않는다'
     body: '응원해요',
     status: 'pending',
   };
-  results = [{ error: null }, { data: saved, error: null }];
+  results = [{ data: [] }, { error: null }, { data: saved, error: null }];
   const response = await request({ action: 'send', requestId: saved.request_id, body: saved.body });
   assert.equal(response.status, 200);
   assert.equal((await response.json()).status, 'pending');
@@ -227,7 +242,7 @@ test('검수 결과를 저장하며 이미 처리된 재시도는 검수를 반�
   };
   for (const status of ['approved', 'rejected', 'crisis']) {
     aiResult = { status };
-    results = [{ error: null }, { data: saved }, { data: { ...saved, status } }];
+    results = [{ data: [] }, { error: null }, { data: saved }, { data: { ...saved, status } }];
     assert.equal(
       (
         await (
@@ -238,7 +253,7 @@ test('검수 결과를 저장하며 이미 처리된 재시도는 검수를 반�
     );
   }
   aiCalls = 0;
-  results = [{ error: null }, { data: { ...saved, status: 'published' } }];
+  results = [{ data: [] }, { error: null }, { data: { ...saved, status: 'published' } }];
   assert.equal(
     (await request({ action: 'send', requestId: saved.request_id, body: saved.body })).status,
     200,
@@ -257,7 +272,12 @@ test('우체통 검수에서 개인정보를 가리고 위기 판정을 우선�
     ['crisis', 'crisis'],
   ]) {
     aiResult = { status: aiStatus };
-    results = [{ error: null }, { data: saved }, { data: { ...saved, status: expected } }];
+    results = [
+      { data: [] },
+      { error: null },
+      { data: saved },
+      { data: { ...saved, status: expected } },
+    ];
     await request({ action: 'send', requestId: saved.request_id, body: saved.body });
     assert.doesNotMatch(aiText, /홍길동|test@example.com/);
     assert.deepEqual(operations.at(-1).update, { status: expected });
@@ -271,7 +291,22 @@ test('우체통 검수는 댓글·릴레이와 같은 공통 규칙을 쓴다', 
     status: 'pending',
   };
   aiResult = { status: 'approved' };
-  results = [{ error: null }, { data: saved }, { data: { ...saved, status: 'approved' } }];
+  results = [
+    { data: [] },
+    { error: null },
+    { data: saved },
+    { data: { ...saved, status: 'approved' } },
+  ];
   await request({ action: 'send', requestId: saved.request_id, body: saved.body });
   assert.equal(aiSystem, moderation.ModerationSystem);
+});
+test('오늘 이미 보낸 한 줄이 있으면 새 한 줄을 저장하지 않는다', async () => {
+  results = [{ data: [{ id: 'earlier' }] }];
+  const response = await request({
+    action: 'send',
+    requestId: 'request-00000002',
+    body: '응원해요',
+  });
+  assert.equal(response.status, 409);
+  assert.ok(operations.every((operation) => !operation.upsert));
 });
