@@ -191,7 +191,7 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 
 모든 AI 호출은 `_shared/ai.ts`의 `generateJson()`을 거친다. 제공자(`AI_PROVIDER`), 모델 등급(`main`: 추천·판정·편지 / `light`: 검수), 시간 제한, 실패 시 `null` 반환 규칙이 여기 있다. 시간 제한: 추천 25초, 판정 20초, 검수 10초, 편지 25초.
 
-기준 사진 비교는 GeminiPicture의 방식을 기존 판정에 통합했다. `_shared/mission-photos.ts`가 비공개 `mission-photos` 버킷에서 해당 미션의 사진만 읽는다. 최대 4장·각 2 MiB(JPEG·PNG·WebP), 읽기 제한 5초. 제출 사진을 첫 번째로 보내고 나머지를 장소 비교에 사용한다. 사진 없음은 기존 판정, 일부라도 누락·초과·형식 오류가 있으면 `verify_fallback`을 따른다. 경로 조회와 업로드는 서버 관리 권한으로만 하며 앱에는 키나 경로를 공개하지 않는다. 테스트 미션은 이관하지 않는다.
+기준 사진 비교는 GeminiPicture의 방식을 기존 판정에 통합했다. `_shared/mission-photos.ts`가 비공개 `mission-photos` 버킷에서 해당 미션의 사진만 읽는다. 최대 4장·각 2 MiB(JPEG·PNG·WebP), 읽기 제한 5초. 제출 사진을 첫 번째로 보내고 나머지를 장소 비교에 사용한다. 사진 없음은 기존 판정이다. 일부라도 누락·초과·형식 오류가 있으면 일부만 비교하지 않고 기준 사진 없이 판정하며 원인을 로그에 남긴다. `verify_fallback`은 AI 판정 자체가 실패했을 때만 쓴다(spec photo-verification). 경로 조회와 업로드는 서버 관리 권한으로만 하며 앱에는 키나 경로를 공개하지 않는다. 테스트 미션은 이관하지 않는다.
 
 2026-11-01 사용자 승인 후 운영 프로젝트 `jpipzrmspryzvjykxefm`에 `20261101090000_mission_photos`·`20261101091000_mission_schedule`를 적용했다. 기존 이력과 일치함을 확인하고 `verify-mission`, `recommend-missions`, `moderate-comment`, `mailbox`, `write-weekly-letter`를 배포했다. 기존 미션 96개와 기존 진행 미션의 상태·기한은 유지됐고, 사진 테이블의 RLS·서버 전용 권한 및 비공개 버킷을 확인했다. DB 타입은 적용 후 운영 스키마에서 재생성했다.
 
