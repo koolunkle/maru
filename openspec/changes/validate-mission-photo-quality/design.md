@@ -18,6 +18,26 @@
 - 라벨 파일(`dataset.json`)에 파일 이름, 미션 id, 종류, 기대 결과, 출처를 적는다. 사진은 저장소 밖 폴더에 두고 스크립트에 경로로 넘긴다.
 - 기준 사진과 제출 사진은 서로 다른 사진이어야 한다. 같은 사진을 쓰면 장소 비교가 아니라 이미지 일치를 재게 된다.
 
+`dataset.json` 형식(`eval.mjs`가 읽을 때 검사한다. 종류와 기대 결과가 위 표와 다르거나, 기준 사진과 같은 파일이 제출 사진에 있으면 멈춘다):
+
+```json
+{
+  "missions": [
+    {
+      "id": "<미션 id>",
+      "title": "<미션 제목>",
+      "verify_hint": "<인증 힌트>",
+      "references": [{ "file": "ref-1.jpg", "hint": "정문 쪽에서 본 모습", "source": "<출처 URL>" }],
+      "submissions": [
+        { "file": "same-1.jpg", "kind": "same", "expected": "pass", "source": "<출처 URL>" }
+      ]
+    }
+  ]
+}
+```
+
+`kind`는 `same`·`other`·`ambiguous`·`capture`·`privacy` 중 하나다.
+
 ## 평가 스크립트
 
 - `tests/helpers/load-source.mjs`로 `verify-mission`을 불러온다(단위 테스트와 같은 방식). DB와 Storage는 가짜로 넣는다.
