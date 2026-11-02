@@ -22,7 +22,8 @@ const anthropicKey = Deno.env.get('ANTHROPIC_API_KEY')?.trim();
 const anthropicWorkspace = Deno.env.get('ANTHROPIC_WORKSPACE_ID')?.trim();
 
 export const provider: 'gemini' | 'anthropic' =
-  Deno.env.get('AI_PROVIDER') === 'anthropic' || (Deno.env.get('AI_PROVIDER') !== 'gemini' && !geminiKey)
+  Deno.env.get('AI_PROVIDER') === 'anthropic' ||
+  (Deno.env.get('AI_PROVIDER') !== 'gemini' && !geminiKey)
     ? 'anthropic'
     : 'gemini';
 
@@ -30,7 +31,11 @@ export const provider: 'gemini' | 'anthropic' =
 const setup = {
   provider,
   geminiKey: geminiKey ? 'set' : 'missing',
-  anthropicKey: anthropicKey ? (anthropicKey.startsWith('sk-ant-') ? 'ok' : 'malformed') : 'missing',
+  anthropicKey: anthropicKey
+    ? anthropicKey.startsWith('sk-ant-')
+      ? 'ok'
+      : 'malformed'
+    : 'missing',
   anthropicWorkspace: anthropicWorkspace ? 'set' : 'missing',
 };
 
@@ -40,7 +45,9 @@ const anthropic = anthropicKey
       apiKey: anthropicKey,
       maxRetries: 1,
       // 워크스페이스에 묶이지 않은 키는 요청마다 워크스페이스 ID 헤더가 필요하다
-      ...(anthropicWorkspace ? { defaultHeaders: { 'anthropic-workspace-id': anthropicWorkspace } } : {}),
+      ...(anthropicWorkspace
+        ? { defaultHeaders: { 'anthropic-workspace-id': anthropicWorkspace } }
+        : {}),
     })
   : null;
 
@@ -67,7 +74,8 @@ function withTimeout<T>(promise: Promise<T>, ms: number) {
 const GeminiHedgeMs = 6_000;
 
 async function viaGemini<S extends z.ZodType>(req: Request<S>): Promise<unknown> {
-  if (req.tier === 'light') return geminiOnce(req, Models.gemini.light, GeminiThinking.light, req.timeoutMs);
+  if (req.tier === 'light')
+    return geminiOnce(req, Models.gemini.light, GeminiThinking.light, req.timeoutMs);
   const startedAt = Date.now();
   let done = false;
   const primary = geminiOnce(req, Models.gemini.main, GeminiThinking.main, req.timeoutMs);
@@ -112,23 +120,32 @@ async function geminiOnce<S extends z.ZodType>(
   if (!gemini) throw new Error('GEMINI_API_KEY is not set');
   const { $schema: _, ...schema } = z.toJSONSchema(req.schema) as Record<string, unknown>;
   const interaction = await withTimeout(
-    gemini.interactions.create({
-      model,
-      system_instruction: req.system,
-      input: [
-        { type: 'text', text: req.text },
-        ...(req.image ? [{ type: 'image' as const, data: req.image, mime_type: 'image/jpeg' }] : []),
-        ...(req.referenceImages ?? []).map((image) => ({ type: 'image' as const, data: image.data, mime_type: image.mimeType })),
-      ],
-      response_format: { type: 'text', mime_type: 'application/json', schema },
-      generation_config: { thinking_level: thinking },
-      // 요청·응답을 Google 쪽에 보관하지 않는다
-      store: false,
-    }, {
-      // SDK 기본값은 429·5xx를 지수 백오프로 재시도해 시간 제한 안에 원인이 드러나지 않는다
-      timeout_ms: timeoutMs,
-      retries: { strategy: 'none' },
-    }),
+    gemini.interactions.create(
+      {
+        model,
+        system_instruction: req.system,
+        input: [
+          { type: 'text', text: req.text },
+          ...(req.image
+            ? [{ type: 'image' as const, data: req.image, mime_type: 'image/jpeg' }]
+            : []),
+          ...(req.referenceImages ?? []).map((image) => ({
+            type: 'image' as const,
+            data: image.data,
+            mime_type: image.mimeType,
+          })),
+        ],
+        response_format: { type: 'text', mime_type: 'application/json', schema },
+        generation_config: { thinking_level: thinking },
+        // 요청·응답을 Google 쪽에 보관하지 않는다
+        store: false,
+      },
+      {
+        // SDK 기본값은 429·5xx를 지수 백오프로 재시도해 시간 제한 안에 원인이 드러나지 않는다
+        timeout_ms: timeoutMs,
+        retries: { strategy: 'none' },
+      },
+    ),
     timeoutMs,
   );
   return JSON.parse(interaction.output_text ?? '');
@@ -146,8 +163,22 @@ async function viaAnthropic<S extends z.ZodType>(req: Request<S>): Promise<unkno
         {
           role: 'user',
           content: [
-            ...(req.image ? [{ type: 'image' as const, source: { type: 'base64' as const, media_type: 'image/jpeg' as const, data: req.image } }] : []),
-            ...(req.referenceImages ?? []).map((image) => ({ type: 'image' as const, source: { type: 'base64' as const, media_type: image.mimeType, data: image.data } })),
+            ...(req.image
+              ? [
+                  {
+                    type: 'image' as const,
+                    source: {
+                      type: 'base64' as const,
+                      media_type: 'image/jpeg' as const,
+                      data: req.image,
+                    },
+                  },
+                ]
+              : []),
+            ...(req.referenceImages ?? []).map((image) => ({
+              type: 'image' as const,
+              source: { type: 'base64' as const, media_type: image.mimeType, data: image.data },
+            })),
             { type: 'text' as const, text: req.text },
           ],
         },
@@ -163,7 +194,9 @@ async function viaAnthropic<S extends z.ZodType>(req: Request<S>): Promise<unkno
  * 스키마에 맞는 JSON을 생성한다. 키·크레딧·장애·시간 초과·형식 오류면 null
  * (호출하는 함수가 규칙 기반 대체로 넘어간다).
  */
-export async function generateJson<S extends z.ZodType>(req: Request<S>): Promise<z.infer<S> | null> {
+export async function generateJson<S extends z.ZodType>(
+  req: Request<S>,
+): Promise<z.infer<S> | null> {
   try {
     const raw = provider === 'gemini' ? await viaGemini(req) : await viaAnthropic(req);
     const parsed = req.schema.safeParse(raw);
