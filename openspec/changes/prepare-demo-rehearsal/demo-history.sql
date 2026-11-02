@@ -16,7 +16,7 @@ declare
   start_difficulty constant int := 1;
   -- 일차별 (시드 번호, 소감). 1일차가 7일 전, 7일차가 어제다.
   plan constant jsonb := '[
-    {"seed": 4,  "note": "출근길 은행나무가 노랗게 물들었어요"},
+    {"seed": 4,  "note": "편의점 가는 길 은행나무가 노랗게 물들었어요"},
     {"seed": 9,  "note": "오랜만에 밥을 지어 먹었어요"},
     {"seed": 5,  "note": "장바구니 챙기는 걸 잊지 않았어요"},
     {"seed": 2,  "note": "좋아하는 문장을 다시 적어 봤어요"},
