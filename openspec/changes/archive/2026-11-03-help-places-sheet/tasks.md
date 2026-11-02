@@ -9,4 +9,4 @@
 
 - [x] 2.1 `npm run typecheck`, `npm run lint`, `npm run format`
 - [x] 2.2 `npm run spec:validate`
-- [ ] 2.3 웹에서 링크 → 시트 열기·닫기, 120·링크 행 동작, 설정에서 /help 화면 그대로인지 확인
+- [x] 2.3 웹에서 링크 → 시트 열기·닫기, 120·링크 행 동작, 설정에서 /help 화면 그대로인지 확인
