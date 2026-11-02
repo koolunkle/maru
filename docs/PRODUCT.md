@@ -145,6 +145,7 @@
 | F15 | 한 줄 기록·기분 | P2 | [daily-note](../openspec/specs/daily-note/spec.md) |
 | F16 | 타임캡슐 | P2 | [time-capsule](../openspec/specs/time-capsule/spec.md) |
 | 공통 | 문구 규칙, AI 데이터 처리 | — | [copy-guidelines](../openspec/specs/copy-guidelines/spec.md), [ai-data-handling](../openspec/specs/ai-data-handling/spec.md) |
+| 운영 | 미션·기준 사진 관리자 웹 | — | [admin-mission-management](../openspec/specs/admin-mission-management/spec.md) |
 
 시간이 부족하면 P2 → P1 순으로 줄인다.
 
