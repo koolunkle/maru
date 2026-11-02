@@ -68,6 +68,7 @@ export function Settings() {
           chevron
           onPress={() => router.push('/settings/minutes')}
         />
+        <Row label="도움받을 수 있는 곳" chevron onPress={() => router.push('/help')} />
       </View>
 
       <AppText variant="caption" color="steel" style={styles.credits}>

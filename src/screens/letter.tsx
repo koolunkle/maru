@@ -162,7 +162,7 @@ export function Letter({ week }: { week: string }) {
                   <Button
                     label="도움 안내 보기"
                     variant="secondary"
-                    onPress={() => router.push('/rest')}
+                    onPress={() => router.push('/help')}
                   />
                 </View>
               )}

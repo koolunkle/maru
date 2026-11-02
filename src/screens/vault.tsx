@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -9,6 +9,7 @@ import { CapsuleCard } from '@/components/capsule-card';
 import { DailyNoteCard } from '@/components/daily-note-card';
 import { MailboxCard } from '@/components/mailbox-card';
 import { PressableScale } from '@/components/pressable-scale';
+import { RainSound } from '@/components/rain-sound';
 import { Screen } from '@/components/screen';
 import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
@@ -16,7 +17,7 @@ import { getDailyNote, MoodLabels } from '@/lib/daily-note';
 import { useSession } from '@/providers/session-provider';
 import { kstDate } from '@/utils/date';
 
-/** 마음 보관함 탭 (spec rest-area, mailbox, daily-note, time-capsule / DESIGN.md §5.2). 우체통·한 줄 기록·타임캡슐 */
+/** S14 마음 보관함 탭 (spec rest-area, mailbox, daily-note, time-capsule / DESIGN.md §5.2). 우체통·한 줄 기록·타임캡슐, 배경음, 도움 안내 링크 */
 export function Vault() {
   const theme = useTheme();
   const { profile } = useSession();
@@ -82,6 +83,22 @@ export function Vault() {
           <CapsuleCard key={`capsule:${profile.id}`} />
         </View>
       )}
+
+      <AppText variant="titleMd" accessibilityRole="header" style={styles.sectionTitle}>
+        배경음
+      </AppText>
+      <RainSound />
+
+      <PressableScale
+        accessibilityRole="link"
+        onPress={() => router.push('/help')}
+        style={styles.helpLink}
+      >
+        <AppText variant="bodySm" color="slate">
+          도움받을 수 있는 곳
+        </AppText>
+        <Feather aria-hidden name="chevron-right" size={16} color={theme.steel} />
+      </PressableScale>
     </Screen>
   );
 }
@@ -107,5 +124,16 @@ const styles = StyleSheet.create({
   rowText: {
     flex: 1,
     gap: 2,
+  },
+  sectionTitle: {
+    marginTop: Spacing.xxl,
+  },
+  helpLink: {
+    marginTop: Spacing.xxl,
+    minHeight: 44,
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    gap: 4,
   },
 });
