@@ -7,7 +7,7 @@ context: |
   Keep code identifiers, file paths, API names, and product names (Expo, Supabase, Gemini) in English.
 
   ## 제품
-  MY서울루틴 (Maru). 서울에 혼자 살며 바깥 활동과 연락이 줄기 시작한 고립 직전 청년(19~39세)을 위한 작은 성공 일상 루틴.
+  MY서울루틴 (Maru). 일을 기다리는 시간이 길어지며 외출·연락이 줄기 시작한 고립·은둔 전 단계 청년(19~39세)을 위한 작은 성공 일상 루틴.
   AI가 미션을 추천하고, 사진으로 인증하면 가구 보상과 익명 응원이 쌓인다.
   배경·문제·페르소나·범위는 docs/PRODUCT.md, 시각 명세와 토큰은 DESIGN.md.
   현재 동작의 기준은 openspec/specs/ 이다. 기능 ID(F1~F16)는 각 spec의 Purpose에 적혀 있고 코드 주석이 이 ID를 쓴다.
