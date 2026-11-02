@@ -40,7 +40,7 @@ flowchart LR
 | --- | --- |
 | `src/app/` | Expo Router 라우트. 파일 = 화면. 본문은 두지 않고 `src/screens/`를 렌더한다 |
 | `src/app/_layout.tsx` | 글꼴 로드, 세션 상태에 따른 `Stack.Protected` 분기(시작 → 온보딩 → 탭), 웹 480px 컬럼 |
-| `src/app/(tabs)/_layout.tsx` | 하단 탭 5개(홈·피드·기록·내 방·휴게소) |
+| `src/app/(tabs)/_layout.tsx` | 하단 탭 6개(홈·마음 보관함·피드·기록·내 방·휴게소) |
 | `src/providers/background-audio.tsx` | 빗소리 배경음(expo-audio). 탭을 옮겨도 유지 |
 | `src/screens/` | 화면 본문. 큰 화면은 폴더(`feed/`, `onboarding/`, `settings/`) |
 | `src/components/` | 공용 UI(`bottom-sheet`(모든 시트), `mission-card`, `ai-card`, `help-card`, `growth-card`, `mailbox-card`, `daily-note-card`, `capsule-card` 등). DESIGN.md §5.3 이름과 맞춘다 |
@@ -79,10 +79,11 @@ flowchart LR
 | S7 | `/record` | `screens/record.tsx` | attendance-streak, weekly-letter |
 | S8 | `/room` | `screens/room.tsx` | room-rewards |
 | S9 | `/settings`, `/settings/[field]` | `screens/settings/` | onboarding |
-| S10 | `/rest` | `screens/rest.tsx` | rest-area. 마음 보관함 카드가 우체통·한 줄 기록·타임캡슐 시트를 연다. 도움 안내 주소는 `constants/help.ts` |
+| S10 | `/rest` | `screens/rest.tsx` | rest-area. 도움 안내와 빗소리. 도움 안내 주소는 `constants/help.ts` |
+| S14 | `/vault` | `screens/vault.tsx` | rest-area의 마음 보관함 탭. 카드가 우체통·한 줄 기록·타임캡슐 시트를 연다 |
 | S11 | `/letter/[week]` | `screens/letter.tsx` | weekly-letter |
-| S12 | `/capsule`, 휴게소 시트 | `screens/capsule.tsx` | time-capsule |
-| S13 | 휴게소 시트 | `components/daily-note-card.tsx` | daily-note. 별도 경로 없음 |
+| S12 | `/capsule`, 마음 보관함 시트 | `screens/capsule.tsx` | time-capsule |
+| S13 | 마음 보관함 시트 | `components/daily-note-card.tsx` | daily-note. 별도 경로 없음 |
 | 관리 | `/admin` | `screens/admin.tsx` | admin-mission-management. 앱 로그인·온보딩과 독립 |
 
 새 Stack 화면은 `src/app/_layout.tsx`의 로그인·온보딩 완료 `Stack.Protected` 블록에 `Stack.Screen`을 추가해야 접근된다.
