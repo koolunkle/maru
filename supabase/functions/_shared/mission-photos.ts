@@ -3,7 +3,7 @@ import { admin } from './clients.ts';
 
 export type MissionImage = { data: string; mimeType: 'image/jpeg' | 'image/png' | 'image/webp' };
 
-/** 기준 사진의 일부만 비교하지 않도록, 하나라도 읽지 못하면 호출자가 대체 판정한다. */
+/** 기준 사진의 일부만 비교하지 않도록 하나라도 읽지 못하면 예외를 던진다. 호출자는 기준 사진 없이 판정한다. */
 export async function loadMissionPhotos(missionId: string) {
   const signal = AbortSignal.timeout(5_000);
   const { data, error } = await admin
