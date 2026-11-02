@@ -1,0 +1,274 @@
+{
+  "missions": [
+    {
+      "id": "71e1d9db-351a-4705-85da-e3f0def00274",
+      "title": "'문화가 흐르는 서울광장' 참여하기",
+      "verify_hint": "서울광장 행사 현장",
+      "references": [
+        {
+          "file": "plaza-7648743.jpg",
+          "hint": "위에서 본 서울시청 본관·신청사와 광장",
+          "source": "https://pixabay.com/photos/building-palace-city-hall-7648743/"
+        },
+        {
+          "file": "plaza-336880.jpg",
+          "hint": "밤 조명 행사 중인 시청 본관 앞",
+          "source": "https://pixabay.com/photos/seoul-city-hall-seoul-plaza-336880/"
+        }
+      ],
+      "submissions": [
+        {
+          "file": "plaza-6609601.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/seoul-city-hall-seoul-building-6609601/",
+          "note": "신청사 유리 외벽, 행사 장면은 없음"
+        },
+        {
+          "file": "plaza-5012159.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/seoul-city-square-leisure-5012159/",
+          "note": "국립중앙박물관 앞 광장"
+        },
+        {
+          "file": "gwanghwamun-2714601.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/jong-ro-yi-sun-sin-park-summer-sky-2714601/",
+          "note": "광화문광장 분수"
+        },
+        {
+          "file": "ddp-1898945.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/dongdaemun-design-plaza-1898945/",
+          "note": "동대문디자인플라자"
+        },
+        {
+          "file": "illust-8318827.jpg",
+          "kind": "capture",
+          "expected": "retry",
+          "source": "https://pixabay.com/illustrations/korea-seoul-streets-of-seoul-street-8318827/",
+          "note": "AI 생성 서울 거리 그림"
+        }
+      ]
+    },
+    {
+      "id": "e637d506-adaa-415e-aa8b-54ca6aad4087",
+      "title": "서울의 궁궐 한 곳 걸어보기",
+      "verify_hint": "궁궐 풍경",
+      "references": [
+        {
+          "file": "gbg-2929520.jpg",
+          "hint": "경복궁 경회루와 연못",
+          "source": "https://pixabay.com/photos/gyeongbok-palace-gyeonghoeru-2929520/"
+        },
+        {
+          "file": "gbg-6854763.jpg",
+          "hint": "경복궁 전각 처마",
+          "source": "https://pixabay.com/photos/gyeongbok-palace-gyeongbokgung-palace-6854763/"
+        },
+        {
+          "file": "gbg-7366036.jpg",
+          "hint": "경복궁 향원정과 단풍",
+          "source": "https://pixabay.com/photos/korea-tree-gyeongbokgung-seoul-7366036/"
+        }
+      ],
+      "submissions": [
+        {
+          "file": "gbg-7100217.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/palace-gyeongbok-palace-7100217/",
+          "note": "향원정, 다른 각도"
+        },
+        {
+          "file": "gbg-5771324.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/gyeongbok-palace-woman-autumn-tree-5771324/",
+          "note": "경복궁 담장과 은행나무, 사람은 멀리 작게"
+        },
+        {
+          "file": "gbg-1256872.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/towards-the-garden-gyeongbok-palace-1256872/",
+          "note": "향원정 반영, 위아래 뒤집힌 사진"
+        },
+        {
+          "file": "palace-woman-1284937.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/south-korea-hanfu-building-woman-1284937/",
+          "note": "궁궐 행각 앞 한복 입은 사람, 멀리 작게"
+        },
+        {
+          "file": "cdg-4595784.jpg",
+          "kind": "alt_place",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/changdeokgung-palace-4595784/",
+          "note": "창덕궁 돈화문"
+        },
+        {
+          "file": "cdg-4545146.jpg",
+          "kind": "alt_place",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/changdeokgung-palace-palace-korea-4545146/",
+          "note": "창덕궁 회랑"
+        },
+        {
+          "file": "dsg-7556904.jpg",
+          "kind": "alt_place",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/deoksugung-palace-roof-tile-hanok-7556904/",
+          "note": "덕수궁 지붕"
+        },
+        {
+          "file": "bukchon-3905234.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/bukchon-hanok-traditional-korea-3905234/",
+          "note": "북촌 한옥마을 골목"
+        },
+        {
+          "file": "ddp-1898945.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/dongdaemun-design-plaza-1898945/",
+          "note": "동대문디자인플라자"
+        },
+        {
+          "file": "sejong-1510336.jpg",
+          "kind": "ambiguous",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/gwanghwamun-gyeongbokgung-palace-1510336/",
+          "note": "광화문광장 세종대왕상, 멀리 광화문"
+        },
+        {
+          "file": "illust-8318823.jpg",
+          "kind": "capture",
+          "expected": "retry",
+          "source": "https://pixabay.com/illustrations/traditional-hanok-village-korea-8318823/",
+          "note": "AI 생성 한옥 그림"
+        },
+        {
+          "file": "selfie-5793436.jpg",
+          "kind": "privacy",
+          "expected": "privacy",
+          "source": "https://pixabay.com/photos/woman-selfie-han-bok-lady-girl-5793436/",
+          "note": "한복 입은 두 사람 셀카, 옆얼굴"
+        }
+      ]
+    },
+    {
+      "id": "2977f2eb-1221-4112-885e-5c3a3fd916f0",
+      "title": "서울 한옥마을 둘러보기",
+      "verify_hint": "한옥마을 풍경",
+      "references": [
+        {
+          "file": "bukchon-3905234.jpg",
+          "hint": "북촌 한옥 골목",
+          "source": "https://pixabay.com/photos/bukchon-hanok-traditional-korea-3905234/"
+        },
+        {
+          "file": "bukchon-3905262.jpg",
+          "hint": "북촌 기와지붕",
+          "source": "https://pixabay.com/photos/bukchon-hanok-roof-korea-3905262/"
+        },
+        {
+          "file": "bukchon-5976962.jpg",
+          "hint": "북촌 한옥과 돌계단",
+          "source": "https://pixabay.com/photos/bukchon-hanok-village-roof-houses-5976962/"
+        }
+      ],
+      "submissions": [
+        {
+          "file": "bukchon-6234212.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/seoul-hanok-roof-bukchon-city-6234212/",
+          "note": "북촌 기와지붕과 주변 건물"
+        },
+        {
+          "file": "bukchon-4617979.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/bukchon-hanok-traditional-house-4617979/",
+          "note": "북촌 한옥 옆 좁은 골목"
+        },
+        {
+          "file": "hanok-3233293.jpg",
+          "kind": "same",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/people-house-hanok-3233293/",
+          "note": "흑백, 위에서 본 북촌 지붕"
+        },
+        {
+          "file": "namsan-2830016.jpg",
+          "kind": "alt_place",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/traditional-village-namsan-2830016/",
+          "note": "남산골한옥마을 문"
+        },
+        {
+          "file": "namsan-2830091.jpg",
+          "kind": "alt_place",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/traditional-village-namsan-2830091/",
+          "note": "남산골한옥마을 지붕과 등"
+        },
+        {
+          "file": "namsan-2839691.jpg",
+          "kind": "alt_place",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/hanok-namsan-seoul-2839691/",
+          "note": "남산골한옥마을 마당"
+        },
+        {
+          "file": "cdg-4595784.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/changdeokgung-palace-4595784/",
+          "note": "창덕궁 돈화문"
+        },
+        {
+          "file": "street-8035148.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/houses-roofs-road-buildings-seoul-8035148/",
+          "note": "양옥 주택가 골목"
+        },
+        {
+          "file": "ddp-1898945.jpg",
+          "kind": "other",
+          "expected": "retry",
+          "source": "https://pixabay.com/photos/dongdaemun-design-plaza-1898945/",
+          "note": "동대문디자인플라자"
+        },
+        {
+          "file": "bukchon-4617977.jpg",
+          "kind": "ambiguous",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/bukchon-village-republic-of-korea-4617977/",
+          "note": "북촌 언덕길, 한옥이 조금만 보임"
+        },
+        {
+          "file": "wall-4623354.jpg",
+          "kind": "ambiguous",
+          "expected": "pass",
+          "source": "https://pixabay.com/photos/korea-temple-section-buddhism-4623354/",
+          "note": "기와 얹은 돌담 가까이"
+        },
+        {
+          "file": "illust-8318823.jpg",
+          "kind": "capture",
+          "expected": "retry",
+          "source": "https://pixabay.com/illustrations/traditional-hanok-village-korea-8318823/",
+          "note": "AI 생성 한옥 그림"
+        }
+      ]
+    }
+  ]
+}
