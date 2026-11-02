@@ -893,6 +893,14 @@ export type Database = {
           ready: boolean
         }[]
       }
+      move_furniture: {
+        Args: {
+          p_furniture_id: string
+          p_slot: Database["public"]["Enums"]["room_slot"]
+          p_user_id: string
+        }
+        Returns: undefined
+      }
       open_time_capsule: { Args: { p_id: string }; Returns: string }
       place_furniture: {
         Args: {
