@@ -9,13 +9,14 @@ type IconName = ComponentProps<typeof Feather>['name'];
 
 const TabIcons: Record<string, IconName> = {
   index: 'sun',
+  vault: 'archive',
   feed: 'message-circle',
   record: 'calendar',
   room: 'home',
   rest: 'coffee',
 };
 
-/** 하단 탭 5개 (DESIGN.md tab-bar: 64px, 활성 ink / 비활성 muted, 전환 애니메이션 없음) */
+/** 하단 탭 6개(DESIGN.md tab-bar: 64px, 활성 ink / 비활성 muted, 전환 애니메이션 없음) */
 export default function TabsLayout() {
   const theme = useTheme();
 
@@ -40,6 +41,7 @@ export default function TabsLayout() {
       })}
     >
       <Tabs.Screen name="index" options={{ title: '홈' }} />
+      <Tabs.Screen name="vault" options={{ title: '마음 보관함' }} />
       <Tabs.Screen name="feed" options={{ title: '피드' }} />
       <Tabs.Screen name="record" options={{ title: '기록' }} />
       <Tabs.Screen name="room" options={{ title: '내 방' }} />
