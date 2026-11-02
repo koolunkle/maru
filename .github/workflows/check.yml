@@ -1,0 +1,39 @@
+# PR마다 CONTRIBUTING의 "검사 (PR 전에 반드시)"를 그대로 돌린다.
+name: check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # expo start가 만드는 타입 참조 파일(.gitignore 대상). 없으면 typecheck가 실패한다
+      - run: echo '/// <reference types="expo/types" />' > expo-env.d.ts
+      - name: typecheck
+        run: npm run typecheck
+      - name: lint (포맷 포함)
+        run: npm run lint
+      - name: format
+        run: npm run format:check
+      - name: test
+        run: npm test
+      - name: spec
+        run: npm run spec:validate

@@ -117,6 +117,8 @@ npm run lint          # 코드 규칙 + 포맷(Prettier). 포맷 오류는 npm r
 npm test
 ```
 
+PR을 열면 GitHub Actions(`.github/workflows/check.yml`)가 같은 검사와 `format:check`, `spec:validate`를 다시 돌린다. PR 화면의 **check**가 빨간색이면 합치지 않는다. 대부분은 `npm run format`을 실행하고 다시 push하면 풀린다.
+
 포맷은 Prettier가 정한다(작은따옴표, 줄 100자, `.prettierrc.json`). VS Code는 저장할 때 자동으로 맞춘다(추천 확장 설치). 문서(`*.md`)·생성 파일·마이그레이션은 포맷하지 않는다(`.prettierignore`).
 
 ### 미리보기 배포 (운영과 분리된 주소)
