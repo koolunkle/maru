@@ -11,7 +11,7 @@ const BackgroundAudioContext = createContext<{
 } | null>(null);
 
 export function BackgroundAudioProvider({ children }: { children: ReactNode }) {
-  const player = useAudioPlayer(require('../../assets/audio/rain.mp3'));
+  const player = useAudioPlayer(require('@/assets/audio/rain.mp3'));
   const { playing } = useAudioPlayerStatus(player);
   const [volume, setVolume] = useState(0.5);
 
