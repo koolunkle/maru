@@ -46,7 +46,8 @@ flowchart LR
 | `src/components/` | 공용 UI(`bottom-sheet`(모든 시트), `mission-card`, `ai-card`, `help-card`, `growth-card`, `mailbox-card`, `daily-note-card`, `capsule-card` 등). DESIGN.md §5.3 이름과 맞춘다 |
 | `src/hooks/` | `use-today-missions`(홈 추천·진행), `use-reward-progress`(다음 보상), `use-feed`(피드), `use-theme` |
 | `src/providers/session-provider.tsx` | 익명 세션과 `profiles` 행 로드, 삭제된 계정 세션 정리 |
-| `src/lib/supabase.ts` | Supabase 클라이언트(환경 변수 읽는 유일한 곳) |
+| `src/lib/supabase.ts` | Supabase 클라이언트와 앱 공개 환경 변수 |
+| `src/lib/admin-missions.ts` | 비밀번호를 메모리에서 전달하는 관리자 전용 HTTP 호출. 세션 JWT 대신 서버 비밀번호 검사를 사용 |
 | `src/lib/functions.ts` | Edge Function 호출 래퍼 `Functions.*`와 응답 타입. 새 함수는 여기에 추가 |
 | `src/lib/mailbox.ts`, `daily-note.ts`, `capsule.ts`, `missions.ts`, `relay.ts`, `verification.ts`, `feed.ts`, `room.ts` | 테이블·Storage·RPC 호출. 화면·컴포넌트·훅은 `supabase`를 직접 부르지 않고 이 파일과 `Functions.*`를 쓴다(예외: 세션을 다루는 `session-provider`) |
 | `src/constants/theme.ts` | 디자인 토큰(DESIGN.md와 같은 값) |
@@ -82,16 +83,18 @@ flowchart LR
 | S11 | `/letter/[week]` | `screens/letter.tsx` | weekly-letter |
 | S12 | `/capsule`, 휴게소 시트 | `screens/capsule.tsx` | time-capsule |
 | S13 | 휴게소 시트 | `components/daily-note-card.tsx` | daily-note. 별도 경로 없음 |
+| 관리 | `/admin` | `screens/admin.tsx` | admin-mission-management. 앱 로그인·온보딩과 독립 |
 
 새 Stack 화면은 `src/app/_layout.tsx`의 로그인·온보딩 완료 `Stack.Protected` 블록에 `Stack.Screen`을 추가해야 접근된다.
+관리 화면은 이 블록 밖에 있으며 모든 관리 데이터 접근은 서버가 별도로 인증한다. 사용법은 [ADMIN.md](./ADMIN.md).
 
 ## 4. 주요 흐름
 
 | 흐름 | 순서 |
 | --- | --- |
 | 가입 | `signInAnonymously()` → 트리거 `handle_new_user`가 `profiles` 생성(닉네임 자동) → 온보딩 저장(`onboarded_at`) |
-| 추천(F2) | 홈 진입 → `Functions.recommendMissions()` → 함수가 당일 `daily_recommendations` 캐시 확인 → 없으면 AI 생성(실패 시 시드) → DB 함수 `save_recommendation`이 한 트랜잭션으로 저장 → 일일 3 + 주간 1 반환 |
-| 인증(F4·F5·F7) | 사진 리사이즈 → Storage `verifications/{uid}/…` 업로드 → `verifications` insert(`ai_result` 없음) → `Functions.verifyMission(id)` → AI 판정 후 DB 함수 `finish_verification`이 완료·출석·가구 보상을 한 트랜잭션으로 처리. 같은 요청을 다시 보내면 저장된 응답을 돌려준다 |
+| 추천(F2) | 홈 진입 → `Functions.recommendMissions()` → 당일 추천이 없으면 AI 생성(실패 시 기간 내 시드) → DB 함수 `save_recommendation`이 저장·캐시·동일 요청 재시도 모두 KST 기간을 검증하고 무효 항목만 보충 → 일일 최대 3 + 주간 최대 1 반환. 자동 보충은 새로고침 횟수를 유지하며 진행 중 미션의 기한은 바꾸지 않는다 |
+| 인증(F4·F5·F7) | 사진 리사이즈 → Storage `verifications/{uid}/…` 업로드 → `verifications` insert(`ai_result` 없음) → `Functions.verifyMission(id)` → 소유권·상태 확인 → 미션의 비공개 기준 사진이 있으면 함께 AI에 전달 → DB 함수 `finish_verification`이 완료·출석·가구 보상을 한 트랜잭션으로 처리. 같은 요청을 다시 보내면 저장된 응답을 돌려준다 |
 | 난이도(F8) | `user_missions` 결과 확정 시 트리거 `adjust_difficulty`(연속 2회 만료 −1, 3회 완료 +1) |
 | 댓글(F6) | `submit-comment` 함수(요청 ID로 중복 방지) → 트리거 `prepare_comment`가 `pending`·`publish_at` 설정 → `Functions.moderateComment(id)` → cron `publish_due_comments`가 공개 |
 | 릴레이(F10) | 완료한 미션에만 `relay_messages` insert → `moderate-comment`(`relay_id`) 검수 → 같은 cron이 공개 → S4에서 `get_relay_messages` |
@@ -137,7 +140,9 @@ DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nick
 | 테이블 | 컬럼 |
 | --- | --- |
 | `profiles` | id(=auth.uid), nickname, categories enum[], district, daily_minutes, difficulty, difficulty_changed_at, preferences, streak, last_attended, rest_used_week, onboarded_at |
-| `missions` | id, source(`seed`/`ai`/`event`), seed_no, official_title, official_level, title, category, difficulty, minutes, verify_hint, reason, event_id, created_for(ai 미션 대상자) |
+| `missions` | id, source(`seed`/`ai`/`event`), seed_no, official_title, official_level, title, category, difficulty, minutes, verify_hint, reason, event_id, created_for(ai 미션 대상자), start_date, end_date(빈 날짜는 제한 없음, KST 양 끝 포함) |
+| `mission_photos` | id, mission_id(UUID), storage_path, hint(원본 비교 힌트). RLS 활성화, service_role만 접근 |
+| `admin_login_attempts` | 비밀번호와 주소를 함께 해시한 제한 키, 오류 횟수, 제한 시작 시각. RLS 활성화, service_role만 접근. 1일 지난 항목은 다음 검사 시 정리 |
 | `daily_recommendations` | (user_id, rec_date) PK, daily_mission_ids, weekly_mission_id, refresh_count(0~1) |
 | `user_missions` | id, user_id, mission_id, type(`daily`/`weekly`), status(`in_progress`/`judging`/`completed`/`expired`), due_at, started_at, completed_at, resolved_at(결과 확정 시각) |
 | `verifications` | id, user_mission_id, user_id, photo_path, text, ai_result(`pass`/`retry`/`privacy`), ai_message, is_public |
@@ -182,7 +187,17 @@ Storage: 버킷 `verifications`(private, JPEG, 5MB), 본인 폴더 업로드, �
 
 ## 8. Edge Functions
 
+`admin-missions`는 공유 비밀번호로 공용 미션과 기준 사진을 관리한다. 비밀번호는 `ADMIN_PASSWORD` 서버 시크릿으로만 설정하며 요청마다 고정 길이 해시를 비교한다. 틀린 입력은 주소별 5회·전체 100회 후 10분 제한한다. 응답은 `no-store`, 사진 미리보기는 5분 서명 URL이다. 이 함수만 `--no-verify-jwt`로 배포하며 기존 사용자 함수의 JWT 검증은 유지한다. `check_admin_attempt`, `admin_delete_mission`, `admin_attach_photo` RPC는 서버 전용이다. 삭제와 4장 제한은 미션 행 잠금 안에서 검사하며 사용자 기록·참여·릴레이·사진이 연결된 미션 삭제를 막는다.
+
 모든 AI 호출은 `_shared/ai.ts`의 `generateJson()`을 거친다. 제공자(`AI_PROVIDER`), 모델 등급(`main`: 추천·판정·편지 / `light`: 검수), 시간 제한, 실패 시 `null` 반환 규칙이 여기 있다. 시간 제한: 추천 25초, 판정 20초, 검수 10초, 편지 25초.
+
+기준 사진 비교는 GeminiPicture의 방식을 기존 판정에 통합했다. `_shared/mission-photos.ts`가 비공개 `mission-photos` 버킷에서 해당 미션의 사진만 읽는다. 최대 4장·각 2 MiB(JPEG·PNG·WebP), 읽기 제한 5초. 제출 사진을 첫 번째로 보내고 나머지를 장소 비교에 사용한다. 사진 없음은 기존 판정, 일부라도 누락·초과·형식 오류가 있으면 `verify_fallback`을 따른다. 경로 조회와 업로드는 서버 관리 권한으로만 하며 앱에는 키나 경로를 공개하지 않는다. 테스트 미션은 이관하지 않는다.
+
+2026-11-01 사용자 승인 후 운영 프로젝트 `jpipzrmspryzvjykxefm`에 `20261101090000_mission_photos`·`20261101091000_mission_schedule`를 적용했다. 기존 이력과 일치함을 확인하고 `verify-mission`, `recommend-missions`, `moderate-comment`, `mailbox`, `write-weekly-letter`를 배포했다. 기존 미션 96개와 기존 진행 미션의 상태·기한은 유지됐고, 사진 테이블의 RLS·서버 전용 권한 및 비공개 버킷을 확인했다. DB 타입은 적용 후 운영 스키마에서 재생성했다.
+
+적용 후 운영 SQL 트랜잭션에서 날짜 경계·기간 보정·동일 요청·새로고침 제한·진행 보존을 검증하고 롤백했다. 임시 익명 계정으로 배포 함수의 동시 HTTP 캐시 조회·새로고침 재시도·운영자 기간 변경 후 보정·사진 경로 접근 차단·존재하지 않는 인증의 404를 확인한 뒤 계정과 관련 데이터를 삭제했다. 실제 사진 판정의 정확도·지연·비용과 미리보기 화면 확인은 change의 남은 검증 항목이다.
+
+문제가 생겨 이전 동작으로 되돌릴 때는 배포 전 커밋 `0687a17`의 해당 Edge Functions를 별도 작업 디렉터리에서 다시 배포하고, 기존 `20261028123000_atomic_recommendations.sql`의 `save_recommendation` 정의만 새 롤백 마이그레이션에서 `CREATE OR REPLACE FUNCTION`으로 복구한다. 새 컬럼·사진 테이블·버킷과 이력은 유지해 등록 데이터를 보존한다. 적용된 마이그레이션을 수정하거나 테이블·버킷을 삭제하지 않는다.
 
 | 함수 | 입력 | 출력 | 호출 시점 |
 | --- | --- | --- | --- |
@@ -244,6 +259,7 @@ AI 호출은 앱이 아니라 Edge Function(`supabase/functions/`)이 한다. �
 | `AI_PROVIDER` | 선택 | `gemini` 또는 `anthropic`으로 강제 선택 | `_shared/ai.ts` |
 | `SEOUL_OPEN_API_KEY` | 행사 동기화 시 | 서울 열린데이터광장 일반 인증키. 주소 경로에 들어가므로 로그에 주소를 남기지 않는다 | `sync-events` |
 | `SYNC_EVENTS_SECRET` | 행사 동기화 시 | cron만 `sync-events`를 부를 수 있게 하는 비밀값. Vault `sync_events_secret`과 같은 값 | `sync-events` |
+| `ADMIN_PASSWORD` | 관리자 웹 사용 시 | 16자 이상 공유 관리자 비밀번호. 앱 환경 변수로 만들지 않는다 | `admin-missions` |
 
 - **자동** 항목은 Supabase가 모든 함수에 넣어 준다. 직접 설정하지 않는다(`SUPABASE_` 접두사는 예약어라 설정도 안 된다).
 - 제공자 선택 규칙: `AI_PROVIDER=anthropic` → Claude / `AI_PROVIDER=gemini` → Gemini / 비어 있으면 `GEMINI_API_KEY`가 있을 때 Gemini, 없으면 Claude.

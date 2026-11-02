@@ -159,6 +159,12 @@ export function Home() {
         </View>
       )}
 
+      {data && (data.daily.length < 3 || !data.weekly) && (
+        <AppText variant="caption" color="steel">
+          지금 추천할 수 있는 미션이 부족해요
+        </AppText>
+      )}
+
       {data && !anyStarted && (
         <View style={styles.others}>
           <Button
