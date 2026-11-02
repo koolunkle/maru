@@ -53,6 +53,7 @@ function RootStack() {
         <Stack.Screen name="mission/[id]/index" />
         <Stack.Screen name="mission/[id]/verify" />
       </Stack.Protected>
+      <Stack.Screen name="admin" />
     </Stack>
   );
 }

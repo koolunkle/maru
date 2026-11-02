@@ -364,7 +364,7 @@ components:
 | --- | --- |
 | S1 시작 | 세로 중앙: 서비스명 `display` → 8px → 소개 `body-md` `slate` / 하단 고정: `button-primary` "시작하기" |
 | S2 온보딩 | 상단 진행 표시(3칸 막대, 높이 4px, 활성 `primary`) → 24px → 질문 `display` → 24px → 선택지(카테고리: 칩 flex-wrap 간격 8px / 구: 2열 그리드 칩 / 시간: 세로 `card-base` 3개) / 하단 고정: "다음" |
-| S3 홈 | 헤더(날짜 `title-lg` + 설정 아이콘) → 연속 출석 줄(`zap` 아이콘 `accent` + "{N}일째" `title-md`) → 32px → "오늘의 미션" `title-md` → `mission-card` ×3 → 32px → "이번 주 미션" → `mission-card` ×1 → `button-ghost` "다른 미션 보기" |
+| S3 홈 | 헤더(날짜 `title-lg` + 설정 아이콘) → 연속 출석 줄(`zap` 아이콘 `accent` + "{N}일째" `title-md`) → 32px → "오늘의 미션" `title-md` → `mission-card` 최대 3개 → 32px → (주간 미션이 있을 때) "이번 주 미션" → `mission-card` ×1 → (유효 후보 부족 시) "지금 추천할 수 있는 미션이 부족해요" `caption` `steel` → `button-ghost` "다른 미션 보기" |
 | S4 미션 상세 | 상단 틴트 영역(카테고리 `tint`, 높이 160px, 미션명 `title-lg`, 라벨 줄) → 인증 힌트 `card-base` → (행사 미션만) 행사 정보 `card-base`: 라벨 "행사 정보" `label` `steel` + 행사명 `body` + "11월 2일 ~ 11월 8일 · 장소" `body-sm` `slate` + (이번 주 안에 끝나면) "오늘 끝나요"/"N일 뒤 끝나요" `body-sm` `accent-ink` + `button-ghost` 작은 높이 "행사 정보 보기"(https 링크만, 새 창) → 추천 이유 `ai-card` → 같이 할래요 행(인원 `body-sm` + `button-secondary` 작은 높이 40px) / 하단 고정: "시작하기" 또는 "인증하기". 불러오기 실패 시 안내 + `button-secondary` "다시 불러오기" |
 | S5 인증 | 사진 영역 1:1, `rounded.lg`, 비어 있으면 `surface-sunken` + `camera` 아이콘 + "사진 추가" → 16px → `text-input` 소감(3줄, 우하단 "0/100" `caption`) → 공개 토글 행 / 하단 고정: "제출하기". 판정 중: 전체 오버레이 대신 버튼을 로딩 상태로. 결과: `ai-card`에 결과 문구 + 보상 시 `reward-badge` |
 | S6 피드 | 게시물 `card-base`: 닉네임 `label` + 시각 `caption` → 사진 1:1 → 소감 `body-md` → 빠른 반응 칩 3개 → 댓글 목록(`body-sm`, 들여쓰기 없음) → 댓글 입력 1줄 / 목록 끝: 20개를 넘으면 `button-ghost` "이전 인증 더 보기" |
@@ -391,6 +391,8 @@ F10~F16 화면·요소
 | S12 타임캡슐 (F16) | 휴게소에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
 
 ### 5.3 컴포넌트 구조
+
+관리 화면 `/admin`은 공통 480px 컬럼·`Screen`·`BackHeader`·토큰을 사용한다. 비밀번호 입력과 "관리 화면 열기" 버튼을 먼저 보여준다. 인증 후에는 관리 종료 → 제목 검색 → 20개 미션 목록과 이전/다음 → 새 미션 작성 → 미션 편집 폼 → 기준 사진 순서다. 폼 간격은 `Spacing.md`, 입력은 `Radius.md`·헤어라인 테두리와 최소 높이 48px로 맞춘다. 카테고리는 기존 `Chip`, 사진은 너비 100%·높이 200px 미리보기와 힌트로 표시한다. 저장·삭제 결과는 화면 안 안내, 삭제 확인은 공통 `BottomSheet`를 사용한다.
 
 | 컴포넌트 | 구조 |
 | --- | --- |

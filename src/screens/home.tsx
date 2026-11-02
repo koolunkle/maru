@@ -73,8 +73,7 @@ export function Home() {
   const completedDailyCount = data
     ? Math.min(
         Object.values(data.progress).filter(
-          (mission) =>
-            mission.type === 'daily' && mission.status === 'completed',
+          (mission) => mission.type === 'daily' && mission.status === 'completed',
         ).length,
         3,
       )
@@ -97,7 +96,9 @@ export function Home() {
       <View
         style={styles.streak}
         accessible
-        accessibilityLabel={streak > 0 ? `연속 출석 ${streak}일째` : '연속 출석 없음. 오늘 미션 하나로 출석해 볼까요?'}
+        accessibilityLabel={
+          streak > 0 ? `연속 출석 ${streak}일째` : '연속 출석 없음. 오늘 미션 하나로 출석해 볼까요?'
+        }
       >
         <Feather aria-hidden name="zap" size={20} color={theme.accent} />
         {streak > 0 ? (
@@ -120,12 +121,7 @@ export function Home() {
         {error ? (
           <View style={styles.state}>
             <AppText color="slate">미션을 불러오지 못했어요.</AppText>
-            <Button
-              label="다시 불러오기"
-              variant="secondary"
-              size="sm"
-              onPress={reload}
-            />
+            <Button label="다시 불러오기" variant="secondary" size="sm" onPress={reload} />
           </View>
         ) : !data ? (
           <View style={styles.state}>
@@ -159,6 +155,12 @@ export function Home() {
         </View>
       )}
 
+      {data && (data.daily.length < 3 || !data.weekly) && (
+        <AppText variant="caption" color="steel">
+          지금 추천할 수 있는 미션이 부족해요
+        </AppText>
+      )}
+
       {data && !anyStarted && (
         <View style={styles.others}>
           <Button
@@ -174,7 +176,6 @@ export function Home() {
           )}
         </View>
       )}
-
     </Screen>
   );
 }

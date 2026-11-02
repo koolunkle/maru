@@ -14,13 +14,3 @@ supabase/migrations/
 *.md
 openspec/
 .claude/
-
-# #83(feat/integrate-mission-photos)이 고치는 파일. 충돌을 피하려고 잠시 뺀다.
-# #83이 main에 합쳐진 뒤 이 목록을 지우고 `npm run format`을 한 번 더 실행한다.
-src/screens/home.tsx
-src/utils/pick-seed-missions.ts
-supabase/functions/_shared/ai.ts
-supabase/functions/_shared/fallback.ts
-supabase/functions/recommend-missions/index.ts
-supabase/functions/verify-mission/index.ts
-tests/verify-atomic.test.mjs

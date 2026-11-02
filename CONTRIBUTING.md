@@ -103,6 +103,7 @@ OpenSpec CLI는 개발 의존성으로 들어 있다(`npm run spec -- <명령>`)
 - **운영 반영은 관리자만, main에 합쳐진 코드로만 한다.** 반영 전에 `git switch main && git pull`로 최신 main인지 확인하고, 커밋하지 않은 변경이 없어야 한다(`git status`).
 - 대상은 세 가지다: 웹(`eas deploy --prod`), 서버 함수(`supabase functions deploy`), 마이그레이션(`supabase db push`).
 - 함수는 바뀐 것만 이름을 붙여 배포한다. 이름 없이 `supabase functions deploy`를 실행하면 모든 함수가 내 작업본으로 바뀐다.
+- `admin-missions`만 `--no-verify-jwt`를 붙여 배포한다. 빼면 관리자 화면이 막힌다. 다른 함수에는 붙이지 않는다(`docs/ADMIN.md`).
 - 반영 순서는 DB → 함수 → 웹이다. 앞 단계가 없으면 뒤 단계가 실패한다.
 - PR 본문에 합친 뒤 할 운영 반영(명령과 순서)을 적고, 관리자는 반영한 뒤 PR에 "반영함" 댓글을 남긴다.
 - 개인 작업 확인은 미리보기 웹(`eas deploy`, `--prod` 없이)으로 한다. 서버 함수는 개인 확인용으로 운영에 배포하지 않는다.
@@ -205,6 +206,7 @@ npx supabase gen types typescript --project-id jpipzrmspryzvjykxefm > src/types/
 
 ```bash
 npx supabase functions deploy moderate-comment --project-ref jpipzrmspryzvjykxefm   # 바뀐 함수만 이름을 붙여서
+npx supabase functions deploy admin-missions --project-ref jpipzrmspryzvjykxefm --no-verify-jwt   # 이 함수만 예외
 ```
 
 실행 로그는 Supabase 대시보드 Edge Functions → 함수 → Logs에서 본다. AI 실패 원인은 `ai error` 줄에 남는다.
