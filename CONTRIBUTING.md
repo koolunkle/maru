@@ -76,6 +76,7 @@ OpenSpec CLI는 개발 의존성으로 들어 있다(`npm run spec -- <명령>`)
    - `specs/<capability>/spec.md` — 기존 spec과의 차이. `## ADDED` / `## MODIFIED`(바뀐 Requirement 전체) / `## REMOVED`(이유 포함) Requirements
    - `design.md` — 기술 결정이 있을 때만(테이블·RLS·함수, 고른 방법과 버린 방법)
    - `tasks.md` — 체크리스트. 마지막 그룹은 검증
+   - `verification.md` — 검증 기록이 PR 본문에 다 담기지 않을 때만. 그 change의 기록은 change 폴더에 두고 `docs/`에 따로 만들지 않는다(archive 폴더 이름에 날짜가 붙으므로 파일 이름에는 날짜를 넣지 않는다)
 2. **제안 리뷰**: `npm run spec:validate`를 통과시킨 뒤 제안 문서만으로 PR(draft)을 열어 방향을 먼저 맞춘다. 작은 변경이면 구현까지 한 PR에 넣어도 된다.
 3. **구현**: `/opsx:apply`로 `tasks.md`를 하나씩 체크하며 구현한다. 하다가 범위가 바뀌면 코드보다 change 문서를 먼저 고친다(`/opsx:update`).
 4. **검사 → 미리보기 배포 → PR**: 아래 검사와 미리보기 배포. PR 본문에 change 이름과 각 Scenario를 어떻게 확인했는지 적는다.

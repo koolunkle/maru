@@ -23,5 +23,5 @@ docs/PRODUCT.md 1.2절 문제 4에 대응하는 장소 미션 인증의 실제 �
 ## Impact
 
 - 사진 등록 이후에 착수한다. 사진과 장소의 대응을 확인하고 현재 Maru DB에 운영 또는 임시 검증 자료로 등록한다.
-- 기존 검증 증거는 docs/qa/mission-integration-2026-11-01.md에 있다. 실제 사진 품질과 실기기 검증은 아직 통과하지 않았다.
+- 기존 검증 증거는 openspec/changes/archive/2026-11-01-integrate-mission-photos/verification.md에 있다. 실제 사진 품질과 실기기 검증은 아직 통과하지 않았다.
 - DB 마이그레이션·Edge Function 재배포·app_config 변경 없음. 운영 공용 설정을 바꿔 장애를 만들지 않는다.

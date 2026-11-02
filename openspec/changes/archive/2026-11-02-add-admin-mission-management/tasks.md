@@ -18,4 +18,4 @@
 - [x] 프로젝트 관리자가 ADMIN_PASSWORD 시크릿을 등록한다. 2026-11-02 등록, 틀린 비밀번호에 503 대신 401 확인.
 - [x] 시크릿 등록 후 배포 함수의 실제 로그인·미션 CRUD·사진 업로드·서명 조회·삭제를 임시 자료로 검증하고 정리한다. Supabase Advisors도 확인한다. 2026-11-02 운영 /admin에서 확인, Advisors 새 경고 없음.
 
-실제 장소 사진의 정확도와 실기기 검증은 사용자 사진 등록 이후 `validate-mission-photo-quality`에서 진행한다. 현재 결과와 배포 상태는 `docs/qa/admin-management-2026-11-02.md`에 기록한다.
+실제 장소 사진의 정확도와 실기기 검증은 사용자 사진 등록 이후 `validate-mission-photo-quality`에서 진행한다. 현재 결과와 배포 상태는 같은 폴더의 `verification.md`에 기록한다.
