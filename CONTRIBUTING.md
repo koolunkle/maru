@@ -65,6 +65,8 @@ npm start          # QR 코드를 Expo Go로 찍어 휴대폰에서 확인
 | spec대로 동작하지 않는 버그를 고친다 | change 없이 GitHub Issue → PR. PR 본문에 어긴 spec과 Requirement 이름을 적는다 |
 | 리팩터링·도구·문서·운영 준비처럼 동작이 그대로다 | change 없이 PR. 묶어서 관리할 만큼 크면 `skip_specs: true` change로 만든다(예: `prepare-demo-rehearsal`) |
 
+spec·README·`docs/` 같은 기준 문서에는 "시연 때", "시연 후", "지금은 ~단계"처럼 특정 시점에 기대는 표현을 쓰지 않는다. 그날이 지나면 저절로 틀린 말이 되기 때문이다. 늘 맞아야 하는 내용은 조건으로 쓰고(예: "실제 참가자를 받기 전에 바꾼다"), 한 번 하고 끝나는 일(데이터 준비, 리허설, 정리)은 change의 `tasks.md`에 둔다. 날짜가 박힌 과거 일정은 그대로 둬도 된다.
+
 spec이 틀렸다는 걸 발견했는데 지금 동작이 맞다면, 그것도 동작 변경과 같이 change로 spec을 고친다. 코드와 spec이 다른 상태로 PR을 합치지 않는다.
 
 ### 3.2 change 한 사이클
