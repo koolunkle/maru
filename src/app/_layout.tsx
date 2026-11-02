@@ -64,7 +64,11 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider
-      value={{ ...navTheme, colors: { ...navTheme.colors, background: colors.canvas, card: colors.surface } }}>
+      value={{
+        ...navTheme,
+        colors: { ...navTheme.colors, background: colors.canvas, card: colors.surface },
+      }}
+    >
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       {/* 웹에서는 480px 컬럼 중앙 정렬, 바깥은 canvas (DESIGN.md §5.1) */}
       <View style={[styles.outer, { backgroundColor: colors.canvas }]}>

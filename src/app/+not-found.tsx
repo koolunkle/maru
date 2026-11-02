@@ -11,7 +11,9 @@ export default function NotFound() {
   return (
     <Screen>
       <View style={styles.body}>
-        <AppText variant="titleLg" accessibilityRole="header">찾는 화면이 없어요</AppText>
+        <AppText variant="titleLg" accessibilityRole="header">
+          찾는 화면이 없어요
+        </AppText>
         <AppText color="slate">주소가 바뀌었거나 없어진 화면이에요.</AppText>
         <Button label="홈으로" onPress={() => router.replace('/')} />
       </View>

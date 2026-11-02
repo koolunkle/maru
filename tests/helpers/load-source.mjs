@@ -12,7 +12,9 @@ const testsDir = new URL('../', import.meta.url);
  */
 export async function loadSource(path, imports = {}, globals = {}) {
   const source = await readFile(new URL(path, testsDir), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS },
+  });
   const exports = {};
   new Function('require', 'exports', ...Object.keys(globals), outputText)(
     (name) => {

@@ -16,7 +16,10 @@ export const FeedPageSize = 20;
 
 /** S6 피드 한 쪽: 공개 인증 최신순 FeedPageSize개와 사진 주소·댓글·반응. before가 있으면 그보다 오래된 것 */
 export async function getFeedPage(userId: string, before?: string): Promise<FeedPost[]> {
-  const { data: rows, error } = await supabase.rpc('get_feed', { page_size: FeedPageSize, ...(before ? { before } : {}) });
+  const { data: rows, error } = await supabase.rpc('get_feed', {
+    page_size: FeedPageSize,
+    ...(before ? { before } : {}),
+  });
   if (error) throw error;
   if (!rows.length) return [];
 
@@ -55,9 +58,24 @@ export async function getFeedPage(userId: string, before?: string): Promise<Feed
 }
 
 /** F6 반응 남기기·지우기. 실패하면 오류를 던진다 */
-export async function setReaction(verificationId: string, userId: string, type: Enums<'reaction_type'>, on: boolean) {
+export async function setReaction(
+  verificationId: string,
+  userId: string,
+  type: Enums<'reaction_type'>,
+  on: boolean,
+) {
   const { error } = on
-    ? await supabase.from('reactions').upsert({ verification_id: verificationId, type }, { onConflict: 'verification_id,user_id,type', ignoreDuplicates: true })
-    : await supabase.from('reactions').delete().eq('verification_id', verificationId).eq('user_id', userId).eq('type', type);
+    ? await supabase
+        .from('reactions')
+        .upsert(
+          { verification_id: verificationId, type },
+          { onConflict: 'verification_id,user_id,type', ignoreDuplicates: true },
+        )
+    : await supabase
+        .from('reactions')
+        .delete()
+        .eq('verification_id', verificationId)
+        .eq('user_id', userId)
+        .eq('type', type);
   if (error) throw error;
 }

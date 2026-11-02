@@ -54,7 +54,12 @@ export function FloorFill({ id, uid, dark, ...area }: FillProps) {
       <Defs>
         {floor.id === 'herringbone' && (
           <Pattern id={pid} x={0} y={0} width={6} height={4} patternUnits="userSpaceOnUse">
-            <Path d="M0 4 L3 1 M3 1 L6 4 M0 2 L1 1 M5 1 L6 2" stroke={floor.ink} strokeWidth={0.5} fill="none" />
+            <Path
+              d="M0 4 L3 1 M3 1 L6 4 M0 2 L1 1 M5 1 L6 2"
+              stroke={floor.ink}
+              strokeWidth={0.5}
+              fill="none"
+            />
           </Pattern>
         )}
         {floor.id === 'carpet' && (
@@ -64,17 +69,36 @@ export function FloorFill({ id, uid, dark, ...area }: FillProps) {
         )}
       </Defs>
       <Rect {...area} fill={floor.base} />
-      {(floor.id === 'herringbone' || floor.id === 'carpet') && <Rect {...area} fill={`url(#${pid})`} opacity={0.7} />}
+      {(floor.id === 'herringbone' || floor.id === 'carpet') && (
+        <Rect {...area} fill={`url(#${pid})`} opacity={0.7} />
+      )}
       {(floor.id === 'wood' || floor.id === 'tile') && (
         <G opacity={0.6}>
           {rays.map((bx) => (
-            <Line key={bx} x1={cx + (bx - cx) * 0.42} y1={y} x2={bx} y2={y + height} stroke={floor.ink} strokeWidth={0.35} />
+            <Line
+              key={bx}
+              x1={cx + (bx - cx) * 0.42}
+              y1={y}
+              x2={bx}
+              y2={y + height}
+              stroke={floor.ink}
+              strokeWidth={0.35}
+            />
           ))}
         </G>
       )}
       {floor.id === 'tile' &&
         [0.18, 0.4, 0.68].map((t) => (
-          <Line key={t} x1={x} y1={y + height * t} x2={x + width} y2={y + height * t} stroke={floor.ink} strokeWidth={0.35} opacity={0.7} />
+          <Line
+            key={t}
+            x1={x}
+            y1={y + height * t}
+            x2={x + width}
+            y2={y + height * t}
+            stroke={floor.ink}
+            strokeWidth={0.35}
+            opacity={0.7}
+          />
         ))}
       <DarkVeil {...area} dark={dark} />
     </G>
@@ -82,7 +106,17 @@ export function FloorFill({ id, uid, dark, ...area }: FillProps) {
 }
 
 /** 꾸미기 시트의 벽지·바닥 견본 */
-export function SurfaceSwatch({ kind, id, size, dark }: { kind: 'wall' | 'floor'; id: string; size: number; dark: boolean }) {
+export function SurfaceSwatch({
+  kind,
+  id,
+  size,
+  dark,
+}: {
+  kind: 'wall' | 'floor';
+  id: string;
+  size: number;
+  dark: boolean;
+}) {
   const Fill = kind === 'wall' ? WallFill : FloorFill;
   return (
     <Svg width={size} height={size} viewBox="0 0 20 20" aria-hidden>

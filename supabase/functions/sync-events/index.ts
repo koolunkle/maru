@@ -7,7 +7,14 @@ import 'jsr:@supabase/functions-js/edge-runtime.d.ts';
 import { admin } from '../_shared/clients.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
 import { kstDate } from '../_shared/kst.ts';
-import { type EventRecord, EventPageSize, eventPageUrl, readEventPage, toEvent, uniqueEvents } from '../_shared/seoul-events.ts';
+import {
+  type EventRecord,
+  EventPageSize,
+  eventPageUrl,
+  readEventPage,
+  toEvent,
+  uniqueEvents,
+} from '../_shared/seoul-events.ts';
 
 const UpsertChunk = 500;
 
@@ -19,7 +26,9 @@ function sameSecret(a: string, b: string) {
 }
 
 async function fetchPage(key: string, start: number) {
-  const res = await fetch(eventPageUrl(key, start, start + EventPageSize - 1), { signal: AbortSignal.timeout(20_000) });
+  const res = await fetch(eventPageUrl(key, start, start + EventPageSize - 1), {
+    signal: AbortSignal.timeout(20_000),
+  });
   // 오류 메시지에 주소(인증키 포함)를 넣지 않는다
   if (!res.ok) throw new Error(`seoul_api_http_${res.status}`);
   return readEventPage(await res.json());
@@ -28,7 +37,8 @@ async function fetchPage(key: string, start: number) {
 Deno.serve(
   handler(async (req) => {
     const secret = Deno.env.get('SYNC_EVENTS_SECRET');
-    if (!secret || !sameSecret(req.headers.get('x-sync-secret') ?? '', secret)) throw new HttpError(401, 'unauthorized');
+    if (!secret || !sameSecret(req.headers.get('x-sync-secret') ?? '', secret))
+      throw new HttpError(401, 'unauthorized');
     const key = Deno.env.get('SEOUL_OPEN_API_KEY');
     if (!key) throw new HttpError(500, 'missing_api_key');
 
@@ -49,7 +59,9 @@ Deno.serve(
 
     const rows = uniqueEvents(events);
     for (let i = 0; i < rows.length; i += UpsertChunk) {
-      const { error } = await admin.from('events').upsert(rows.slice(i, i + UpsertChunk), { onConflict: 'external_id' });
+      const { error } = await admin
+        .from('events')
+        .upsert(rows.slice(i, i + UpsertChunk), { onConflict: 'external_id' });
       if (error) throw error;
     }
     console.log('sync-events', { fetched, upserted: rows.length });

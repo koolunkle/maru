@@ -27,10 +27,14 @@ async function fetchStats(userId: string, today: string): Promise<Stats> {
   const from = weekStart < monthStart ? weekStart : monthStart;
   const data = await getMissionsStartedSince(userId, from);
 
-  const week = data.filter((um) => um.type === 'daily' && kstDate(new Date(um.started_at)) >= weekStart);
+  const week = data.filter(
+    (um) => um.type === 'daily' && kstDate(new Date(um.started_at)) >= weekStart,
+  );
   const weekDone = week.filter((um) => um.status === 'completed').length;
   const attended = new Set(
-    data.filter((um) => um.status === 'completed' && um.completed_at).map((um) => kstDate(new Date(um.completed_at!))),
+    data
+      .filter((um) => um.status === 'completed' && um.completed_at)
+      .map((um) => kstDate(new Date(um.completed_at!))),
   );
   return {
     weekRate: week.length ? Math.round((weekDone / week.length) * 100) : null,
@@ -89,7 +93,9 @@ export function Record() {
 
       {failed && (
         <View style={styles.failed}>
-          <AppText color="slate" accessibilityRole="alert">기록을 불러오지 못했어요.</AppText>
+          <AppText color="slate" accessibilityRole="alert">
+            기록을 불러오지 못했어요.
+          </AppText>
           <Button
             label="다시 불러오기"
             variant="secondary"
@@ -113,7 +119,12 @@ export function Record() {
               {stats.weekRate === null ? '-' : `${stats.weekRate}%`}
             </AppText>
             <View style={[styles.track, { backgroundColor: theme.surfaceSunken }]}>
-              <View style={[styles.fill, { backgroundColor: theme.primary, width: `${stats.weekRate ?? 0}%` }]} />
+              <View
+                style={[
+                  styles.fill,
+                  { backgroundColor: theme.primary, width: `${stats.weekRate ?? 0}%` },
+                ]}
+              />
             </View>
             <AppText variant="caption" color="steel" tabular>
               {stats.weekStarted
@@ -142,8 +153,10 @@ export function Record() {
                         style={[
                           styles.dot,
                           on && { backgroundColor: theme.accentSoft },
-                          day === today && !on && { borderWidth: 1, borderColor: theme.hairlineStrong },
-                        ]}>
+                          day === today &&
+                            !on && { borderWidth: 1, borderColor: theme.hairlineStrong },
+                        ]}
+                      >
                         <AppText variant="caption" color={on ? 'accentInk' : 'slate'} tabular>
                           {Number(day.slice(8))}
                         </AppText>
@@ -156,13 +169,19 @@ export function Record() {
           </View>
         </>
       )}
-      <View style={[styles.letter, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
-        <AppText variant="label" color="steel">이번 주 편지</AppText>
+      <View
+        style={[styles.letter, { backgroundColor: theme.surface, borderColor: theme.hairline }]}
+      >
+        <AppText variant="label" color="steel">
+          이번 주 편지
+        </AppText>
         <AppText>기분과 한 줄, 완료한 미션을 돌아봐요.</AppText>
         <Button
           label="이번 주 마음 리포트 보기"
           variant="ghost"
-          onPress={() => router.push({ pathname: '/letter/[week]', params: { week: kstWeekStart() } })}
+          onPress={() =>
+            router.push({ pathname: '/letter/[week]', params: { week: kstWeekStart() } })
+          }
         />
       </View>
     </Screen>

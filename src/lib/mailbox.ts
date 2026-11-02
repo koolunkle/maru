@@ -32,7 +32,11 @@ async function invokeMailbox<T>(body: object): Promise<T> {
   return data;
 }
 
-export async function sendMailboxMessage(userId: string, text: string, requestId: string): Promise<MailboxMessage> {
+export async function sendMailboxMessage(
+  userId: string,
+  text: string,
+  requestId: string,
+): Promise<MailboxMessage> {
   const body = text.trim();
   if (!userId.trim()) throw new Error('로그인이 필요해요');
   if (!body || body.length > MailboxMaxLength) throw new Error('한 줄은 1~60자로 적어 주세요');
@@ -40,6 +44,8 @@ export async function sendMailboxMessage(userId: string, text: string, requestId
   return invokeMailbox({ action: 'send', body, requestId });
 }
 
-export const getReceivedMailboxMessages = () => invokeMailbox<ReceivedMailboxMessage[]>({ action: 'inbox' });
+export const getReceivedMailboxMessages = () =>
+  invokeMailbox<ReceivedMailboxMessage[]>({ action: 'inbox' });
 export const getSentMailboxMessages = () => invokeMailbox<MailboxMessage[]>({ action: 'sent' });
-export const markMailboxMessageRead = (id: string) => invokeMailbox<ReceivedMailboxMessage>({ action: 'read', id });
+export const markMailboxMessageRead = (id: string) =>
+  invokeMailbox<ReceivedMailboxMessage>({ action: 'read', id });

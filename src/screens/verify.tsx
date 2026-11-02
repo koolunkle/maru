@@ -90,18 +90,34 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
     setNotice(null);
     try {
       let verificationId = pendingId;
-      if (uploadRequest.current && (uploadRequest.current.note !== note.trim() || uploadRequest.current.isPublic !== isPublic)) {
+      if (
+        uploadRequest.current &&
+        (uploadRequest.current.note !== note.trim() || uploadRequest.current.isPublic !== isPublic)
+      ) {
         verificationId = null;
         uploadRequest.current = null;
         setPendingId(null);
       }
       if (!verificationId) {
         const text = note.trim();
-        if (!uploadRequest.current || uploadRequest.current.note !== text || uploadRequest.current.isPublic !== isPublic) {
-          uploadRequest.current = { path: `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 12)}.jpg`, note: text, isPublic };
+        if (
+          !uploadRequest.current ||
+          uploadRequest.current.note !== text ||
+          uploadRequest.current.isPublic !== isPublic
+        ) {
+          uploadRequest.current = {
+            path: `${session.user.id}/${Date.now()}-${Math.random().toString(36).slice(2, 12)}.jpg`,
+            note: text,
+            isPublic,
+          };
         }
         verificationId = await uploadVerification({
-          userId: session.user.id, userMissionId, path: uploadRequest.current.path, bytes: photo.bytes, text: text || null, isPublic,
+          userId: session.user.id,
+          userMissionId,
+          path: uploadRequest.current.path,
+          bytes: photo.bytes,
+          text: text || null,
+          isPublic,
         });
         setPendingId(verificationId);
       }
@@ -136,7 +152,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           <View style={styles.footer}>
             <RelayActions {...relay} />
           </View>
-        }>
+        }
+      >
         <BackHeader />
         {!revealDone && result.rewards.length > 0 && (
           <RewardReveal
@@ -159,7 +176,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
             <Animated.View
               key={f.id}
               entering={FadeInDown.duration(200).delay(150 + i * 100)}
-              style={[styles.badge, { backgroundColor: theme.accentSoft }]}>
+              style={[styles.badge, { backgroundColor: theme.accentSoft }]}
+            >
               <Feather aria-hidden name="award" size={14} color={theme.accent} />
               <AppText variant="label" color="accentInk">
                 {f.name} 획득
@@ -188,7 +206,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
           )}
           <Button label="제출하기" onPress={submit} disabled={!photo} loading={busy} />
         </View>
-      }>
+      }
+    >
       <BackHeader title="인증하기" />
 
       <PressableScale
@@ -196,7 +215,8 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
         accessibilityLabel={photo ? '사진 바꾸기' : '사진 추가'}
         onPress={() => pick('library')}
         disabled={busy}
-        style={[styles.photo, { backgroundColor: theme.surfaceSunken }]}>
+        style={[styles.photo, { backgroundColor: theme.surfaceSunken }]}
+      >
         {photo ? (
           <Image source={{ uri: photo.uri }} style={StyleSheet.absoluteFill} contentFit="cover" />
         ) : (
@@ -209,7 +229,12 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
         )}
       </PressableScale>
       {Platform.OS !== 'web' && (
-        <Button label="카메라로 찍기" variant="ghost" onPress={() => pick('camera')} disabled={busy} />
+        <Button
+          label="카메라로 찍기"
+          variant="ghost"
+          onPress={() => pick('camera')}
+          disabled={busy}
+        />
       )}
 
       {result?.result === 'retry' && (
@@ -253,7 +278,11 @@ export function Verify({ missionId, userMissionId }: { missionId: string; userMi
             닉네임으로만 보여요. 공개하면 익명 댓글을 받을 수 있어요.
           </AppText>
         </View>
-        <AppSwitch accessibilityLabel="피드에 공개하기" value={isPublic} onValueChange={setIsPublic} />
+        <AppSwitch
+          accessibilityLabel="피드에 공개하기"
+          value={isPublic}
+          onValueChange={setIsPublic}
+        />
       </View>
     </Screen>
   );

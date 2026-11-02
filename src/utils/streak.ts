@@ -1,6 +1,10 @@
 import { addKstDays, kstWeekStart } from './date';
 
-type StreakProfile = { streak: number; last_attended: string | null; rest_used_week: string | null };
+type StreakProfile = {
+  streak: number;
+  last_attended: string | null;
+  rest_used_week: string | null;
+};
 
 /**
  * 지금 이어지고 있는 연속 출석 일수(spec attendance-streak).
@@ -11,6 +15,7 @@ export function currentStreak(profile: StreakProfile, today: string) {
   const last = profile.last_attended;
   if (!last || profile.streak <= 0) return 0;
   if (last === today || last === addKstDays(today, -1)) return profile.streak;
-  if (last === addKstDays(today, -2) && profile.rest_used_week !== kstWeekStart(today)) return profile.streak;
+  if (last === addKstDays(today, -2) && profile.rest_used_week !== kstWeekStart(today))
+    return profile.streak;
   return 0;
 }

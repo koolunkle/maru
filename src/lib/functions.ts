@@ -53,20 +53,24 @@ type ModerationResult = {
 
 export const Functions = {
   /** F2 오늘의 추천. refresh = '다른 미션 보기' (하루 1회) */
-  recommendMissions: (refresh = false, requestId?: string) => invoke<Recommendation>('recommend-missions', { refresh, requestId }),
+  recommendMissions: (refresh = false, requestId?: string) =>
+    invoke<Recommendation>('recommend-missions', { refresh, requestId }),
   /** F4 사진 판정 + 완료·출석·보상 처리 */
-  verifyMission: (verificationId: string) => invoke<JudgeResult>('verify-mission', { verification_id: verificationId }),
+  verifyMission: (verificationId: string) =>
+    invoke<JudgeResult>('verify-mission', { verification_id: verificationId }),
   /** F6 댓글 검수 */
   moderateComment: (commentId: string) =>
     invoke<ModerationResult>('moderate-comment', {
       comment_id: commentId,
     }),
-  moderateRelay: (relayId: string) => invoke<ModerationResult>('moderate-comment', { relay_id: relayId }),
+  moderateRelay: (relayId: string) =>
+    invoke<ModerationResult>('moderate-comment', { relay_id: relayId }),
   /** F3 미션 시작 (한도 초과 시 code 'mission_limit') */
   startMission: (missionId: string, type: Enums<'mission_type'>, dueAt: string) =>
     invoke<{ id: string } | null>('start-mission', { missionId, type, dueAt }),
   /** F7 가구 놓기·비우기 */
-  placeFurniture: (slot: Enums<'room_slot'>, furnitureId: string | null) => invoke<{ ok: boolean }>('place-furniture', { slot, furnitureId }),
+  placeFurniture: (slot: Enums<'room_slot'>, furnitureId: string | null) =>
+    invoke<{ ok: boolean }>('place-furniture', { slot, furnitureId }),
   /** F7 가구 옮기기. 그 자리에 다른 가구가 있으면 서버가 한 번에 서로 바꾼다 */
   moveFurniture: (furnitureId: string, slot: Enums<'room_slot'>) =>
     invoke<{ ok: boolean }>('place-furniture', { slot, furnitureId, move: true }),

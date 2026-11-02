@@ -42,7 +42,11 @@ Deno.serve(
       .maybeSingle();
     if (updateError) throw updateError;
     if (updated) return json({ status: updated.status, judged_by: 'ai' });
-    const { data: current, error: currentError } = await admin.from(table).select('status').eq('id', c.id).single();
+    const { data: current, error: currentError } = await admin
+      .from(table)
+      .select('status')
+      .eq('id', c.id)
+      .single();
     if (currentError) throw currentError;
     return json({ status: current.status, judged_by: null });
   }),

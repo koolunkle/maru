@@ -59,7 +59,8 @@ export function nextReward(
     }
     if (left === null || left < 1) continue;
     const text = left === 1 ? `완료하면 ${f.name}` : `${left}${unit} ${f.name}`;
-    if (!best || left < best.left || (left === best.left && f.sort < best.sort)) best = { left, sort: f.sort, text };
+    if (!best || left < best.left || (left === best.left && f.sort < best.sort))
+      best = { left, sort: f.sort, text };
   }
   return best?.text ?? null;
 }

@@ -32,7 +32,9 @@ Deno.serve(
     const input = parsed.data;
 
     if (input.action === 'inbox') {
-      const { error: claimError } = await admin.rpc('receive_mailbox_message', { recipient: userId });
+      const { error: claimError } = await admin.rpc('receive_mailbox_message', {
+        recipient: userId,
+      });
       if (claimError) throw claimError;
       const { data, error } = await admin
         .from('mailbox_messages')

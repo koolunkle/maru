@@ -68,22 +68,31 @@ export function GrowthCard({ completedCount }: GrowthCardProps) {
   }));
 
   const message =
-    stage === 0 ? '오늘의 화분이에요' : stage === 3 ? '오늘의 꽃이 피었어요' : `오늘 ${stage}개 해냈어요`;
+    stage === 0
+      ? '오늘의 화분이에요'
+      : stage === 3
+        ? '오늘의 꽃이 피었어요'
+        : `오늘 ${stage}개 해냈어요`;
 
   return (
     <View
       accessibilityRole="summary"
-      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+      style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}
+    >
       <View style={styles.icon}>
         <Animated.View
           key={current.icon}
           entering={
-            reduceMotion
-              ? FadeIn.duration(150)
-              : ZoomIn.springify().damping(12).stiffness(180)
+            reduceMotion ? FadeIn.duration(150) : ZoomIn.springify().damping(12).stiffness(180)
           }
-          exiting={FadeOut.duration(120)}>
-          <MaterialCommunityIcons aria-hidden name={current.icon} size={48} color={theme[current.color]} />
+          exiting={FadeOut.duration(120)}
+        >
+          <MaterialCommunityIcons
+            aria-hidden
+            name={current.icon}
+            size={48}
+            color={theme[current.color]}
+          />
         </Animated.View>
       </View>
 
@@ -93,7 +102,8 @@ export function GrowthCard({ completedCount }: GrowthCardProps) {
           accessibilityRole="progressbar"
           accessibilityLabel="오늘의 미션 진행"
           accessibilityValue={{ min: 0, max: 3, now: stage }}
-          style={[styles.track, { backgroundColor: theme.surfaceSunken }]}>
+          style={[styles.track, { backgroundColor: theme.surfaceSunken }]}
+        >
           <Animated.View style={[styles.fill, { backgroundColor: theme.success }, progressStyle]} />
         </View>
         <View style={styles.labels}>
@@ -102,7 +112,8 @@ export function GrowthCard({ completedCount }: GrowthCardProps) {
               key={item.label}
               variant="caption"
               color={index === stage ? 'success' : 'steel'}
-              style={index === stage && styles.currentLabel}>
+              style={index === stage && styles.currentLabel}
+            >
               {item.label}
             </AppText>
           ))}
