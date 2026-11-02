@@ -1,5 +1,5 @@
 import { Feather } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { useFocusEffect } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -7,6 +7,7 @@ import { AppText } from '@/components/app-text';
 import { BottomSheet } from '@/components/bottom-sheet';
 import { CapsuleCard } from '@/components/capsule-card';
 import { DailyNoteCard } from '@/components/daily-note-card';
+import { HelpPlaceList } from '@/components/help-place-list';
 import { MailboxCard } from '@/components/mailbox-card';
 import { PressableScale } from '@/components/pressable-scale';
 import { RainSound } from '@/components/rain-sound';
@@ -22,6 +23,7 @@ export function Vault() {
   const theme = useTheme();
   const { profile } = useSession();
   const [noteOpen, setNoteOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [todayMood, setTodayMood] = useState<number | null>(null);
 
   // 한 줄 기록 카드에 오늘 기록 여부를 보인다. 실패하면 기본 문구를 둔다
@@ -90,8 +92,8 @@ export function Vault() {
       <RainSound />
 
       <PressableScale
-        accessibilityRole="link"
-        onPress={() => router.push('/help')}
+        accessibilityRole="button"
+        onPress={() => setHelpOpen(true)}
         style={styles.helpLink}
       >
         <AppText variant="bodySm" color="slate">
@@ -99,6 +101,11 @@ export function Vault() {
         </AppText>
         <Feather aria-hidden name="chevron-right" size={16} color={theme.steel} />
       </PressableScale>
+      {helpOpen && (
+        <BottomSheet title="도움받을 수 있는 곳" onClose={() => setHelpOpen(false)}>
+          <HelpPlaceList />
+        </BottomSheet>
+      )}
     </Screen>
   );
 }
