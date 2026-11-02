@@ -16,4 +16,4 @@
 - [x] KST 경계, 후보 부족, 중복 요청, 늦게 온 저장, 새로고침 횟수, 진행 중 미션을 로컬에서 테스트한다.
 - [x] 운영 PostgreSQL 트랜잭션에서 기간 변경·재시도·진행 보존을 검증하고, 배포 함수에 동시에 HTTP 요청을 보내 캐시 조회·새로고침 재시도·횟수 보존을 확인한다. 임시 데이터는 롤백 또는 삭제한다.
 - [x] npm run spec:validate, npm run typecheck, npm run lint, npm test 및 웹 export를 실행한다.
-- [x] EAS 미리보기에서 추천 유지·새로고침 제한·테스트 계정의 기간 변경 후 보정·진행 상태 보존을 확인하고 후보 부족 안내는 격리된 로컬 응답으로 검증한다. 상세 증거는 docs/qa/mission-integration-2026-11-01.md에 기록한다.
+- [x] EAS 미리보기에서 추천 유지·새로고침 제한·테스트 계정의 기간 변경 후 보정·진행 상태 보존을 확인하고 후보 부족 안내는 격리된 로컬 응답으로 검증한다. 상세 증거는 archive/2026-11-01-integrate-mission-photos/verification.md에 기록한다.

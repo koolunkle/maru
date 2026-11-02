@@ -18,7 +18,7 @@
 - [x] 운영 DB 트랜잭션에서 retry·privacy 결과의 진행·공개·출석·보상 처리를 검증한 뒤 롤백한다.
 - [x] 모의 응답 중단으로 다운로드 5초 제한과 AI 시간 초과의 대체 전달을 검증한다.
 - [x] npm run spec:validate, npm run typecheck, npm run lint, npm test 및 웹 export를 실행한다.
-- [x] EAS 미리보기에 배포하고 온보딩·추천·미션 시작·사진 없는 제출 차단·비공개 기본값을 확인한다. 상세 증거는 docs/qa/mission-integration-2026-11-01.md에 기록한다.
+- [x] EAS 미리보기에 배포하고 온보딩·추천·미션 시작·사진 없는 제출 차단·비공개 기본값을 확인한다. 상세 증거는 같은 폴더의 verification.md에 기록한다.
 
 ## 보류된 후속 검증
 
