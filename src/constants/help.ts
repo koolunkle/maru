@@ -1,7 +1,7 @@
 import type { Feather } from '@expo/vector-icons';
 import type { ComponentProps } from 'react';
 
-/** S10 도움받을 수 있는 곳 화면의 기관 목록. 서울마음편의점은 서울시 복지 누리집 사업 안내(지점 목록 포함) */
+/** 도움받을 수 있는 곳(S10 화면, 마음 보관함 바텀 시트)의 기관 목록. 서울마음편의점은 서울시 복지 누리집 사업 안내(지점 목록 포함) */
 export const HelpPlaces: {
   name: string;
   description: string;
