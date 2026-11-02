@@ -5,7 +5,14 @@ import { loadSource } from './helpers/load-source.mjs';
 const calls = [];
 let result = { data: null, error: null };
 const capsule = await loadSource('../src/lib/capsule.ts', {
-  './supabase': { supabase: { rpc: async (name, args) => { calls.push({ name, args }); return result; } } },
+  './supabase': {
+    supabase: {
+      rpc: async (name, args) => {
+        calls.push({ name, args });
+        return result;
+      },
+    },
+  },
 });
 
 test('목록, 전송, 열기는 서버 함수와 요청 식별자를 사용한다', async () => {

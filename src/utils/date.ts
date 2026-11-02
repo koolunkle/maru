@@ -39,7 +39,9 @@ export function formatDateRange(start: string, end: string) {
 
 /** 'YYYY-MM-DD' → "10월 26일 (월)" */
 export function formatDayWithWeekday(day: string) {
-  const weekday = ['일', '월', '화', '수', '목', '금', '토'][new Date(`${day}T00:00:00Z`).getUTCDay()];
+  const weekday = ['일', '월', '화', '수', '목', '금', '토'][
+    new Date(`${day}T00:00:00Z`).getUTCDay()
+  ];
   return `${formatDateRange(day, day)} (${weekday})`;
 }
 

@@ -36,15 +36,13 @@ export function MissionCard({ mission, status, reward, onPress }: MissionCardPro
       accessibilityRole="button"
       disabled={!onPress}
       onPress={onPress}
-      style={[
-        styles.card,
-        { backgroundColor: isDark ? theme.surface : tint },
-        done && styles.done,
-      ]}>
+      style={[styles.card, { backgroundColor: isDark ? theme.surface : tint }, done && styles.done]}
+    >
       {isDark && <View style={[styles.bar, { backgroundColor: CategoryBar[mission.category] }]} />}
       <View style={styles.body}>
         <AppText variant="label" color="slate">
-          {CategoryLabel[mission.category]} · {mission.minutes}분{statusLabel ? ` · ${statusLabel}` : ''}
+          {CategoryLabel[mission.category]} · {mission.minutes}분
+          {statusLabel ? ` · ${statusLabel}` : ''}
         </AppText>
         <AppText variant="titleMd" numberOfLines={2}>
           {mission.title}

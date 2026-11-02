@@ -1,5 +1,15 @@
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Defs, Ellipse, G, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, {
+  Circle,
+  Defs,
+  Ellipse,
+  G,
+  LinearGradient,
+  Path,
+  RadialGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg';
 
 import { FloorFill, WallFill } from '@/components/room/room-surfaces';
 import { Sky, type DayPart, type RoomArtColors } from '@/constants/room-art';
@@ -14,7 +24,10 @@ export const SceneHeight = 85;
  * 슬롯마다 가구를 놓는 기준점과 크기(방 단위).
  * 바닥·책상·창가는 아래 가운데(bottom), 벽은 가운데(center)에 맞춘다.
  */
-export const SlotAnchor: Record<Slot, { x: number; y: number; height: number; align: 'bottom' | 'center' }> = {
+export const SlotAnchor: Record<
+  Slot,
+  { x: number; y: number; height: number; align: 'bottom' | 'center' }
+> = {
   window: { x: 50, y: 29.5, height: 17, align: 'bottom' },
   desk: { x: 85, y: 52, height: 15, align: 'bottom' },
   'wall-1': { x: 17, y: 23, height: 19, align: 'center' },
@@ -23,14 +36,27 @@ export const SlotAnchor: Record<Slot, { x: number; y: number; height: number; al
   'floor-2': { x: 61, y: 81, height: 19, align: 'bottom' },
 };
 
-type SceneProps = { width: number; colors: RoomArtColors; wallpaper: string; floor: string; dark: boolean; dayPart: DayPart };
+type SceneProps = {
+  width: number;
+  colors: RoomArtColors;
+  wallpaper: string;
+  floor: string;
+  dark: boolean;
+  dayPart: DayPart;
+};
 
 /** 방 배경: 벽지·걸레받이·바닥·러그·창문(시간대별 하늘)·책상 */
 export function RoomScene({ width, colors, wallpaper, floor, dark, dayPart }: SceneProps) {
   const sky = Sky[dayPart];
   const night = dayPart === 'night';
   return (
-    <Svg width={width} height={(width * SceneHeight) / 100} viewBox={`0 0 100 ${SceneHeight}`} style={StyleSheet.absoluteFill} aria-hidden>
+    <Svg
+      width={width}
+      height={(width * SceneHeight) / 100}
+      viewBox={`0 0 100 ${SceneHeight}`}
+      style={StyleSheet.absoluteFill}
+      aria-hidden
+    >
       <Defs>
         <LinearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
           <Stop offset="0" stopColor={sky.top} />
@@ -74,8 +100,17 @@ export function RoomScene({ width, colors, wallpaper, floor, dark, dayPart }: Sc
         </G>
       ) : (
         <G>
-          <Circle cx={dayPart === 'evening' ? 44 : 56} cy={dayPart === 'day' ? 12 : 20} r={3} fill={dayPart === 'evening' ? '#f7a96b' : '#fff3c4'} />
-          <Path d="M39 19 C41 17 44 17 45 19 C47 18.5 49 19.5 49 21 H39 Z" fill="#ffffff" opacity={0.85} />
+          <Circle
+            cx={dayPart === 'evening' ? 44 : 56}
+            cy={dayPart === 'day' ? 12 : 20}
+            r={3}
+            fill={dayPart === 'evening' ? '#f7a96b' : '#fff3c4'}
+          />
+          <Path
+            d="M39 19 C41 17 44 17 45 19 C47 18.5 49 19.5 49 21 H39 Z"
+            fill="#ffffff"
+            opacity={0.85}
+          />
         </G>
       )}
       {/* 창틀 십자 */}
@@ -94,18 +129,40 @@ export function RoomScene({ width, colors, wallpaper, floor, dark, dayPart }: Sc
 }
 
 /** 밤에는 방을 어둡게 하고, 스탠드가 있으면 그 둘레를 밝힌다 (가구 위에 덮는다) */
-export function RoomLight({ width, colors, dayPart, lampAt }: { width: number; colors: RoomArtColors; dayPart: DayPart; lampAt: { x: number; y: number } | null }) {
+export function RoomLight({
+  width,
+  colors,
+  dayPart,
+  lampAt,
+}: {
+  width: number;
+  colors: RoomArtColors;
+  dayPart: DayPart;
+  lampAt: { x: number; y: number } | null;
+}) {
   if (dayPart !== 'night' && dayPart !== 'evening') return null;
   return (
     <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Svg width={width} height={(width * SceneHeight) / 100} viewBox={`0 0 100 ${SceneHeight}`} aria-hidden>
+      <Svg
+        width={width}
+        height={(width * SceneHeight) / 100}
+        viewBox={`0 0 100 ${SceneHeight}`}
+        aria-hidden
+      >
         <Defs>
           <RadialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
             <Stop offset="0" stopColor={colors.glow} stopOpacity={0.55} />
             <Stop offset="1" stopColor={colors.glow} stopOpacity={0} />
           </RadialGradient>
         </Defs>
-        <Rect x={0} y={0} width={100} height={SceneHeight} fill={colors.night} opacity={dayPart === 'night' ? 1 : 0.45} />
+        <Rect
+          x={0}
+          y={0}
+          width={100}
+          height={SceneHeight}
+          fill={colors.night}
+          opacity={dayPart === 'night' ? 1 : 0.45}
+        />
         {lampAt && <Circle cx={lampAt.x} cy={lampAt.y} r={26} fill="url(#glow)" />}
       </Svg>
     </View>

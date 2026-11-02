@@ -112,8 +112,11 @@ OpenSpec CLI는 개발 의존성으로 들어 있다(`npm run spec -- <명령>`)
 
 ```bash
 npm run typecheck
-npm run lint
+npm run lint          # 코드 규칙 + 포맷(Prettier). 포맷 오류는 npm run format으로 고친다
+npm test
 ```
+
+포맷은 Prettier가 정한다(작은따옴표, 줄 100자, `.prettierrc.json`). VS Code는 저장할 때 자동으로 맞춘다(추천 확장 설치). 문서(`*.md`)·생성 파일·마이그레이션은 포맷하지 않는다(`.prettierignore`).
 
 ### 미리보기 배포 (운영과 분리된 주소)
 
@@ -158,7 +161,7 @@ PR 본문 체크리스트:
 - [ ] 동작이 바뀌었다면 change를 archive해서 `openspec/specs/`가 바뀐 동작과 같다. 화면 모양이 바뀌었다면 DESIGN.md도 고쳤다
 - [ ] `npm run spec:validate` 통과
 - [ ] 테이블·함수·폴더가 바뀌었다면 docs/ARCHITECTURE.md를 고쳤다
-- [ ] `npm run typecheck`, `npm run lint` 통과
+- [ ] `npm run typecheck`, `npm run lint`(포맷 포함), `npm test` 통과
 - [ ] 미리보기 URL에서 웹 동작 확인, 가능하면 Expo Go에서도 확인
 - [ ] DB 변경이 있으면 마이그레이션 파일과 `src/types/database.ts`를 함께 올렸다
 - [ ] 동료 프로토타입에서 가져온 기능이면 PR 본문에 출처를 적었다

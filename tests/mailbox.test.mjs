@@ -25,15 +25,22 @@ beforeEach(() => {
 test('입력 검증 후 익명 서버 요청으로 보낸다', async () => {
   const message = { id: 'saved', body: '오늘도 응원해요', status: 'approved' };
   response.data = message;
-  assert.deepEqual(await mailbox.sendMailboxMessage('user-a', '  오늘도 응원해요  ', 'request-00000001'), message);
+  assert.deepEqual(
+    await mailbox.sendMailboxMessage('user-a', '  오늘도 응원해요  ', 'request-00000001'),
+    message,
+  );
   assert.deepEqual(calls, [
-    { name: 'mailbox', body: { action: 'send', body: '오늘도 응원해요', requestId: 'request-00000001' } },
+    {
+      name: 'mailbox',
+      body: { action: 'send', body: '오늘도 응원해요', requestId: 'request-00000001' },
+    },
   ]);
 });
 test('빈 입력·공백·60자 초과·계정 없음은 서버로 보내지 않는다', async () => {
   for (const body of ['', ' \n\t ', '가'.repeat(61)])
     await assert.rejects(mailbox.sendMailboxMessage('a', body, 'request'));
-  for (const id of ['', '  ']) await assert.rejects(mailbox.sendMailboxMessage(id, '응원해요', 'request'));
+  for (const id of ['', '  '])
+    await assert.rejects(mailbox.sendMailboxMessage(id, '응원해요', 'request'));
   assert.equal(calls.length, 0);
   await mailbox.sendMailboxMessage('a', '가'.repeat(60), 'request');
   assert.equal(calls.length, 1);
@@ -108,7 +115,10 @@ const admin = {
         return query;
       },
       then(resolve, reject) {
-        return Promise.resolve(results.shift() ?? { data: null, error: null }).then(resolve, reject);
+        return Promise.resolve(results.shift() ?? { data: null, error: null }).then(
+          resolve,
+          reject,
+        );
       },
     };
     return query;
@@ -159,7 +169,9 @@ beforeEach(() => {
   aiCalls = 0;
 });
 const request = (body) =>
-  endpoint(new Request('https://example.com/mailbox', { method: 'POST', body: JSON.stringify(body) }));
+  endpoint(
+    new Request('https://example.com/mailbox', { method: 'POST', body: JSON.stringify(body) }),
+  );
 
 test('서버는 미인증·잘못된 동작·잘못된 입력을 거절한다', async () => {
   user = null;
@@ -183,14 +195,22 @@ test('수신함은 JWT 사용자에게만 배정하고 작성자 식별자를 �
 });
 test('타인의 글 읽음 요청은 404이고 수신자·공개 상태로 한정한다', async () => {
   results = [{ error: null }, { data: null, error: null }];
-  assert.equal((await request({ action: 'read', id: '20000000-0000-4000-8000-000000000001' })).status, 404);
+  assert.equal(
+    (await request({ action: 'read', id: '20000000-0000-4000-8000-000000000001' })).status,
+    404,
+  );
   for (const operation of operations) {
     assert.ok(operation.filters.some(([key, value]) => key === 'recipient_id' && value === user));
     assert.ok(operation.filters.some(([key, value]) => key === 'status' && value === 'published'));
   }
 });
 test('AI 장애면 저장된 글은 pending으로 남고 공개하지 않는다', async () => {
-  const saved = { id: 'saved', request_id: 'request-00000001', body: '응원해요', status: 'pending' };
+  const saved = {
+    id: 'saved',
+    request_id: 'request-00000001',
+    body: '응원해요',
+    status: 'pending',
+  };
   results = [{ error: null }, { data: saved, error: null }];
   const response = await request({ action: 'send', requestId: saved.request_id, body: saved.body });
   assert.equal(response.status, 200);
@@ -199,23 +219,43 @@ test('AI 장애면 저장된 글은 pending으로 남고 공개하지 않는다'
   assert.ok(operations.every((operation) => !operation.update));
 });
 test('검수 결과를 저장하며 이미 처리된 재시도는 검수를 반복하지 않는다', async () => {
-  const saved = { id: 'saved', request_id: 'request-00000001', body: '응원해요', status: 'pending' };
+  const saved = {
+    id: 'saved',
+    request_id: 'request-00000001',
+    body: '응원해요',
+    status: 'pending',
+  };
   for (const status of ['approved', 'rejected', 'crisis']) {
     aiResult = { status };
     results = [{ error: null }, { data: saved }, { data: { ...saved, status } }];
     assert.equal(
-      (await (await request({ action: 'send', requestId: saved.request_id, body: saved.body })).json()).status,
+      (
+        await (
+          await request({ action: 'send', requestId: saved.request_id, body: saved.body })
+        ).json()
+      ).status,
       status,
     );
   }
   aiCalls = 0;
   results = [{ error: null }, { data: { ...saved, status: 'published' } }];
-  assert.equal((await request({ action: 'send', requestId: saved.request_id, body: saved.body })).status, 200);
+  assert.equal(
+    (await request({ action: 'send', requestId: saved.request_id, body: saved.body })).status,
+    200,
+  );
   assert.equal(aiCalls, 0);
 });
 test('우체통 검수에서 개인정보를 가리고 위기 판정을 우선한다', async () => {
-  const saved = { id: 'saved', request_id: 'request-00000001', body: '홍길동님 test@example.com', status: 'pending' };
-  for (const [aiStatus, expected] of [['approved', 'rejected'], ['crisis', 'crisis']]) {
+  const saved = {
+    id: 'saved',
+    request_id: 'request-00000001',
+    body: '홍길동님 test@example.com',
+    status: 'pending',
+  };
+  for (const [aiStatus, expected] of [
+    ['approved', 'rejected'],
+    ['crisis', 'crisis'],
+  ]) {
     aiResult = { status: aiStatus };
     results = [{ error: null }, { data: saved }, { data: { ...saved, status: expected } }];
     await request({ action: 'send', requestId: saved.request_id, body: saved.body });
@@ -224,7 +264,12 @@ test('우체통 검수에서 개인정보를 가리고 위기 판정을 우선�
   }
 });
 test('우체통 검수는 댓글·릴레이와 같은 공통 규칙을 쓴다', async () => {
-  const saved = { id: 'saved', request_id: 'request-00000001', body: '응원해요', status: 'pending' };
+  const saved = {
+    id: 'saved',
+    request_id: 'request-00000001',
+    body: '응원해요',
+    status: 'pending',
+  };
   aiResult = { status: 'approved' };
   results = [{ error: null }, { data: saved }, { data: { ...saved, status: 'approved' } }];
   await request({ action: 'send', requestId: saved.request_id, body: saved.body });

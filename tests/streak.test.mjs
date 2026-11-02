@@ -2,13 +2,16 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { loadSource } from './helpers/load-source.mjs';
 
-
 const date = await loadSource('../src/utils/date.ts');
 const { currentStreak } = await loadSource('../src/utils/streak.ts', { './date': date });
 
 // 2026-10-28은 수요일, 그 주 월요일은 10-26
 const today = '2026-10-28';
-const p = (last_attended, streak = 5, rest_used_week = null) => ({ streak, last_attended, rest_used_week });
+const p = (last_attended, streak = 5, rest_used_week = null) => ({
+  streak,
+  last_attended,
+  rest_used_week,
+});
 
 test('오늘이나 어제 출석했으면 이어진다', () => {
   assert.equal(currentStreak(p('2026-10-28'), today), 5);

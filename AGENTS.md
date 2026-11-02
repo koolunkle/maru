@@ -20,6 +20,7 @@ npx tsc --noEmit            # typecheck
 npx expo-doctor             # diagnose dependency and config issues
 npx expo install --fix      # fix incompatible package versions
 npm run spec:validate       # validate OpenSpec specs and changes
+npm run format              # format code with Prettier (lint fails on unformatted code)
 ```
 
 Run lint and typecheck before declaring any task done.

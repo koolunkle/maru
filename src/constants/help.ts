@@ -8,7 +8,12 @@ export const HelpPlaces: {
   icon: ComponentProps<typeof Feather>['name'];
   url: string;
 }[] = [
-  { name: '외로움안녕120', description: '전화 120 · 누구나 편하게 이야기할 수 있는 서울시 창구', icon: 'phone', url: 'tel:120' },
+  {
+    name: '외로움안녕120',
+    description: '전화 120 · 누구나 편하게 이야기할 수 있는 서울시 창구',
+    icon: 'phone',
+    url: 'tel:120',
+  },
   {
     name: '서울마음편의점',
     description: '예약 없이 들러 쉬어 가는 동네 공간',

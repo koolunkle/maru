@@ -17,7 +17,15 @@ type ChipProps = {
 };
 
 /** chip-category / chip-category-selected (DESIGN.md) */
-export function Chip({ label, selected, onPress, disabled, style, icon, role = 'checkbox' }: ChipProps) {
+export function Chip({
+  label,
+  selected,
+  onPress,
+  disabled,
+  style,
+  icon,
+  role = 'checkbox',
+}: ChipProps) {
   const theme = useTheme();
   return (
     <PressableScale
@@ -35,8 +43,11 @@ export function Chip({ label, selected, onPress, disabled, style, icon, role = '
           opacity: disabled ? 0.5 : 1,
         },
         style,
-      ]}>
-      {icon && <Feather aria-hidden name={icon} size={18} color={selected ? theme.surface : theme.ink} />}
+      ]}
+    >
+      {icon && (
+        <Feather aria-hidden name={icon} size={18} color={selected ? theme.surface : theme.ink} />
+      )}
       <AppText variant="bodySm" color={selected ? 'surface' : 'ink'}>
         {label}
       </AppText>

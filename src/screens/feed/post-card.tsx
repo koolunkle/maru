@@ -28,7 +28,9 @@ const MaxComment = 200;
 /** "약 3시간 뒤 공개돼요" / "약 1분 뒤 공개돼요" */
 function publishIn(publishAt: string) {
   const minutes = Math.max(1, Math.ceil((Date.parse(publishAt) - Date.now()) / 60_000));
-  return minutes >= 60 ? `약 ${Math.round(minutes / 60)}시간 뒤 공개돼요` : `약 ${minutes}분 뒤 공개돼요`;
+  return minutes >= 60
+    ? `약 ${Math.round(minutes / 60)}시간 뒤 공개돼요`
+    : `약 ${minutes}분 뒤 공개돼요`;
 }
 
 function timeAgo(iso: string) {
@@ -59,7 +61,10 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
     if (reactionWorking.current) return;
     reactionWorking.current = true;
     const on = post.myReactions.includes(type);
-    const saved = await setReaction(post.id, userId, type, !on).then(() => true, () => false);
+    const saved = await setReaction(post.id, userId, type, !on).then(
+      () => true,
+      () => false,
+    );
     reactionWorking.current = false;
     if (!saved) {
       setNotice('지금은 반응을 남기지 못했어요. 다시 눌러 볼까요?');
@@ -77,14 +82,24 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
     const body = draft.trim();
     if (!body || commentWorking.current) return;
     commentWorking.current = true;
-    if (commentRequest.current?.body !== body) commentRequest.current = { body, id: createRequestId() };
+    if (commentRequest.current?.body !== body)
+      commentRequest.current = { body, id: createRequestId() };
     setSending(true);
     setNotice(null);
-    const data = await Functions.submitComment(post.id, body, commentRequest.current.id).catch(() => null);
-    if (!data) { commentWorking.current = false; setSending(false); setNotice('댓글을 남기지 못했어요. 다시 시도해 주세요.'); return; }
+    const data = await Functions.submitComment(post.id, body, commentRequest.current.id).catch(
+      () => null,
+    );
+    if (!data) {
+      commentWorking.current = false;
+      setSending(false);
+      setNotice('댓글을 남기지 못했어요. 다시 시도해 주세요.');
+      return;
+    }
     commentRequest.current = null;
     setDraft('');
-    const { status } = await Functions.moderateComment(data.id).catch(() => ({ status: 'pending' as const }));
+    const { status } = await Functions.moderateComment(data.id).catch(() => ({
+      status: 'pending' as const,
+    }));
     setSending(false);
     commentWorking.current = false;
     if (status === 'crisis') {
@@ -99,7 +114,9 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
   }
 
   const visibleComments = post.comments.filter(
-    (c) => c.status === 'published' || (c.user_id === userId && (c.status === 'pending' || c.status === 'approved')),
+    (c) =>
+      c.status === 'published' ||
+      (c.user_id === userId && (c.status === 'pending' || c.status === 'approved')),
   );
 
   return (
@@ -115,7 +132,12 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
       </AppText>
 
       {post.photoUrl && (
-        <Image source={{ uri: post.photoUrl }} style={styles.photo} contentFit="cover" accessibilityLabel="인증 사진" />
+        <Image
+          source={{ uri: post.photoUrl }}
+          style={styles.photo}
+          contentFit="cover"
+          accessibilityLabel="인증 사진"
+        />
       )}
       {post.text && <AppText>{post.text}</AppText>}
 
@@ -123,7 +145,11 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
         {(Object.keys(ReactionLabel) as ReactionType[]).map((type) => (
           <Chip
             key={type}
-            label={post.reactions[type] ? `${ReactionLabel[type]} ${post.reactions[type]}` : ReactionLabel[type]}
+            label={
+              post.reactions[type]
+                ? `${ReactionLabel[type]} ${post.reactions[type]}`
+                : ReactionLabel[type]
+            }
             selected={post.myReactions.includes(type)}
             onPress={() => toggleReaction(type)}
           />
@@ -169,7 +195,11 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
             style={[
               styles.input,
               Typography.bodySm,
-              { color: theme.ink, borderColor: theme.hairlineStrong, backgroundColor: theme.surface },
+              {
+                color: theme.ink,
+                borderColor: theme.hairlineStrong,
+                backgroundColor: theme.surface,
+              },
             ]}
           />
           <PressableScale
@@ -177,8 +207,14 @@ export function PostCard({ post, userId, onChange }: PostCardProps) {
             accessibilityLabel="댓글 보내기"
             onPress={send}
             disabled={sending || !draft.trim()}
-            style={styles.sendButton}>
-            <Feather aria-hidden name="send" size={20} color={draft.trim() ? theme.primary : theme.muted} />
+            style={styles.sendButton}
+          >
+            <Feather
+              aria-hidden
+              name="send"
+              size={20}
+              color={draft.trim() ? theme.primary : theme.muted}
+            />
           </PressableScale>
         </View>
       )}
