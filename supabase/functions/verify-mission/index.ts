@@ -40,52 +40,86 @@ const FallbackMessage = {
 Deno.serve(
   handler(async (req) => {
     const userId = await requireUserId(req);
-    const { verification_id } = (await req.json().catch(() => ({}))) as { verification_id?: string };
+    const { verification_id } = (await req.json().catch(() => ({}))) as {
+      verification_id?: string;
+    };
     if (!verification_id) throw new HttpError(400, 'verification_id_required');
 
     const { data: v } = await admin
       .from('verifications')
-      .select('id, user_id, photo_path, text, ai_result, user_mission_id, user_missions(id, mission_id, status, type, missions(title, verify_hint, category, event_id))')
+      .select(
+        'id, user_id, photo_path, text, ai_result, user_mission_id, user_missions(id, mission_id, status, type, missions(title, verify_hint, category, event_id))',
+      )
       .eq('id', verification_id)
       .single();
     if (!v || v.user_id !== userId) throw new HttpError(404, 'not_found');
     if (v.ai_result) {
-      const { data: saved, error } = await admin.from('verification_responses').select('response').eq('verification_id', v.id).maybeSingle();
+      const { data: saved, error } = await admin
+        .from('verification_responses')
+        .select('response')
+        .eq('verification_id', v.id)
+        .maybeSingle();
       if (error) throw error;
       if (saved) return json(saved.response);
       throw new HttpError(409, 'already_judged');
     }
     const um = v.user_missions;
-    if (!um || !['in_progress', 'judging'].includes(um.status)) throw new HttpError(409, 'mission_not_active');
+    if (!um || !['in_progress', 'judging'].includes(um.status))
+      throw new HttpError(409, 'mission_not_active');
 
-    const { data: file, error: dlError } = await admin.storage.from('verifications').download(v.photo_path);
+    const { data: file, error: dlError } = await admin.storage
+      .from('verifications')
+      .download(v.photo_path);
     if (dlError || !file) throw new HttpError(400, 'photo_missing');
     const image = encodeBase64(new Uint8Array(await file.arrayBuffer()));
 
-    const { error: judgingError } = await admin.from('user_missions').update({ status: 'judging' }).eq('id', um.id).eq('status', 'in_progress');
+    const { error: judgingError } = await admin
+      .from('user_missions')
+      .update({ status: 'judging' })
+      .eq('id', um.id)
+      .eq('status', 'in_progress');
     if (judgingError) throw judgingError;
 
-    let judged: z.infer<typeof JudgeSchema> | null = null;
+    // 기준 사진을 하나라도 읽지 못하면 일부만 비교하지 않고 기준 사진 없이 판정한다.
+    // 대체 판정(통과)으로 넘기면 직접 촬영·개인정보 판정까지 건너뛰기 때문이다.
+    let photos: Awaited<ReturnType<typeof loadMissionPhotos>> = [];
     try {
-      const photos = await loadMissionPhotos(um.mission_id);
-      judged = await generateJson({
-        tier: 'main',
-        system: System + (photos.length ? '\n첫 번째 이미지는 제출 사진이고 나머지는 해당 미션의 기준 사진입니다. 기준 사진은 장소 비교에만 사용하세요. 조명·각도가 달라도 같은 장소일 수 있고 불확실하면 기존의 관대한 기준을 따르세요. 직접 촬영 여부와 개인정보는 제출 사진만 판정하세요.' : ''),
-        text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, reference_hints: photos.map((p) => p.hint), user_note: filterModerationText(v.text ?? '').text }),
-        image,
-        referenceImages: photos.map((p) => p.image),
-        schema: JudgeSchema,
-        timeoutMs: 20_000,
-      });
-    } catch {
-      console.error('reference photos unavailable');
+      photos = await loadMissionPhotos(um.mission_id);
+    } catch (e) {
+      console.error('reference photos unavailable', um.mission_id, e);
     }
+    let judged: z.infer<typeof JudgeSchema> | null = await generateJson({
+      tier: 'main',
+      system:
+        System +
+        (photos.length
+          ? '\n첫 번째 이미지는 제출 사진이고 나머지는 해당 미션의 기준 사진입니다. 기준 사진은 장소 비교에만 사용하세요. 조명·각도가 달라도 같은 장소일 수 있고 불확실하면 기존의 관대한 기준을 따르세요. 직접 촬영 여부와 개인정보는 제출 사진만 판정하세요.'
+          : ''),
+      text: JSON.stringify({
+        mission: um.missions.title,
+        verify_hint: um.missions.verify_hint,
+        reference_hints: photos.map((p) => p.hint),
+        user_note: filterModerationText(v.text ?? '').text,
+      }),
+      image,
+      referenceImages: photos.map((p) => p.image),
+      schema: JudgeSchema,
+      timeoutMs: 20_000,
+    });
     let judgedBy: 'ai' | 'rule' = 'ai';
     if (!judged) {
-      const { data: config } = await admin.from('app_config').select('value').eq('key', 'verify_fallback').maybeSingle();
+      const { data: config } = await admin
+        .from('app_config')
+        .select('value')
+        .eq('key', 'verify_fallback')
+        .maybeSingle();
       if (config?.value !== 'pass') {
         // 다시 시도할 수 있도록 진행 중 상태로 되돌린다
-        const { error } = await admin.from('user_missions').update({ status: 'in_progress' }).eq('id', um.id).eq('status', 'judging');
+        const { error } = await admin
+          .from('user_missions')
+          .update({ status: 'in_progress' })
+          .eq('id', um.id)
+          .eq('status', 'judging');
         if (error) throw error;
         throw new HttpError(503, 'ai_unavailable');
       }
@@ -95,10 +129,16 @@ Deno.serve(
     }
 
     const message =
-      judged.message.trim() && !hasBannedWord(judged.message) ? judged.message.trim().slice(0, 60) : FallbackMessage[judged.result];
+      judged.message.trim() && !hasBannedWord(judged.message)
+        ? judged.message.trim().slice(0, 60)
+        : FallbackMessage[judged.result];
 
     const { data: result, error } = await admin.rpc('finish_verification', {
-      p_user_id: userId, p_verification_id: v.id, p_result: judged.result, p_message: message, p_judged_by: judgedBy,
+      p_user_id: userId,
+      p_verification_id: v.id,
+      p_result: judged.result,
+      p_message: message,
+      p_judged_by: judgedBy,
     });
     if (error) throw error;
     return json(result);

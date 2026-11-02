@@ -43,8 +43,15 @@ function rank(pool: Mission[], categories: Profile['categories'], seed: number) 
  * - 일일: 난이도 ≤ 프로필+1, 소요 시간 ≤ 하루 가능 시간. 부족하면 소요 시간 조건을 푼다.
  * - 주간: 난이도 = 프로필+1 이상인 미션 중 1개. 같은 주(weekKey) 동안 유지된다.
  */
-export function pickSeedMissions(seeds: Mission[], profile: Profile, date: string, weekKey: string) {
-  seeds = seeds.filter((m) => (!m.start_date || m.start_date <= date) && (!m.end_date || m.end_date >= date));
+export function pickSeedMissions(
+  seeds: Mission[],
+  profile: Profile,
+  date: string,
+  weekKey: string,
+) {
+  seeds = seeds.filter(
+    (m) => (!m.start_date || m.start_date <= date) && (!m.end_date || m.end_date >= date),
+  );
   const seed = hash(`${profile.id}:${date}`);
   const weekSeed = hash(`${profile.id}:${weekKey}`);
   const maxDifficulty = profile.difficulty + 1;
@@ -52,10 +59,10 @@ export function pickSeedMissions(seeds: Mission[], profile: Profile, date: strin
 
   const strict = seeds.filter((m) => m.difficulty <= maxDifficulty && m.minutes <= maxMinutes);
   const relaxed = seeds.filter((m) => m.difficulty <= maxDifficulty && !strict.includes(m));
-  const daily = [...rank(strict, profile.categories, seed), ...rank(relaxed, profile.categories, seed)].slice(
-    0,
-    DailyMissionCount,
-  );
+  const daily = [
+    ...rank(strict, profile.categories, seed),
+    ...rank(relaxed, profile.categories, seed),
+  ].slice(0, DailyMissionCount);
 
   const weeklyPool = seeds.filter((m) => m.difficulty >= maxDifficulty && !daily.includes(m));
   const weekly = rank(weeklyPool, profile.categories, weekSeed)[0] ?? null;
