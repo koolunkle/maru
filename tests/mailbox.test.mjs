@@ -61,6 +61,17 @@ test('응답 유실 뒤 같은 요청 식별자로 재시도한다', async () =>
   await mailbox.sendMailboxMessage('a', '응원해요', 'request-00000001');
   assert.equal(calls[0].body.requestId, calls[1].body.requestId);
 });
+test('함수의 HTTP 오류는 상태와 코드로 구분한다', async () => {
+  response = {
+    data: null,
+    error: { context: new Response(JSON.stringify({ error: 'daily_limit' }), { status: 409 }) },
+  };
+  await assert.rejects(
+    mailbox.sendMailboxMessage('a', '응원해요', 'request-00000003'),
+    (error) =>
+      error instanceof mailbox.MailboxError && error.status === 409 && error.code === 'daily_limit',
+  );
+});
 test('수신함 오류와 빈 응답을 빈 목록으로 숨기지 않는다', async () => {
   response = { data: null, error: new Error('unavailable') };
   await assert.rejects(mailbox.getReceivedMailboxMessages(), /unavailable/);

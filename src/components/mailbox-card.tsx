@@ -20,12 +20,15 @@ import {
   sendMailboxMessage,
   type MailboxMessage,
   type ReceivedMailboxMessage,
+  MailboxError,
 } from '@/lib/mailbox';
 import { formatDateRange, kstDate } from '@/utils/date';
 import { createRequestId } from '@/utils/request-id';
 
 const DeliveryNotice =
   '검수를 거친 뒤 다른 사람에게 전달돼요. 이름이나 연락처는 함께 보내지 않아요.';
+
+const DailyLimitNotice = '오늘은 이미 한 줄을 보냈어요. 내일 또 보내볼까요?';
 
 /** F14: 미션·릴레이와 관계없이 익명 사용자에게 한 줄을 작성한다. */
 export function MailboxCard({ userId }: { userId: string }) {
@@ -48,6 +51,8 @@ export function MailboxCard({ userId }: { userId: string }) {
   const loadVersion = useRef(0);
   const opened = useRef(false);
   const sentChecking = sent === null && !sentError;
+  // 보낸 글이 하나라도 있으면 '보낸 한 줄'을 늘 보인다. 지난 글의 상태 확인과 '검수 다시 요청'이 이 목록에만 있다
+  const hasSent = !!sent?.length;
   const wroteToday = !!sent?.some(
     (message) =>
       message.status !== 'rejected' &&
@@ -152,7 +157,7 @@ export function MailboxCard({ userId }: { userId: string }) {
     const text = retry?.body ?? body;
     if (sending.current || !text.trim() || text.trim().length > MailboxMaxLength) return;
     if (!retry && wroteToday) {
-      setNotice('오늘은 이미 한 줄을 보냈어요. 내일 또 보내볼까요?');
+      setNotice(DailyLimitNotice);
       return;
     }
     sending.current = true;
@@ -174,8 +179,14 @@ export function MailboxCard({ userId }: { userId: string }) {
         requestId.current = createRequestId();
       }
       setFocused(false);
-    } catch {
-      setNotice('한 줄을 맡기지 못했어요. 다시 눌러볼까요?');
+    } catch (e) {
+      // 다른 기기에서 이미 보냈거나 요청이 겹치면 서버가 하루 한 줄로 거절한다. 다시 눌러도 같으니 안내하고 목록을 맞춘다
+      if (e instanceof MailboxError && e.code === 'daily_limit') {
+        setNotice(DailyLimitNotice);
+        void loadSent();
+      } else {
+        setNotice('한 줄을 맡기지 못했어요. 다시 눌러볼까요?');
+      }
     } finally {
       sending.current = false;
       setBusy(false);
@@ -445,23 +456,23 @@ export function MailboxCard({ userId }: { userId: string }) {
                   );
                 })
               )}
-              {!sentChecking &&
-                (wroteToday ? (
-                  <Button
-                    label="보낸 한 줄"
-                    variant="secondary"
-                    disabled={busy}
-                    onPress={() => show('sent')}
-                    style={styles.button}
-                  />
-                ) : (
-                  <Button
-                    label="한 줄 쓰기"
-                    disabled={busy}
-                    onPress={() => show('compose')}
-                    style={styles.button}
-                  />
-                ))}
+              {!sentChecking && !wroteToday && (
+                <Button
+                  label="한 줄 쓰기"
+                  disabled={busy}
+                  onPress={() => show('compose')}
+                  style={styles.button}
+                />
+              )}
+              {!sentChecking && hasSent && (
+                <Button
+                  label="보낸 한 줄"
+                  variant="secondary"
+                  disabled={busy}
+                  onPress={() => show('sent')}
+                  style={wroteToday ? styles.button : undefined}
+                />
+              )}
             </>
           )}
         </BottomSheet>
