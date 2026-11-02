@@ -23,6 +23,7 @@ const Kinds = {
   same: 'pass', // 같은 장소 (조명·각도·계절이 다름)
   other: 'retry', // 다른 장소
   ambiguous: 'pass', // 장소가 애매한 직접 촬영 사진
+  alt_place: 'pass', // 기준 사진과 다른 곳이지만 미션에 맞는 장소 (북촌 기준인데 남산골 한옥마을)
   capture: 'retry', // 화면 캡처·그림·내려받은 이미지
   privacy: 'privacy', // 얼굴 정면·번호판
 };
@@ -278,6 +279,10 @@ function metrics(list) {
     잘못거절: rate(byExpected('pass'), (r) => r.result === 'retry'),
     잘못통과: rate(byExpected('retry'), (r) => r.result === 'pass'),
     다른장소거절: rate(list.filter((r) => r.submission.kind === 'other'), (r) => r.result === 'retry'),
+    다른곳통과: rate(
+      list.filter((r) => r.submission.kind === 'alt_place'),
+      (r) => r.result === 'pass',
+    ),
     개인정보: rate(byExpected('privacy'), (r) => r.result === 'privacy'),
     오류: rate(list, (r) => !['pass', 'retry', 'privacy'].includes(r.result)),
     기준사진누락: rate(list, (r) => r.condition === 'B' && r.refs === 0),
