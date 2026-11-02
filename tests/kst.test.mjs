@@ -1,19 +1,10 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
-
-async function loadModule(path) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', outputText)(() => { throw new Error('Unexpected dependency'); }, exports);
-  return exports;
-}
+import { loadSource } from './helpers/load-source.mjs';
 
 // 앱(src/utils/date.ts)과 Edge Function(supabase/functions/_shared/kst.ts)은 실행 환경이 달라 따로 두었다. 같은 날짜를 내는지 여기서 맞춘다
-const app = await loadModule('../src/utils/date.ts');
-const server = await loadModule('../supabase/functions/_shared/kst.ts');
+const app = await loadSource('../src/utils/date.ts');
+const server = await loadSource('../supabase/functions/_shared/kst.ts');
 
 const instants = [
   '2026-10-28T14:59:59.999Z', // KST 10/28 23:59:59
@@ -24,7 +15,8 @@ const instants = [
 ];
 
 test('KST 날짜는 앱과 함수가 같다 (자정 경계·연말·윤년)', () => {
-  for (const iso of instants) assert.equal(app.kstDate(new Date(iso)), server.kstDate(new Date(iso)), iso);
+  for (const iso of instants)
+    assert.equal(app.kstDate(new Date(iso)), server.kstDate(new Date(iso)), iso);
 });
 
 test('주 시작(월요일)은 앱과 함수가 같다', () => {
@@ -36,7 +28,12 @@ test('주 시작(월요일)은 앱과 함수가 같다', () => {
 });
 
 test('날짜 이동은 앱과 함수가 같다', () => {
-  for (const [day, n] of [['2026-10-29', 11], ['2026-12-31', 1], ['2028-03-01', -1], ['2026-10-29', -7]]) {
+  for (const [day, n] of [
+    ['2026-10-29', 11],
+    ['2026-12-31', 1],
+    ['2028-03-01', -1],
+    ['2026-10-29', -7],
+  ]) {
     assert.equal(app.addKstDays(day, n), server.addDays(day, n), `${day} ${n}`);
   }
 });

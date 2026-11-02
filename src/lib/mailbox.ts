@@ -25,18 +25,36 @@ export const MailboxStatus: Record<MailboxMessage['status'], string> = {
   crisis: '이 한 줄은 전달되지 않았어요. 이야기를 들어줄 곳이 있어요.',
 };
 
-export function createMailboxRequestId() {
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 12).padEnd(10, '0')}`;
+/** 우체통 함수가 돌려준 오류. code는 함수의 { error } 값 (예: 'daily_limit') */
+export class MailboxError extends Error {
+  constructor(
+    public status: number,
+    public code: string,
+  ) {
+    super(code);
+  }
 }
 
 async function invokeMailbox<T>(body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>('mailbox', { body });
-  if (error) throw error;
+  if (error) {
+    // 함수가 HTTP 오류로 답하면 context에 응답이 담긴다. 그 밖의 오류(네트워크)는 그대로 던진다
+    const context = (error as { context?: Response }).context;
+    if (context && typeof context.json === 'function') {
+      const payload = await context.json().catch(() => ({}));
+      throw new MailboxError(context.status, payload?.error ?? 'unknown');
+    }
+    throw error;
+  }
   if (data === null) throw new Error('우체통 응답이 없어요');
   return data;
 }
 
-export async function sendMailboxMessage(userId: string, text: string, requestId: string): Promise<MailboxMessage> {
+export async function sendMailboxMessage(
+  userId: string,
+  text: string,
+  requestId: string,
+): Promise<MailboxMessage> {
   const body = text.trim();
   if (!userId.trim()) throw new Error('로그인이 필요해요');
   if (!body || body.length > MailboxMaxLength) throw new Error('한 줄은 1~60자로 적어 주세요');
@@ -44,6 +62,8 @@ export async function sendMailboxMessage(userId: string, text: string, requestId
   return invokeMailbox({ action: 'send', body, requestId });
 }
 
-export const getReceivedMailboxMessages = () => invokeMailbox<ReceivedMailboxMessage[]>({ action: 'inbox' });
+export const getReceivedMailboxMessages = () =>
+  invokeMailbox<ReceivedMailboxMessage[]>({ action: 'inbox' });
 export const getSentMailboxMessages = () => invokeMailbox<MailboxMessage[]>({ action: 'sent' });
-export const markMailboxMessageRead = (id: string) => invokeMailbox<ReceivedMailboxMessage>({ action: 'read', id });
+export const markMailboxMessageRead = (id: string) =>
+  invokeMailbox<ReceivedMailboxMessage>({ action: 'read', id });

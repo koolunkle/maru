@@ -35,24 +35,29 @@ function RootStack() {
 
   const signedIn = Boolean(session);
   const onboarded = Boolean(profile?.onboarded_at);
+  // 막힌 화면에서 갈 곳을 직접 정한다. 지정하지 않으면 Expo Router가 파일 이름순으로
+  // 첫 번째 열린 화면을 고르는데, 가드가 없는 admin이 welcome보다 앞이라 /admin으로 넘어간다.
+  const home = !signedIn ? '/welcome' : !onboarded ? '/onboarding' : '/';
 
   return (
     <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Protected guard={!signedIn}>
+      <Stack.Protected guard={!signedIn} redirectTo={home}>
         <Stack.Screen name="welcome" />
       </Stack.Protected>
-      <Stack.Protected guard={signedIn && !onboarded}>
+      <Stack.Protected guard={signedIn && !onboarded} redirectTo={home}>
         <Stack.Screen name="onboarding" />
       </Stack.Protected>
-      <Stack.Protected guard={signedIn && onboarded}>
+      <Stack.Protected guard={signedIn && onboarded} redirectTo={home}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings/index" />
         <Stack.Screen name="settings/[field]" />
         <Stack.Screen name="letter/[week]" />
         <Stack.Screen name="capsule" />
+        <Stack.Screen name="help" />
         <Stack.Screen name="mission/[id]/index" />
         <Stack.Screen name="mission/[id]/verify" />
       </Stack.Protected>
+      <Stack.Screen name="admin" />
     </Stack>
   );
 }
@@ -64,7 +69,11 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider
-      value={{ ...navTheme, colors: { ...navTheme.colors, background: colors.canvas, card: colors.surface } }}>
+      value={{
+        ...navTheme,
+        colors: { ...navTheme.colors, background: colors.canvas, card: colors.surface },
+      }}
+    >
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       {/* 웹에서는 480px 컬럼 중앙 정렬, 바깥은 canvas (DESIGN.md §5.1) */}
       <View style={[styles.outer, { backgroundColor: colors.canvas }]}>

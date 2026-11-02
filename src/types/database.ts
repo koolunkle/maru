@@ -15,6 +15,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_login_attempts: {
+        Row: {
+          failures: number
+          key_hash: string
+          window_start: string
+        }
+        Insert: {
+          failures?: number
+          key_hash: string
+          window_start?: string
+        }
+        Update: {
+          failures?: number
+          key_hash?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       app_config: {
         Row: {
           key: string
@@ -293,12 +311,42 @@ export type Database = {
           },
         ]
       }
+      mission_photos: {
+        Row: {
+          hint: string
+          id: number
+          mission_id: string
+          storage_path: string
+        }
+        Insert: {
+          hint?: string
+          id?: never
+          mission_id: string
+          storage_path: string
+        }
+        Update: {
+          hint?: string
+          id?: never
+          mission_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mission_photos_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "missions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       missions: {
         Row: {
           category: Database["public"]["Enums"]["mission_category"]
           created_at: string
           created_for: string | null
           difficulty: number
+          end_date: string | null
           event_id: string | null
           id: string
           minutes: number
@@ -307,6 +355,7 @@ export type Database = {
           reason: string | null
           seed_no: number | null
           source: Database["public"]["Enums"]["mission_source"]
+          start_date: string | null
           title: string
           verify_hint: string
         }
@@ -315,6 +364,7 @@ export type Database = {
           created_at?: string
           created_for?: string | null
           difficulty: number
+          end_date?: string | null
           event_id?: string | null
           id?: string
           minutes: number
@@ -323,6 +373,7 @@ export type Database = {
           reason?: string | null
           seed_no?: number | null
           source: Database["public"]["Enums"]["mission_source"]
+          start_date?: string | null
           title: string
           verify_hint: string
         }
@@ -331,6 +382,7 @@ export type Database = {
           created_at?: string
           created_for?: string | null
           difficulty?: number
+          end_date?: string | null
           event_id?: string | null
           id?: string
           minutes?: number
@@ -339,6 +391,7 @@ export type Database = {
           reason?: string | null
           seed_no?: number | null
           source?: Database["public"]["Enums"]["mission_source"]
+          start_date?: string | null
           title?: string
           verify_hint?: string
         }
@@ -765,6 +818,18 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_attach_photo: {
+        Args: { p_hint: string; p_mission_id: string; p_storage_path: string }
+        Returns: number
+      }
+      admin_delete_mission: {
+        Args: { p_mission_id: string }
+        Returns: undefined
+      }
+      check_admin_attempt: {
+        Args: { p_key_hash: string; p_limit?: number; p_valid: boolean }
+        Returns: boolean
+      }
       expire_due_missions: { Args: never; Returns: number }
       finish_verification: {
         Args: {
@@ -827,6 +892,14 @@ export type Database = {
           opened_at: string
           ready: boolean
         }[]
+      }
+      move_furniture: {
+        Args: {
+          p_furniture_id: string
+          p_slot: Database["public"]["Enums"]["room_slot"]
+          p_user_id: string
+        }
+        Returns: undefined
       }
       open_time_capsule: { Args: { p_id: string }; Returns: string }
       place_furniture: {

@@ -65,31 +65,65 @@ npm start          # QR 코드를 Expo Go로 찍어 휴대폰에서 확인
 | spec대로 동작하지 않는 버그를 고친다 | change 없이 GitHub Issue → PR. PR 본문에 어긴 spec과 Requirement 이름을 적는다 |
 | 리팩터링·도구·문서·운영 준비처럼 동작이 그대로다 | change 없이 PR. 묶어서 관리할 만큼 크면 `skip_specs: true` change로 만든다(예: `prepare-demo-rehearsal`) |
 
+spec·README·`docs/` 같은 기준 문서에는 "시연 때", "시연 후", "지금은 ~단계"처럼 특정 시점에 기대는 표현을 쓰지 않는다. 그날이 지나면 저절로 틀린 말이 되기 때문이다. 늘 맞아야 하는 내용은 조건으로 쓰고(예: "실제 참가자를 받기 전에 바꾼다"), 한 번 하고 끝나는 일(데이터 준비, 리허설, 정리)은 change의 `tasks.md`에 둔다. 날짜가 박힌 과거 일정은 그대로 둬도 된다.
+
 spec이 틀렸다는 걸 발견했는데 지금 동작이 맞다면, 그것도 동작 변경과 같이 change로 spec을 고친다. 코드와 spec이 다른 상태로 PR을 합치지 않는다.
 
 ### 3.2 change 한 사이클
 
 OpenSpec CLI는 개발 의존성으로 들어 있다(`npm run spec -- <명령>`). Claude Code의 `/opsx:*` 명령은 터미널에서 `openspec`을 바로 부르므로, 쓰려면 한 번 `npm i -g @fission-ai/openspec@1.16.0`을 한다.
 
-1. **제안**: main에서 브랜치를 만들고(`feat/add-heavy-mood-notice`처럼 change 이름 그대로) `/opsx:propose "하고 싶은 것"`을 실행하거나 `npm run spec -- new change <이름>`으로 폴더를 만든다. `openspec/changes/<이름>/`에 아래를 쓴다.
+1. **제안**: main에서 브랜치를 만들고(`feat/add-mission-share`처럼 change 이름 그대로. `develop`으로 보낼 작업이면 `develop`에서, 3.3) `/opsx:propose "하고 싶은 것"`을 실행하거나 `npm run spec -- new change <이름>`으로 폴더를 만든다. `openspec/changes/<이름>/`에 아래를 쓴다.
    - `proposal.md` — 이 작업의 PRD. 왜(PRODUCT의 어느 문제·페르소나), 무엇이 바뀌나, 하지 않는 것, 영향(DB·함수·운영 설정)
    - `specs/<capability>/spec.md` — 기존 spec과의 차이. `## ADDED` / `## MODIFIED`(바뀐 Requirement 전체) / `## REMOVED`(이유 포함) Requirements
    - `design.md` — 기술 결정이 있을 때만(테이블·RLS·함수, 고른 방법과 버린 방법)
    - `tasks.md` — 체크리스트. 마지막 그룹은 검증
+   - `verification.md` — 검증 기록이 PR 본문에 다 담기지 않을 때만. 그 change의 기록은 change 폴더에 두고 `docs/`에 따로 만들지 않는다(archive 폴더 이름에 날짜가 붙으므로 파일 이름에는 날짜를 넣지 않는다)
 2. **제안 리뷰**: `npm run spec:validate`를 통과시킨 뒤 제안 문서만으로 PR(draft)을 열어 방향을 먼저 맞춘다. 작은 변경이면 구현까지 한 PR에 넣어도 된다.
 3. **구현**: `/opsx:apply`로 `tasks.md`를 하나씩 체크하며 구현한다. 하다가 범위가 바뀌면 코드보다 change 문서를 먼저 고친다(`/opsx:update`).
 4. **검사 → 미리보기 배포 → PR**: 아래 검사와 미리보기 배포. PR 본문에 change 이름과 각 Scenario를 어떻게 확인했는지 적는다.
-5. **합치기**: 리뷰어 1명 승인 후 작성자가 합친다(Squash and merge). 합치기 전에 같은 PR에서 `/opsx:archive`(또는 `npm run spec -- archive <이름>`)로 change를 `changes/archive/`로 옮긴다. 이때 차이가 `openspec/specs/`에 합쳐져, main의 spec이 늘 지금 동작과 같다.
-6. 운영 배포(`--prod`)는 관리자가 합친 뒤에 한다.
+5. **합치기**: 리뷰어 1명 승인 후 작성자가 합친다(Squash and merge. 단 `develop` → main은 3.3). 합치기 전에 같은 PR에서 `/opsx:archive`(또는 `npm run spec -- archive <이름>`)로 change를 `changes/archive/`로 옮긴다. 이때 차이가 `openspec/specs/`에 합쳐져, main의 spec이 늘 지금 동작과 같다.
+6. 운영 반영(웹·함수·마이그레이션)은 관리자가 main에 합쳐진 코드로 한다(3.4).
 
 진행 중인 작업과 남은 할 일은 `npm run spec -- list`로 본다. 담당자는 change 폴더의 PR 작성자다.
+
+### 3.3 브랜치: main과 develop
+
+| 브랜치 | 쓰임 |
+| --- | --- |
+| `main` | 운영과 같은 코드. 대부분의 PR은 여기로 보낸다. spec(`openspec/specs/`)도 main이 기준이다 |
+| `develop` | 여러 PR을 모아 먼저 맞춰 볼 큰 작업용 통합 브랜치(예: 기준 사진 판정). 필요한 작업만 여기로 보낸다 |
+
+- `develop`으로 보낼 작업은 최신 `develop`에서 브랜치를 만들고, PR의 base를 `develop`으로 연다.
+- main에 새 PR이 합쳐지면 `develop`에도 main을 합쳐 따라오게 한다(`git switch develop && git merge origin/main`, PR 또는 관리자).
+- `develop` → main은 PR로 올리고 **"Create a merge commit"으로 합친다.** squash로 합치면 `develop`과 main의 이력이 어긋나 다음에 충돌이 난다. squash를 썼다면 합친 직후 `develop`을 main으로 다시 맞춘다.
+- `develop`은 GitHub 보호 규칙으로 삭제·강제 push를 막아 둔다. 저장소가 머지한 브랜치를 자동으로 지우게 되어 있어, 보호하지 않으면 develop → main을 합칠 때 `develop`도 지워진다. 보호 규칙을 풀지 않는다.
+- `develop`에서는 운영에 배포하지 않는다(3.4). 백엔드가 운영 하나뿐이라 `develop`을 따로 시험할 서버 환경은 없다. 서버를 바꾸는 작업은 미리보기 웹과 테스트로 확인하고, 운영 반영은 main에 들어간 뒤에 한다.
+
+### 3.4 운영 반영 규칙
+
+운영 웹, 서버 함수, DB는 모두 하나를 함께 쓴다. 누군가 자기 작업본으로 배포하면 다른 사람이 배포한 코드를 덮어쓴다.
+
+- **운영 반영은 관리자만, main에 합쳐진 코드로만 한다.** 반영 전에 `git switch main && git pull`로 최신 main인지 확인하고, 커밋하지 않은 변경이 없어야 한다(`git status`).
+- 대상은 세 가지다: 웹(`eas deploy --prod`), 서버 함수(`supabase functions deploy`), 마이그레이션(`supabase db push`).
+- 함수는 바뀐 것만 이름을 붙여 배포한다. 이름 없이 `supabase functions deploy`를 실행하면 모든 함수가 내 작업본으로 바뀐다.
+- `admin-missions`만 `--no-verify-jwt`를 붙여 배포한다. 빼면 관리자 화면이 막힌다. 다른 함수에는 붙이지 않는다(`docs/ADMIN.md`).
+- 반영 순서는 DB → 함수 → 웹이다. 앞 단계가 없으면 뒤 단계가 실패한다.
+- 웹을 반영한 뒤에는 로그인 기록이 없는 새 브라우저 프로필(게스트 모드나 시크릿 창도 된다)로 운영 주소를 열어, 첫 화면이 시작 화면인지 확인한다. 이미 로그인된 브라우저로는 처음 온 사용자가 보는 화면을 확인할 수 없다.
+- PR 본문에 합친 뒤 할 운영 반영(명령과 순서)을 적고, 관리자는 반영한 뒤 PR에 "반영함" 댓글을 남긴다.
+- 개인 작업 확인은 미리보기 웹(`eas deploy`, `--prod` 없이)으로 한다. 서버 함수는 개인 확인용으로 운영에 배포하지 않는다.
 
 ### 검사 (PR 전에 반드시)
 
 ```bash
 npm run typecheck
-npm run lint
+npm run lint          # 코드 규칙 + 포맷(Prettier). 포맷 오류는 npm run format으로 고친다
+npm test
 ```
+
+PR을 열면 GitHub Actions(`.github/workflows/check.yml`)가 같은 검사와 `format:check`, `spec:validate`를 다시 돌린다. PR 화면의 **check**가 빨간색이면 합치지 않는다. 대부분은 `npm run format`을 실행하고 다시 push하면 풀린다.
+
+포맷은 Prettier가 정한다(작은따옴표, 줄 100자, `.prettierrc.json`). VS Code는 저장할 때 자동으로 맞춘다(추천 확장 설치). 문서(`*.md`)·생성 파일·마이그레이션은 포맷하지 않는다(`.prettierignore`).
 
 ### 미리보기 배포 (운영과 분리된 주소)
 
@@ -99,7 +133,7 @@ npx expo export -p web
 npx eas-cli@latest deploy          # --prod 없이. 출력된 미리보기 URL을 PR에 붙인다
 ```
 
-- 운영 배포(`--prod`)는 관리자만 한다. PR을 합쳐도 운영 주소는 바뀌지 않으니, 합친 뒤 아래를 실행한다.
+- 운영 배포(`--prod`)는 관리자만 main에서 한다(3.4). PR을 합쳐도 운영 주소는 바뀌지 않으니, 합친 뒤 아래를 실행한다.
 
 ```bash
 git switch main && git pull && npm install
@@ -134,7 +168,7 @@ PR 본문 체크리스트:
 - [ ] 동작이 바뀌었다면 change를 archive해서 `openspec/specs/`가 바뀐 동작과 같다. 화면 모양이 바뀌었다면 DESIGN.md도 고쳤다
 - [ ] `npm run spec:validate` 통과
 - [ ] 테이블·함수·폴더가 바뀌었다면 docs/ARCHITECTURE.md를 고쳤다
-- [ ] `npm run typecheck`, `npm run lint` 통과
+- [ ] `npm run typecheck`, `npm run lint`(포맷 포함), `npm test` 통과
 - [ ] 미리보기 URL에서 웹 동작 확인, 가능하면 Expo Go에서도 확인
 - [ ] DB 변경이 있으면 마이그레이션 파일과 `src/types/database.ts`를 함께 올렸다
 - [ ] 동료 프로토타입에서 가져온 기능이면 PR 본문에 출처를 적었다
@@ -152,7 +186,7 @@ PR 본문 체크리스트:
 
 ## 6. DB·서버 함수 변경
 
-DB는 운영 프로젝트 하나를 함께 쓴다. 마이그레이션은 바로 운영에 반영되므로 PR 리뷰 후에 적용한다.
+DB는 운영 프로젝트 하나를 함께 쓴다. 마이그레이션과 함수 배포는 바로 운영에 반영되므로, PR이 main에 합쳐진 뒤 관리자가 적용한다(3.4).
 
 처음 한 번:
 
@@ -166,7 +200,7 @@ npx supabase migration list                             # 로컬 파일과 원�
 
 ```bash
 npx supabase migration new relay_messages               # supabase/migrations/<타임스탬프>_relay_messages.sql 생성
-# SQL 작성 → PR 리뷰 → 승인 후
+# SQL 작성 → PR 리뷰 → main에 합친 뒤 관리자가(3.4)
 npx supabase db push
 npx supabase gen types typescript --project-id jpipzrmspryzvjykxefm > src/types/database.ts
 ```
@@ -175,10 +209,11 @@ npx supabase gen types typescript --project-id jpipzrmspryzvjykxefm > src/types/
 - 적용 후 Supabase 대시보드 Advisors에서 새 보안 경고가 없는지 확인한다.
 - 이미 적용된 마이그레이션 파일은 고치지 않는다. 바꿀 내용은 새 파일로 만든다.
 
-서버 함수:
+서버 함수(관리자, 최신 main에서):
 
 ```bash
-npx supabase functions deploy moderate-comment --project-ref jpipzrmspryzvjykxefm
+npx supabase functions deploy moderate-comment --project-ref jpipzrmspryzvjykxefm   # 바뀐 함수만 이름을 붙여서
+npx supabase functions deploy admin-missions --project-ref jpipzrmspryzvjykxefm --no-verify-jwt   # 이 함수만 예외
 ```
 
 실행 로그는 Supabase 대시보드 Edge Functions → 함수 → Logs에서 본다. AI 실패 원인은 `ai error` 줄에 남는다.

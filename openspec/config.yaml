@@ -7,13 +7,13 @@ context: |
   Keep code identifiers, file paths, API names, and product names (Expo, Supabase, Gemini) in English.
 
   ## 제품
-  MY서울루틴 (Maru). 서울 청년(19~39세, 핵심 세그먼트 청년 남성)을 위한 하루 5분 일상 챌린지.
+  MY서울루틴 (Maru). 서울에 혼자 살며 바깥 활동과 연락이 줄기 시작한 고립 직전 청년(19~39세)을 위한 작은 성공 일상 루틴.
   AI가 미션을 추천하고, 사진으로 인증하면 가구 보상과 익명 응원이 쌓인다.
   배경·문제·페르소나·범위는 docs/PRODUCT.md, 시각 명세와 토큰은 DESIGN.md.
   현재 동작의 기준은 openspec/specs/ 이다. 기능 ID(F1~F16)는 각 spec의 Purpose에 적혀 있고 코드 주석이 이 ID를 쓴다.
 
   ## 스택
-  - Expo SDK 58 (React Native, Expo Router), TypeScript strict. 웹(EAS Hosting)이 주력, Expo Go로 모바일 시연.
+  - Expo SDK 58 (React Native, Expo Router), TypeScript strict. 웹(EAS Hosting)이 주력, 모바일은 Expo Go로 실행.
   - Supabase 하나(ref jpipzrmspryzvjykxefm): Postgres + RLS, 익명 Auth, Storage, Edge Functions(Deno), pg_cron.
   - AI(Gemini 기본, Claude 전환 가능)는 Edge Function의 supabase/functions/_shared/ai.ts generateJson으로만 부른다.
   - 모든 날짜 경계는 Asia/Seoul(KST), 주 시작은 월요일.
@@ -31,6 +31,7 @@ rules:
     - "범위에서 뺀 것을 What Changes 끝에 '하지 않는 것'으로 적는다."
     - "Impact에 DB 마이그레이션, Edge Function 재배포, 운영 설정값(app_config) 변경 여부를 적는다."
   specs:
+    - "spec에는 '시연 때', '시연 후', '당분간'처럼 특정 시점에 기대는 표현을 쓰지 않는다. 언제 읽어도 맞도록 조건으로 쓴다(예: '실제 참가자를 받기 전'). 한 번 하고 끝나는 일은 change의 tasks.md에 둔다."
     - "spec은 사용자나 외부에서 관찰할 수 있는 동작만 쓴다. 테이블·컬럼·함수 이름 같은 구현은 design.md나 docs/ARCHITECTURE.md에 둔다."
     - "사용자에게 보이는 고정 문구는 따옴표로 정확히 적는다."
     - "AI가 관여하는 요구사항에는 AI를 쓸 수 없을 때의 Scenario를 반드시 둔다."

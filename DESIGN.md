@@ -355,7 +355,7 @@ components:
 | 카드 간격 | 12px |
 | 섹션 간격 | 32px |
 | 하단 고정 버튼 | 좌우 20px, 하단 16px + safe area, 위 경계 elevation 1 |
-| 탭 바 | 64px + safe area. 아이콘 24px + `label`. 탭 5개와 Feather 아이콘: 홈 `sun`, 피드 `message-circle`, 기록 `calendar`, 내 방 `home`, 휴게소 `coffee` |
+| 탭 바 | 64px + safe area. 아이콘 24px + `label`. 탭 5개와 Feather 아이콘: 홈 `sun`, 마음 보관함 `archive`, 피드 `message-circle`, 기록 `calendar`, 내 방 `home` |
 | 아이콘 | `@expo/vector-icons`의 Feather, 기본 24px, 선 굵기 기본값 |
 
 ### 5.2 화면별 구조 (위 → 아래)
@@ -364,33 +364,36 @@ components:
 | --- | --- |
 | S1 시작 | 세로 중앙: 서비스명 `display` → 8px → 소개 `body-md` `slate` / 하단 고정: `button-primary` "시작하기" |
 | S2 온보딩 | 상단 진행 표시(3칸 막대, 높이 4px, 활성 `primary`) → 24px → 질문 `display` → 24px → 선택지(카테고리: 칩 flex-wrap 간격 8px / 구: 2열 그리드 칩 / 시간: 세로 `card-base` 3개) / 하단 고정: "다음" |
-| S3 홈 | 헤더(날짜 `title-lg` + 설정 아이콘) → 연속 출석 줄(`zap` 아이콘 `accent` + "{N}일째" `title-md`) → 32px → "오늘의 미션" `title-md` → `mission-card` ×3 → 32px → "이번 주 미션" → `mission-card` ×1 → `button-ghost` "다른 미션 보기" |
+| S3 홈 | 헤더(날짜 `title-lg` + 설정 아이콘) → 연속 출석 줄(`zap` 아이콘 `accent` + "{N}일째" `title-md`) → 32px → "오늘의 미션" `title-md` → `mission-card` 최대 3개 → 32px → (주간 미션이 있을 때) "이번 주 미션" → `mission-card` ×1 → (유효 후보 부족 시) "지금 추천할 수 있는 미션이 부족해요" `caption` `steel` → `button-ghost` "다른 미션 보기" |
 | S4 미션 상세 | 상단 틴트 영역(카테고리 `tint`, 높이 160px, 미션명 `title-lg`, 라벨 줄) → 인증 힌트 `card-base` → (행사 미션만) 행사 정보 `card-base`: 라벨 "행사 정보" `label` `steel` + 행사명 `body` + "11월 2일 ~ 11월 8일 · 장소" `body-sm` `slate` + (이번 주 안에 끝나면) "오늘 끝나요"/"N일 뒤 끝나요" `body-sm` `accent-ink` + `button-ghost` 작은 높이 "행사 정보 보기"(https 링크만, 새 창) → 추천 이유 `ai-card` → 같이 할래요 행(인원 `body-sm` + `button-secondary` 작은 높이 40px) / 하단 고정: "시작하기" 또는 "인증하기". 불러오기 실패 시 안내 + `button-secondary` "다시 불러오기" |
 | S5 인증 | 사진 영역 1:1, `rounded.lg`, 비어 있으면 `surface-sunken` + `camera` 아이콘 + "사진 추가" → 16px → `text-input` 소감(3줄, 우하단 "0/100" `caption`) → 공개 토글 행 / 하단 고정: "제출하기". 판정 중: 전체 오버레이 대신 버튼을 로딩 상태로. 결과: `ai-card`에 결과 문구 + 보상 시 `reward-badge` |
 | S6 피드 | 게시물 `card-base`: 닉네임 `label` + 시각 `caption` → 사진 1:1 → 소감 `body-md` → 빠른 반응 칩 3개 → 댓글 목록(`body-sm`, 들여쓰기 없음) → 댓글 입력 1줄 / 목록 끝: 20개를 넘으면 `button-ghost` "이전 인증 더 보기" |
 | S7 기록 | 이번 주 달성률 `display` 숫자 + 막대(높이 8px, `primary`, 배경 `surface-sunken`) → 32px → 월간 캘린더(7열, 출석일 원 28px `accent-soft` 채움 + 숫자 `accent-ink`) → 32px → 이번 주 편지(F13, 아래 표) |
 | S8 내 방 | 제목 `title-lg` + "꾸미기" 버튼 → 방 영역(5.4) → 한 줄 상태 `body-sm` `slate`(창밖 시간대·화분 단계, 꾸미기 중에는 안내) → (꾸미기) 벽지·바닥 고르기 → 가구 도감 |
-| S9 설정 | `list-row` 목록. 닉네임 → 관심 카테고리 → 생활권 → 하루 가능 시간(오른쪽 `chevron-right`) → 하단 출처 `caption`. 도움 안내는 S10으로 옮긴다 |
+| S9 설정 | `list-row` 목록. 닉네임 → 관심 카테고리 → 생활권 → 하루 가능 시간 → 도움받을 수 있는 곳(S10으로 이동)(오른쪽 `chevron-right`) → 하단 출처 `caption` |
 
 F10~F16 화면·요소
 
 | 화면·위치 | 구조 |
 | --- | --- |
 | S3 성장 화분 (F11) | 연속 출석 줄 → 12px → `growth-card`: 왼쪽 단계 아이콘 48px, 오른쪽 문구 `title-md` → 8px → 진행 막대(높이 6px, `success`, 배경 `surface-sunken`) → 4px → 단계 이름 4개 `caption`(현재 단계만 `success` SemiBold). 그 아래 32px 뒤 "오늘의 미션" |
-| S10 타임캡슐 메뉴 (F16) | 한 줄 기록 아래 8px `card-base`: `mail` 아이콘 20px `accent` + "타임캡슐" `title-md` + 도착한 한 줄 또는 미래의 나에게 보내기 안내 `caption` `steel` + `chevron-right` |
-| S10 마음 우체통 카드 (F14) | "마음 보관함" `title-md` 아래 8px → `card-base`: Feather `mail` 24px `accent` + "마음 우체통" `title-md` + 안 읽은 글이 있으면 "아직 읽지 않은 한 줄 {N}개가 있어요", 없으면 "한 줄을 주고받아 볼까요?" `caption` `steel` + `chevron-right`. 카드 전체가 터치 영역. 미션·릴레이와 독립 |
-| S10 마음 우체통 수신함 (F14) | `bottom-sheet`: "마음 우체통" `title-md` → 받은 한 줄·보낸 한 줄 전환 버튼 → `list-row` 목록(본문 1줄 말줄임, 안 읽음은 `accent` 라벨, 읽음은 `steel`) → "한 줄 쓰기" `button-primary` → "닫기" `button-ghost`. 목록은 가상화하고 로딩·빈 상태·오류·다시 불러오기 제공. 본문은 `letter-card`에 "누군가가 보낸 한 줄" + 전체 글 + "목록으로". 작성자 정보·답장 기능 없음 |
-| S10 마음 우체통 작성 (F14) | `bottom-sheet`: Feather `mail` 32px `accent` → 12px → 제목 "누군가에게 한 줄 보내볼까요?" `title-md` → 안내 `body-sm` → `text-input` 여러 줄(0/60) → "검수를 거친 뒤 다른 사람에게 전달돼요" `comment-pending` → `button-primary` "보내기" → `button-ghost` "우체통으로". 저장 후 `check-circle` + "한 줄을 맡겼어요" + 본문 `relay-item` + 실제 검수 상태 안내 + "우체통으로". 비공개 결과는 중립 문구, 위기 표현에는 `help-card`. 보낸 목록의 검수 대기 항목에는 "검수 다시 요청". 키보드 회피·스크롤·safe area 적용, 최대 폭 480px |
+| S14 타임캡슐 메뉴 (F16) | 한 줄 기록 아래 8px `card-base`: `mail` 아이콘 20px `accent` + "타임캡슐" `title-md` + 도착한 한 줄 또는 미래의 나에게 보내기 안내 `caption` `steel` + `chevron-right` |
+| S14 마음 우체통 카드 (F14) | 마음 보관함 탭 맨 위 `card-base`: Feather `mail` 24px `accent` + "마음 우체통" `title-md` + 안 읽은 글이 있으면 "아직 읽지 않은 한 줄 {N}개가 있어요", 없으면 "한 줄을 주고받아 볼까요?" `caption` `steel` + `chevron-right`. 카드 전체가 터치 영역. 미션·릴레이와 독립 |
+| S14 마음 우체통 수신함 (F14) | `bottom-sheet`: "마음 우체통" `title-md` → 받은 한 줄·보낸 한 줄 전환 버튼 → `list-row` 목록(본문 1줄 말줄임, 안 읽음은 `accent` 라벨, 읽음은 `steel`) → "한 줄 쓰기" `button-primary` → "닫기" `button-ghost`. 목록은 가상화하고 로딩·빈 상태·오류·다시 불러오기 제공. 본문은 `letter-card`에 "누군가가 보낸 한 줄" + 전체 글 + "목록으로". 작성자 정보·답장 기능 없음 |
+| S14 마음 우체통 작성 (F14) | `bottom-sheet`: Feather `mail` 32px `accent` → 12px → 제목 "누군가에게 한 줄 보내볼까요?" `title-md` → 안내 `body-sm` → `text-input` 여러 줄(0/60) → "검수를 거친 뒤 다른 사람에게 전달돼요" `comment-pending` → `button-primary` "보내기" → `button-ghost` "우체통으로". 저장 후 `check-circle` + "한 줄을 맡겼어요" + 본문 `relay-item` + 실제 검수 상태 안내 + "우체통으로". 비공개 결과는 중립 문구, 위기 표현에는 `help-card`. 보낸 목록의 검수 대기 항목에는 "검수 다시 요청". 키보드 회피·스크롤·safe area 적용, 최대 폭 480px |
 | S4 먼저 해낸 사람의 한 줄 (F10) | 같이 할래요 행 아래 32px → 제목 `title-md` → 8px → `relay-item` 최대 3개(간격 8px, 따옴표·닉네임 없음). 없으면 `caption` `steel` 한 줄 |
 | S5 다음 사람에게 한 줄 (F10) | 판정 결과 `ai-card` 아래 24px → 제목 `title-md` → 8px → `text-input` 1줄(우하단 "0/60") → 하단 고정 버튼이 "남기기"로 바뀌고 그 위에 `button-ghost` "건너뛰기". 남긴 뒤 `comment-pending` 형태로 "약 {N}시간 뒤 다음 사람에게 보여요" |
 | S7 이번 주 편지 (F13) | 월간 캘린더 아래 32px → `letter-card`: "이번 주 편지" `label` `steel`, 기분·한 줄·완료 미션 안내, `button-ghost` "이번 주 마음 리포트 보기". 통계 조회와 독립적으로 표시 |
-| S10 한 줄 기록 메뉴 (F15) | 마음 우체통 아래 8px → `card-base`: Feather `edit-3`, "한 줄 기록", 안내 문구와 `chevron-right`. 누르면 한 줄 기록 바텀 시트를 연다 |
-| S13 한 줄 기록 (F15) | 휴게소에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → "오늘 한 줄" `title-md` → 안내 `body-sm` → 기분 칩 5개(`chip-category` 모양, 아이콘 + 이름, 줄바꿈) → 선택 입력 `text-input`(0/60) → `button-primary` "저장하기". 기존 기록은 불러와 수정하고, 삭제는 화면 안 확인 후 실행. 로딩·저장 오류·재시도 표시 |
-| S10 마음 휴게소 (F12) | 헤더 "마음 휴게소" `title-lg` → 8px → 안내 `body-sm` `slate` → 24px → "마음 보관함" `title-md` + 우체통·한 줄 기록·타임캡슐 카드 → 32px → "도움받을 수 있는 곳" `title-md` → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart` → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) |
+| S14 한 줄 기록 메뉴 (F15) | 마음 우체통 아래 8px → `card-base`: Feather `edit-3`, "한 줄 기록", 안내 문구와 `chevron-right`. 누르면 한 줄 기록 바텀 시트를 연다 |
+| S13 한 줄 기록 (F15) | 마음 보관함에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → "오늘 한 줄" `title-md` → 안내 `body-sm` → 기분 칩 5개(`chip-category` 모양, 아이콘 + 이름, 줄바꿈) → 선택 입력 `text-input`(0/60) → `button-primary` "저장하기". 기존 기록은 불러와 수정하고, 삭제는 화면 안 확인 후 실행. 로딩·저장 오류·재시도 표시 |
+| S14 마음 보관함 탭 (F14·F15·F16) | 헤더 "마음 보관함" `title-lg` → 8px → 안내 "마음을 남기고 받는 곳이에요" `body-sm` `slate` → 24px → 우체통·한 줄 기록·타임캡슐 카드(카드 사이 8px) → 32px → "배경음" `title-md` → `list-row`: `cloud-rain` + "빗소리 틀어 두기" + Switch → 켜져 있을 때만 볼륨 슬라이더(0~100%) → 32px → "도움받을 수 있는 곳" `body-sm` `slate` + `chevron-right` 16px 링크(S10으로 이동). 카드 동작은 아래 S14 항목과 같다 |
+| S10 도움받을 수 있는 곳 (F12) | 탭이 아닌 스택 화면. `BackHeader` "도움받을 수 있는 곳" → 안내 "필요할 때 언제든 닿을 수 있는 서울시 창구예요" `body-sm` `slate` → 24px → `list-row` 3개(아이콘 24px + 이름 `body-md` + 설명 `caption` `steel`, 오른쪽 `chevron-right`): 외로움안녕120 `phone`(설명에 번호 120 표시), 서울마음편의점 `map-pin`, 청년마음건강 지원사업 `heart`. 주간 리포트(S11)·설정(S9)·마음 보관함(S14)에서 연다 |
 | S11 주간 편지 (F13) | `BackHeader`와 KST 주차 → Gemini 원문 전송·보관 안내와 생성 버튼 → 실제 기분·한 줄·완료 미션 목록 → AI 편지는 `ai-card`, 기본 편지는 일반 카드 → 마음이 무거운 기록이 있으면 `help-soft`와 설정 안내 → 지난 3주 및 보관된 주차 목록과 이번 주 복귀. 현재 표시되는 원본과 과거 생성 편지의 시점 차이를 안내한다. |
-| S12 타임캡슐 (F16) | 휴게소에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
+| S12 타임캡슐 (F16) | 마음 보관함에서는 우체통과 같은 바텀 시트, 직접 주소 접근 시 화면 → `text-input` 3줄(우하단 "0/100") → 8px → 열리는 날 칩 3개(7일 뒤·30일 뒤·100일 뒤) → 하단 고정 "보내기" / 위쪽 목록: `list-row`(`lock` 아이콘 + 열리는 날짜, 열린 것은 `unlock` + 첫 줄) |
 
 ### 5.3 컴포넌트 구조
+
+관리 화면 `/admin`은 공통 480px 컬럼·`Screen`·`BackHeader`·토큰을 사용한다. 비밀번호 입력과 "관리 화면 열기" 버튼을 먼저 보여준다. 인증 후에는 관리 종료 → 제목 검색 → 20개 미션 목록과 이전/다음 → 새 미션 작성 → 미션 편집 폼 → 기준 사진 순서다. 폼 간격은 `Spacing.md`, 입력은 `Radius.md`·헤어라인 테두리와 최소 높이 48px로 맞춘다. 카테고리는 기존 `Chip`, 사진은 너비 100%·높이 200px 미리보기와 힌트로 표시한다. 저장·삭제 결과는 화면 안 안내, 삭제 확인은 공통 `BottomSheet`를 사용한다.
 
 | 컴포넌트 | 구조 |
 | --- | --- |
@@ -458,7 +461,7 @@ F10~F16 화면·요소
 | --- | --- | --- |
 | Notion ([awesome-design-md](https://github.com/VoltAgent/awesome-design-md) DESIGN.md) | 웜 뉴트럴 배경, 파스텔 틴트 카드, 헤어라인 우선, 사각 버튼(pill 미사용), frontmatter 토큰 구조 | 네이비 히어로 밴드, 보라 primary, 장식 일러스트 |
 | 싸이월드 미니홈피 | '방 꾸미기'로 보상을 모으는 구조, 고정 슬롯 배치 | 픽셀 아트, 자동 재생 배경음악, 일촌·방명록 |
-| 동료 프로토타입 ([sesac-hackathon-seoul-challenge](https://github.com/lilill16171df/sesac-hackathon-seoul-challenge)) | 응원 릴레이·성장 화분·마음 휴게소·주간 편지·우체통·한 줄 기록·타임캡슐의 경험 구성, 사용자가 켜는 빗소리 | 세이지 그린 팔레트, 이모지 아이콘, 포인트 구매, 화면 가운데 팝업 |
+| 동료 프로토타입 ([sesac-hackathon-seoul-challenge](https://github.com/lilill16171df/sesac-hackathon-seoul-challenge)) | 응원 릴레이·성장 화분·마음 휴게소(지금은 마음 보관함과 도움 안내 화면)·주간 편지·우체통·한 줄 기록·타임캡슐의 경험 구성, 사용자가 켜는 빗소리 | 세이지 그린 팔레트, 이모지 아이콘, 포인트 구매, 화면 가운데 팝업 |
 | Pretendard | 한글·영문 균형, 웹·앱 공통 서체 | — |
 
 ## 8. 금지사항
@@ -477,5 +480,5 @@ F10~F16 화면·요소
 | 화면당 주요 버튼 2개 이상 | 하나의 행동만 강조 |
 | 6절에 없는 애니메이션(바운스, 파티클, 컨페티) | 차분함 유지 |
 | 순백 #ffffff 화면 배경, 순흑 #000000 텍스트 | `canvas`, `ink` 사용 |
-| 소리 자동 재생, 앱 시작 시 소리 | 사용자가 휴게소에서 켤 때만 재생(F12) |
+| 소리 자동 재생, 앱 시작 시 소리 | 사용자가 마음 보관함의 배경음에서 켤 때만 재생(F12) |
 | 화면 가운데 모달 팝업 | 확인·안내는 화면 안 문구 또는 `bottom-sheet`. 웹에서 `Alert.alert`는 표시되지 않는다 |

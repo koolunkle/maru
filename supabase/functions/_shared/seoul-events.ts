@@ -9,9 +9,31 @@ export const EventWindowDays = 30;
 
 /** src/constants/domain.ts Districts와 같은 목록. 프로필 district와 일치하는 행사만 저장한다 */
 export const Districts = [
-  '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구', '노원구',
-  '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구', '성북구', '송파구',
-  '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구',
+  '강남구',
+  '강동구',
+  '강북구',
+  '강서구',
+  '관악구',
+  '광진구',
+  '구로구',
+  '금천구',
+  '노원구',
+  '도봉구',
+  '동대문구',
+  '동작구',
+  '마포구',
+  '서대문구',
+  '서초구',
+  '성동구',
+  '성북구',
+  '송파구',
+  '양천구',
+  '영등포구',
+  '용산구',
+  '은평구',
+  '종로구',
+  '중구',
+  '중랑구',
 ] as const;
 
 export type SeoulEventRow = {
@@ -45,7 +67,10 @@ export function readEventPage(body: unknown): { total: number; rows: SeoulEventR
   const code: string | undefined = page?.RESULT?.CODE ?? root.RESULT?.CODE;
   if (code === 'INFO-200') return { total: 0, rows: [] };
   if (code !== 'INFO-000' || !page) throw new Error(`seoul_api_${code ?? 'unknown'}`);
-  return { total: Number(page.list_total_count) || 0, rows: Array.isArray(page.row) ? page.row : [] };
+  return {
+    total: Number(page.list_total_count) || 0,
+    rows: Array.isArray(page.row) ? page.row : [],
+  };
 }
 
 const DatePattern = /^\d{4}-\d{2}-\d{2}$/;
@@ -99,7 +124,9 @@ export function eventMissionTitle(title: string, eventTitle: string) {
   if (title !== name && title !== name.slice(0, 40)) return title;
   const short = name.replace(/^\[[^\]]*\]\s*/, '') || name;
   const suffix = ' 보러 가기';
-  return short.length + suffix.length <= 40 ? `${short}${suffix}` : `${short.slice(0, 39 - suffix.length)}…${suffix}`;
+  return short.length + suffix.length <= 40
+    ? `${short}${suffix}`
+    : `${short.slice(0, 39 - suffix.length)}…${suffix}`;
 }
 
 /** 같은 행사가 여러 번 오면 마지막 것만 남긴다(upsert 한 번에 같은 키가 두 번 있으면 실패한다) */

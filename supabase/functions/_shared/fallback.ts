@@ -4,7 +4,14 @@
 // ---------------------------------------------------------------------------
 // 미션 추천 (앱의 src/utils/pick-seed-missions.ts와 같은 규칙)
 // ---------------------------------------------------------------------------
-type Seed = { id: string; category: string; difficulty: number; minutes: number };
+type Seed = {
+  id: string;
+  category: string;
+  difficulty: number;
+  minutes: number;
+  start_date?: string | null;
+  end_date?: string | null;
+};
 type Profile = { categories: string[]; difficulty: number; daily_minutes: number | null };
 
 function shuffle<T>(items: T[]) {
@@ -18,7 +25,10 @@ function shuffle<T>(items: T[]) {
 
 /** 관심 카테고리 미션을 앞에 두고 각각 섞는다 */
 function rank(pool: Seed[], categories: string[]) {
-  return [...shuffle(pool.filter((m) => categories.includes(m.category))), ...shuffle(pool.filter((m) => !categories.includes(m.category)))];
+  return [
+    ...shuffle(pool.filter((m) => categories.includes(m.category))),
+    ...shuffle(pool.filter((m) => !categories.includes(m.category))),
+  ];
 }
 
 /**
@@ -26,13 +36,26 @@ function rank(pool: Seed[], categories: string[]) {
  * 주간 1개: 난이도 ≥ 프로필+1
  * exclude: '다른 미션 보기'에서 직전 추천을 제외할 id
  */
-export function pickSeeds<T extends Seed>(seeds: T[], profile: Profile, exclude: string[] = []) {
-  const pool = seeds.filter((m) => !exclude.includes(m.id));
+export function pickSeeds<T extends Seed>(
+  seeds: T[],
+  profile: Profile,
+  date: string,
+  exclude: string[] = [],
+) {
+  const pool = seeds.filter(
+    (m) =>
+      !exclude.includes(m.id) &&
+      (!m.start_date || m.start_date <= date) &&
+      (!m.end_date || m.end_date >= date),
+  );
   const maxDifficulty = profile.difficulty + 1;
   const maxMinutes = profile.daily_minutes ?? 5;
   const strict = pool.filter((m) => m.difficulty <= maxDifficulty && m.minutes <= maxMinutes);
   const relaxed = pool.filter((m) => m.difficulty <= maxDifficulty && !strict.includes(m));
-  const daily = [...rank(strict, profile.categories), ...rank(relaxed, profile.categories)].slice(0, 3) as T[];
+  const daily = [...rank(strict, profile.categories), ...rank(relaxed, profile.categories)].slice(
+    0,
+    3,
+  ) as T[];
   const weekly = (rank(
     pool.filter((m) => m.difficulty >= maxDifficulty && !daily.includes(m)),
     profile.categories,

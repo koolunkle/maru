@@ -6,8 +6,9 @@ import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { Spacing } from '@/constants/theme';
-import { useFeed, type FeedPost } from '@/hooks/use-feed';
+import { useFeed } from '@/hooks/use-feed';
 import { useTheme } from '@/hooks/use-theme';
+import type { FeedPost } from '@/lib/feed';
 import { useSession } from '@/providers/session-provider';
 
 import { PostCard } from './post-card';
@@ -17,7 +18,8 @@ export function Feed() {
   const theme = useTheme();
   const { session } = useSession();
   const userId = session?.user.id;
-  const { posts, error, reload, setPosts, hasMore, loadingMore, moreError, loadMore } = useFeed(userId);
+  const { posts, error, reload, setPosts, hasMore, loadingMore, moreError, loadMore } =
+    useFeed(userId);
 
   const firstFocus = useRef(true);
   useFocusEffect(
@@ -63,11 +65,23 @@ export function Feed() {
             <PostCard key={p.id} post={p} userId={userId ?? ''} onChange={update} />
           ))}
           {moreError && (
-            <AppText variant="caption" color="slate" accessibilityRole="alert" style={styles.center}>
+            <AppText
+              variant="caption"
+              color="slate"
+              accessibilityRole="alert"
+              style={styles.center}
+            >
               이전 인증을 불러오지 못했어요. 다시 눌러 볼까요?
             </AppText>
           )}
-          {hasMore && <Button label="이전 인증 더 보기" variant="ghost" onPress={loadMore} loading={loadingMore} />}
+          {hasMore && (
+            <Button
+              label="이전 인증 더 보기"
+              variant="ghost"
+              onPress={loadMore}
+              loading={loadingMore}
+            />
+          )}
         </View>
       )}
     </Screen>

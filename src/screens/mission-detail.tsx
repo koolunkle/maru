@@ -51,13 +51,24 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
     setBusy(true);
     setNotice(null);
     try {
-      const data = await Functions.startMission(missionId, type, (type === 'daily' ? kstEndOfDay() : kstEndOfWeek()).toISOString());
-      if (!data?.id) { setNotice('시작하지 못했어요. 다시 시도해 주세요.'); return; }
+      const data = await Functions.startMission(
+        missionId,
+        type,
+        (type === 'daily' ? kstEndOfDay() : kstEndOfWeek()).toISOString(),
+      );
+      if (!data?.id) {
+        setNotice('시작하지 못했어요. 다시 시도해 주세요.');
+        return;
+      }
       load();
     } catch (e) {
-      setNotice(e instanceof FunctionError && e.code === 'mission_limit'
-        ? (type === 'daily' ? '오늘 미션은 3개까지 함께 할 수 있어요' : '이번 주 미션은 하나씩 해요')
-        : '시작하지 못했어요. 다시 시도해 주세요.');
+      setNotice(
+        e instanceof FunctionError && e.code === 'mission_limit'
+          ? type === 'daily'
+            ? '오늘 미션은 3개까지 함께 할 수 있어요'
+            : '이번 주 미션은 하나씩 해요'
+          : '시작하지 못했어요. 다시 시도해 주세요.',
+      );
     } finally {
       setBusy(false);
     }
@@ -108,7 +119,9 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
         <View style={styles.center}>
           {failed ? (
             <>
-              <AppText color="slate" accessibilityRole="alert">미션을 불러오지 못했어요.</AppText>
+              <AppText color="slate" accessibilityRole="alert">
+                미션을 불러오지 못했어요.
+              </AppText>
               <Button
                 label="다시 불러오기"
                 variant="secondary"
@@ -138,7 +151,8 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
       <Button
         label="인증하기"
         onPress={() =>
-          mine && router.push({ pathname: '/mission/[id]/verify', params: { id: missionId, um: mine.id } })
+          mine &&
+          router.push({ pathname: '/mission/[id]/verify', params: { id: missionId, um: mine.id } })
         }
       />
     ) : (
@@ -156,20 +170,25 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
           )}
           {footer}
         </View>
-      }>
+      }
+    >
       <BackHeader />
 
-      <View
-        style={[styles.hero, { backgroundColor: isDark ? theme.surface : tint }]}>
-        {isDark && <View style={[styles.bar, { backgroundColor: CategoryBar[mission.category] }]} />}
+      <View style={[styles.hero, { backgroundColor: isDark ? theme.surface : tint }]}>
+        {isDark && (
+          <View style={[styles.bar, { backgroundColor: CategoryBar[mission.category] }]} />
+        )}
         <AppText variant="label" color="slate">
-          {CategoryLabel[mission.category]} · {mission.minutes}분 · {type === 'daily' ? '오늘의 미션' : '이번 주 미션'}
+          {CategoryLabel[mission.category]} · {mission.minutes}분 ·{' '}
+          {type === 'daily' ? '오늘의 미션' : '이번 주 미션'}
         </AppText>
         <AppText variant="titleLg">{mission.title}</AppText>
       </View>
 
       <View style={styles.blocks}>
-        <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+        <View
+          style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}
+        >
           <AppText variant="label" color="steel">
             이렇게 인증해요
           </AppText>
@@ -177,7 +196,9 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
         </View>
 
         {mission.event && (
-          <View style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}>
+          <View
+            style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}
+          >
             <AppText variant="label" color="steel">
               행사 정보
             </AppText>
@@ -238,7 +259,10 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
             </AppText>
           ) : (
             detail.relays.map((body, index) => (
-              <View key={index} style={[styles.relayItem, { backgroundColor: theme.surfaceSunken }]}>
+              <View
+                key={index}
+                style={[styles.relayItem, { backgroundColor: theme.surfaceSunken }]}
+              >
                 <AppText variant="bodySm">{body}</AppText>
               </View>
             ))
@@ -248,7 +272,13 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
               <AppText variant="caption" color="steel">
                 내가 남긴 한 줄은 검수를 기다리고 있어요.
               </AppText>
-              <Button label="검수 다시 요청" variant="secondary" size="sm" onPress={retryRelay} loading={busy} />
+              <Button
+                label="검수 다시 요청"
+                variant="secondary"
+                size="sm"
+                onPress={retryRelay}
+                loading={busy}
+              />
             </>
           )}
           {relayNotice && (

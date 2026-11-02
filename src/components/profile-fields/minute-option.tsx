@@ -29,7 +29,8 @@ export function MinuteOption({ label, description, selected, onPress }: MinuteOp
           borderWidth: selected ? 2 : 1,
           padding: selected ? Spacing.lg - 1 : Spacing.lg,
         },
-      ]}>
+      ]}
+    >
       <View style={styles.text}>
         <AppText variant="titleMd">{label}</AppText>
         <AppText variant="bodySm" color="slate">

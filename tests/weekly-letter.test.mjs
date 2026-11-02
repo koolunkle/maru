@@ -1,31 +1,24 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { loadSource } from './helpers/load-source.mjs';
 
-async function loadModule(path, require = () => { throw new Error('Unexpected dependency'); }) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', outputText)(require, exports);
-  return exports;
-}
-
-const date = await loadModule('../src/utils/date.ts');
-const letter = await loadModule('../src/utils/weekly-letter.ts', (name) => {
-  assert.equal(name, './date', '시연용 리포트는 날짜 외에 API·개인 기록 의존성이 없다');
-  return date;
-});
-const kst = await loadModule('../supabase/functions/_shared/kst.ts');
-const privacy = await loadModule('../supabase/functions/_shared/moderation-privacy.ts');
-const server = await loadModule('../supabase/functions/_shared/weekly-letter.ts', (name) => {
-  assert.equal(name, './kst.ts');
-  return kst;
+const date = await loadSource('../src/utils/date.ts');
+const letter = await loadSource('../src/utils/weekly-letter.ts', { './date': date });
+const kst = await loadSource('../supabase/functions/_shared/kst.ts');
+const privacy = await loadSource('../supabase/functions/_shared/moderation-privacy.ts');
+const server = await loadSource('../supabase/functions/_shared/weekly-letter.ts', {
+  './kst.ts': kst,
 });
 
 test('리포트에 보내는 기록만 가리고 원문과 기분은 유지한다', () => {
-  const notes = [{ text: '010-1234-5678', mood: 3 }, { text: null, mood: 2 }];
-  assert.deepEqual(privacy.filterNoteTexts(notes), [{ text: '[연락처]', mood: 3 }, { text: null, mood: 2 }]);
+  const notes = [
+    { text: '010-1234-5678', mood: 3 },
+    { text: null, mood: 2 },
+  ];
+  assert.deepEqual(privacy.filterNoteTexts(notes), [
+    { text: '[연락처]', mood: 3 },
+    { text: null, mood: 2 },
+  ]);
   assert.equal(notes[0].text, '010-1234-5678');
 });
 
@@ -53,18 +46,32 @@ test('KST 일요일에서 월요일로 넘어갈 때 주차가 바뀐다', () =>
   assert.equal(date.kstWeekStart('2026-11-01'), '2026-10-26');
 });
 
-test('시연용 주차는 이번 주와 지난 3주이며 연도 경계를 넘을 수 있다', () => {
+test('고를 수 있는 주차는 이번 주와 지난 3주이며 연도 경계를 넘을 수 있다', () => {
   assert.deepEqual(letter.letterWeeks('2027-01-01'), [
-    '2026-12-28', '2026-12-21', '2026-12-14', '2026-12-07',
+    '2026-12-28',
+    '2026-12-21',
+    '2026-12-14',
+    '2026-12-07',
   ]);
   assert.deepEqual(letter.letterWeeks('2026-10-27'), [
-    '2026-10-26', '2026-10-19', '2026-10-12', '2026-10-05',
+    '2026-10-26',
+    '2026-10-19',
+    '2026-10-12',
+    '2026-10-05',
   ]);
 });
 
-test('잘못된 날짜·월요일 아닌 날짜·미래·범위 밖 주차는 시연 목록에 없다', () => {
+test('잘못된 날짜·월요일 아닌 날짜·미래·범위 밖 주차는 고를 수 있는 목록에 없다', () => {
   const weeks = letter.letterWeeks('2026-10-27');
-  for (const invalid of ['', 'bad', '2026-02-30', '2026-10-27', '2026-11-02', '2026-09-28', '2026-10-26/extra']) {
+  for (const invalid of [
+    '',
+    'bad',
+    '2026-02-30',
+    '2026-10-27',
+    '2026-11-02',
+    '2026-09-28',
+    '2026-10-26/extra',
+  ]) {
     assert.equal(weeks.includes(invalid), false, invalid);
   }
 });
@@ -74,4 +81,3 @@ test('편지 날짜 범위는 월요일부터 일요일까지이며 윤년과 �
   assert.equal(letter.formatLetterWeek('2026-12-28'), '2026.12.28 – 2027.01.03');
   assert.equal(letter.formatLetterWeek('2024-02-26'), '2024.02.26 – 2024.03.03');
 });
-

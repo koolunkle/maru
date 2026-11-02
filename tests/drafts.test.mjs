@@ -1,17 +1,9 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { loadSource } from './helpers/load-source.mjs';
 
-async function loadModule(path) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', outputText)(() => { throw new Error('Unexpected dependency'); }, exports);
-  return exports;
-}
-
-const drafts = await loadModule('../src/lib/drafts.ts');
+const drafts = await loadSource('../src/lib/drafts.ts');
 
 test('작성 중인 입력은 지울 때까지 키별로 남는다', () => {
   assert.equal(drafts.readDraft('capsule:a'), undefined);

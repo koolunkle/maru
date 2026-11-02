@@ -1,17 +1,19 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { loadSource } from './helpers/load-source.mjs';
 
 const calls = [];
 let result = { data: null, error: null };
-const source = await readFile(new URL('../src/lib/capsule.ts', import.meta.url), 'utf8');
-const code = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } }).outputText;
-const capsule = {};
-new Function('require', 'exports', code)((name) => {
-  assert.equal(name, './supabase');
-  return { supabase: { rpc: async (name, args) => { calls.push({ name, args }); return result; } } };
-}, capsule);
+const capsule = await loadSource('../src/lib/capsule.ts', {
+  './supabase': {
+    supabase: {
+      rpc: async (name, args) => {
+        calls.push({ name, args });
+        return result;
+      },
+    },
+  },
+});
 
 test('목록, 전송, 열기는 서버 함수와 요청 식별자를 사용한다', async () => {
   result = { data: [], error: null };

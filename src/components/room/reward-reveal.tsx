@@ -1,6 +1,15 @@
 import { useEffect } from 'react';
 import { Modal, StyleSheet, View } from 'react-native';
-import Animated, { Easing, FadeIn, useAnimatedStyle, useSharedValue, withDelay, withSequence, withTiming, ZoomIn } from 'react-native-reanimated';
+import Animated, {
+  Easing,
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withTiming,
+  ZoomIn,
+} from 'react-native-reanimated';
 import Svg, { Path, Rect } from 'react-native-svg';
 
 import { AppText } from '@/components/app-text';
@@ -38,7 +47,11 @@ export function RewardReveal({ rewards, streak, onPlace, onClose }: Props) {
 
   const boxStyle = useAnimatedStyle(() => ({ transform: [{ rotate: `${shake.value}deg` }] }));
   const lidStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: 56 * lid.value }, { translateY: -24 * lid.value }, { rotate: `${28 * lid.value}deg` }],
+    transform: [
+      { translateX: 56 * lid.value },
+      { translateY: -24 * lid.value },
+      { rotate: `${28 * lid.value}deg` },
+    ],
     opacity: 1 - lid.value,
   }));
   const artStyle = useAnimatedStyle(() => ({
@@ -47,12 +60,20 @@ export function RewardReveal({ rewards, streak, onPlace, onClose }: Props) {
   }));
 
   if (!first) return null;
-  const state = { plantStage: plantStageOf(streak ?? 0), lampOn: false, clock: kstClock(), posterTitle: null };
+  const state = {
+    plantStage: plantStageOf(streak ?? 0),
+    lampOn: false,
+    clock: kstClock(),
+    posterTitle: null,
+  };
 
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <Animated.View entering={ZoomIn.springify().damping(14)} style={[styles.card, { backgroundColor: theme.surface }]}>
+        <Animated.View
+          entering={ZoomIn.springify().damping(14)}
+          style={[styles.card, { backgroundColor: theme.surface }]}
+        >
           <View style={styles.stage} aria-hidden>
             <Animated.View style={[styles.art, artStyle]}>
               <FurnitureArt id={first.id} height={72} colors={colors} state={state} />
@@ -73,7 +94,9 @@ export function RewardReveal({ rewards, streak, onPlace, onClose }: Props) {
           </View>
 
           <Animated.View entering={FadeIn.delay(600)} style={styles.text}>
-            <AppText variant="label" color="accentInk">새 가구가 도착했어요</AppText>
+            <AppText variant="label" color="accentInk">
+              새 가구가 도착했어요
+            </AppText>
             <AppText variant="titleLg" accessibilityRole="header" style={styles.center}>
               {rewards.map((r) => r.name).join(', ')}
             </AppText>

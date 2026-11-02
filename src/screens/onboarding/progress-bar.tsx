@@ -10,11 +10,15 @@ export function ProgressBar({ total, current }: { total: number; current: number
     <View
       style={styles.row}
       accessibilityRole="progressbar"
-      accessibilityValue={{ min: 1, max: total, now: current + 1 }}>
+      accessibilityValue={{ min: 1, max: total, now: current + 1 }}
+    >
       {Array.from({ length: total }, (_, i) => (
         <View
           key={i}
-          style={[styles.segment, { backgroundColor: i <= current ? theme.primary : theme.hairline }]}
+          style={[
+            styles.segment,
+            { backgroundColor: i <= current ? theme.primary : theme.hairline },
+          ]}
         />
       ))}
     </View>

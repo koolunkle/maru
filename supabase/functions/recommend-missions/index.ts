@@ -13,7 +13,15 @@ import { handler, HttpError, json } from '../_shared/http.ts';
 import { addDays, kstDate } from '../_shared/kst.ts';
 import { eventMissionTitle, weeklyEventWindow } from '../_shared/seoul-events.ts';
 
-const Categories = ['walk', 'food', 'culture', 'growth', 'neighborhood', 'rhythm', 'people'] as const;
+const Categories = [
+  'walk',
+  'food',
+  'culture',
+  'growth',
+  'neighborhood',
+  'rhythm',
+  'people',
+] as const;
 
 const MissionSchema = z.object({
   title: z.string(),
@@ -47,8 +55,6 @@ const System = `당신은 서울에 사는 청년에게 하루 5분짜리 작은
 - 사진 한 장으로 인증할 수 있는 미션만 낸다. 다른 사람의 얼굴이 찍혀야 하는 미션은 내지 않는다.
 ${CopyRules}`;
 
-type MissionRow = { id: string; source: string; title: string; category: string; difficulty: number; minutes: number };
-
 function sanitize(m: AiMission, maxMinutes: number | null): AiMission | null {
   const text = `${m.title} ${m.verify_hint} ${m.reason}`;
   if (hasBannedWord(text) || !m.title.trim() || !m.verify_hint.trim()) return null;
@@ -68,38 +74,56 @@ Deno.serve(
     const input = (await req.json().catch(() => ({}))) as { refresh?: boolean; requestId?: string };
     const { refresh = false } = input;
     const requestId = input.requestId ?? crypto.randomUUID();
-    if (typeof refresh !== 'boolean' || typeof requestId !== 'string' || requestId.length < 1 || requestId.length > 100) {
+    if (
+      typeof refresh !== 'boolean' ||
+      typeof requestId !== 'string' ||
+      requestId.length < 1 ||
+      requestId.length > 100
+    ) {
       throw new HttpError(400, 'invalid_request');
     }
     const today = kstDate();
     const eventWindow = weeklyEventWindow(today);
 
-    const { data: prior, error: priorError } = await admin.from('recommendation_requests')
-      .select('response, rec_date, refresh').eq('user_id', userId).eq('request_id', requestId).maybeSingle();
+    const { data: prior, error: priorError } = await admin
+      .from('recommendation_requests')
+      .select('response, rec_date, refresh')
+      .eq('user_id', userId)
+      .eq('request_id', requestId)
+      .maybeSingle();
     if (priorError) throw priorError;
     if (prior) {
-      if (prior.rec_date !== today || prior.refresh !== refresh) throw new HttpError(409, 'request_body_changed');
-      return json(prior.response);
+      if (prior.rec_date !== today || prior.refresh !== refresh)
+        throw new HttpError(409, 'request_body_changed');
     }
 
-    const { data: existing } = await admin
+    const { data: existing, error: existingError } = await admin
       .from('daily_recommendations')
       .select('daily_mission_ids, weekly_mission_id, refresh_count')
       .eq('user_id', userId)
       .eq('rec_date', today)
       .maybeSingle();
+    if (existingError) throw existingError;
 
-    if (existing && !refresh) {
-      const ids = [...existing.daily_mission_ids, existing.weekly_mission_id].filter(Boolean);
-      const { data } = await admin.from('missions').select('*').in('id', ids);
-      const byId = new Map((data ?? []).map((m: MissionRow) => [m.id, m]));
-      const daily = existing.daily_mission_ids.map((id: string) => byId.get(id)).filter(Boolean);
-      return json({
-        daily,
-        weekly: byId.get(existing.weekly_mission_id) ?? null,
-        source: daily.some((m: MissionRow) => m.source === 'ai') ? 'ai' : 'rule',
+    async function save(dailyIds: string[], weeklyId: string | null, aiMissions: unknown = null) {
+      const { data, error } = await admin.rpc('save_recommendation', {
+        p_user_id: userId,
+        p_date: today,
+        p_refresh: refresh,
+        p_request_id: requestId,
+        p_expected_count: existing?.refresh_count ?? -1,
+        p_daily_ids: dailyIds,
+        p_weekly_id: weeklyId,
+        p_ai_missions: aiMissions,
       });
+      if (error?.message === 'refresh_limit') throw new HttpError(409, 'refresh_limit');
+      if (error?.message === 'request_body_changed')
+        throw new HttpError(409, 'request_body_changed');
+      if (error) throw error;
+      return json(data);
     }
+    // 저장된 추천과 동일 요청도 트랜잭션 안에서 현재 기간을 검사한다.
+    if (prior || (existing && !refresh)) return await save([], null);
     if (existing && existing.refresh_count >= 1) throw new HttpError(409, 'refresh_limit');
 
     const { data: profile } = await admin.from('profiles').select('*').eq('id', userId).single();
@@ -124,18 +148,11 @@ Deno.serve(
         .order('start_date')
         .limit(10),
     ]);
-
-    async function save(dailyIds: string[], weeklyId: string | null, aiMissions: unknown = null) {
-      const { data, error } = await admin.rpc('save_recommendation', {
-        p_user_id: userId, p_date: today, p_refresh: refresh, p_request_id: requestId,
-        p_expected_count: existing?.refresh_count ?? -1, p_daily_ids: dailyIds,
-        p_weekly_id: weeklyId, p_ai_missions: aiMissions,
-      });
-      if (error?.message === 'refresh_limit') throw new HttpError(409, 'refresh_limit');
-      if (error?.message === 'request_body_changed') throw new HttpError(409, 'request_body_changed');
-      if (error) throw error;
-      return json(data);
-    }
+    if (seeds.error) throw seeds.error;
+    // 추천 기간(KST, 양 끝 포함) 밖의 시드는 AI 후보와 규칙 대체 양쪽에서 뺀다
+    const activeSeeds = (seeds.data ?? []).filter(
+      (m) => (!m.start_date || m.start_date <= today) && (!m.end_date || m.end_date >= today),
+    );
 
     const context = {
       user: {
@@ -145,13 +162,15 @@ Deno.serve(
         difficulty: profile.difficulty,
       },
       recent_missions: history.data ?? [],
-      seoul_challenge: (seeds.data ?? []).map(({ seed_no, title, category, difficulty, minutes }: Record<string, unknown>) => ({
-        seed_no,
-        title,
-        category,
-        difficulty,
-        minutes,
-      })),
+      seoul_challenge: activeSeeds.map(
+        ({ seed_no, title, category, difficulty, minutes }: Record<string, unknown>) => ({
+          seed_no,
+          title,
+          category,
+          difficulty,
+          minutes,
+        }),
+      ),
       events: events.data ?? [],
       today,
     };
@@ -172,17 +191,21 @@ Deno.serve(
 
     // AI 결과가 없거나 규칙을 어기면 시드 규칙으로 대체
     if (daily.length < 3 || !weekly) {
-      const exclude = existing ? [...existing.daily_mission_ids, existing.weekly_mission_id].filter(Boolean) : [];
-      let picked = pickSeeds(seeds.data ?? [], profile, exclude);
+      const exclude = existing
+        ? [...existing.daily_mission_ids, existing.weekly_mission_id].filter(Boolean)
+        : [];
+      let picked = pickSeeds(activeSeeds, profile, today, exclude);
       // 직전 추천을 빼고 3개가 안 되면 전체에서 다시 고른다
-      if (picked.daily.length < 3) picked = pickSeeds(seeds.data ?? [], profile);
+      if (picked.daily.length < 3) picked = pickSeeds(activeSeeds, profile, today);
       return await save(
         picked.daily.map((m) => m.id),
         picked.weekly?.id ?? null,
       );
     }
 
-    const eventsById = new Map((events.data ?? []).map((e: { id: string; title: string }) => [e.id, e]));
+    const eventsById = new Map(
+      (events.data ?? []).map((e: { id: string; title: string }) => [e.id, e]),
+    );
     const rows = [...daily, weekly].map((m, i) => {
       // 행사 연계는 주간 미션(마지막)만 허용한다. 난이도 4 = 행사 참여(spec mission-recommendation)
       const event = i === daily.length && m.event_id ? eventsById.get(m.event_id) : undefined;
