@@ -47,6 +47,13 @@ export function MailboxCard({ userId }: { userId: string }) {
   const requestId = useRef(createRequestId());
   const loadVersion = useRef(0);
   const opened = useRef(false);
+  const sentChecking = sent === null && !sentError;
+  const wroteToday = !!sent?.some(
+    (message) =>
+      message.status !== 'rejected' &&
+      message.status !== 'crisis' &&
+      kstDate(new Date(message.created_at)) === kstDate(),
+  );
   const unread = received.filter((message) => !message.read_at).length;
   const accepted = submitted?.status === 'approved' || submitted?.status === 'published';
   const resultTitle = accepted
@@ -79,6 +86,7 @@ export function MailboxCard({ userId }: { userId: string }) {
     const version = ++loadVersion.current;
     setLoading(true);
     setLoadError(false);
+    void loadSent();
     try {
       const inbox = await getReceivedMailboxMessages();
       if (version !== loadVersion.current) return;
@@ -143,6 +151,10 @@ export function MailboxCard({ userId }: { userId: string }) {
   async function send(retry?: MailboxMessage) {
     const text = retry?.body ?? body;
     if (sending.current || !text.trim() || text.trim().length > MailboxMaxLength) return;
+    if (!retry && wroteToday) {
+      setNotice('오늘은 이미 한 줄을 보냈어요. 내일 또 보내볼까요?');
+      return;
+    }
     sending.current = true;
     setBusy(true);
     setNotice(null);
@@ -323,7 +335,7 @@ export function MailboxCard({ userId }: { userId: string }) {
               </AppText>
               <Button
                 label="보내기"
-                disabled={!body.trim() || !userId}
+                disabled={!body.trim() || !userId || wroteToday}
                 loading={busy}
                 onPress={() => void send()}
                 style={styles.button}
@@ -433,18 +445,23 @@ export function MailboxCard({ userId }: { userId: string }) {
                   );
                 })
               )}
-              <Button
-                label="한 줄 쓰기"
-                disabled={busy}
-                onPress={() => show('compose')}
-                style={styles.button}
-              />
-              <Button
-                label="보낸 한 줄"
-                variant="secondary"
-                disabled={busy}
-                onPress={() => show('sent')}
-              />
+              {!sentChecking &&
+                (wroteToday ? (
+                  <Button
+                    label="보낸 한 줄"
+                    variant="secondary"
+                    disabled={busy}
+                    onPress={() => show('sent')}
+                    style={styles.button}
+                  />
+                ) : (
+                  <Button
+                    label="한 줄 쓰기"
+                    disabled={busy}
+                    onPress={() => show('compose')}
+                    style={styles.button}
+                  />
+                ))}
             </>
           )}
         </BottomSheet>

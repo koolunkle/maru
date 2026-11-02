@@ -77,6 +77,19 @@ Deno.serve(
       return json(data);
     }
 
+    // 하루(KST) 한 줄만 보낼 수 있다. 같은 요청의 재시도와 거절·위기 글은 세지 않는다.
+    const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const { data: today, error: todayError } = await admin
+      .from('mailbox_messages')
+      .select('id')
+      .eq('user_id', userId)
+      .neq('request_id', input.requestId)
+      .in('status', ['pending', 'approved', 'published'])
+      .gte('created_at', `${kstToday}T00:00:00+09:00`)
+      .limit(1);
+    if (todayError) throw todayError;
+    if (today && today.length > 0) throw new HttpError(409, 'daily_limit');
+
     // 같은 요청은 한 행만 보관한다. 응답 유실 후 재시도해도 다시 발송하지 않는다.
     const { error: insertError } = await admin.from('mailbox_messages').upsert(
       {
