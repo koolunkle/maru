@@ -1,11 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
-import { z } from 'zod/v4';
+import { z } from 'zod';
+import { compileSource } from './helpers/load-source.mjs';
 
-const source = await readFile(new URL('../supabase/functions/recommend-missions/index.ts', import.meta.url), 'utf8');
-const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
+const run = await compileSource('../supabase/functions/recommend-missions/index.ts');
 
 function setup(prior, existing) {
   let endpoint;
@@ -31,9 +29,7 @@ function setup(prior, existing) {
     '../_shared/kst.ts': { kstDate: () => '2026-11-09' },
     '../_shared/seoul-events.ts': { weeklyEventWindow: () => ({}) },
   };
-  new Function('require', 'exports', 'Deno', outputText)((name) => {
-    assert.ok(name in imports, name); return imports[name];
-  }, {}, { serve(fn) { endpoint = fn; } });
+  run(imports, { Deno: { serve(fn) { endpoint = fn; } } });
   return { endpoint, calls, repaired };
 }
 const request = (refresh) => ({ json: async () => ({ requestId: 'same', refresh }) });

@@ -1,28 +1,22 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
 import { test } from "node:test";
-import ts from "typescript";
+import { compileSource } from "./helpers/load-source.mjs";
 
-const source = await readFile(
-  new URL("../src/lib/admin-missions.ts", import.meta.url),
-  "utf8",
-);
-const { outputText } = ts.transpileModule(source, {
-  compilerOptions: { module: ts.ModuleKind.CommonJS },
-});
+const run = await compileSource("../src/lib/admin-missions.ts");
 function setup(response) {
   const calls = [];
-  const exports = {};
-  new Function("exports", "fetch", "process", outputText)(
-    exports,
-    async (url, options) => {
-      calls.push({ url, options });
-      return response;
-    },
+  const exports = run(
+    {},
     {
-      env: {
-        EXPO_PUBLIC_SUPABASE_URL: "https://example.invalid",
-        EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "public-key",
+      async fetch(url, options) {
+        calls.push({ url, options });
+        return response;
+      },
+      process: {
+        env: {
+          EXPO_PUBLIC_SUPABASE_URL: "https://example.invalid",
+          EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY: "public-key",
+        },
       },
     },
   );

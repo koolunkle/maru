@@ -65,21 +65,23 @@ Deno.serve(
     const { error: judgingError } = await admin.from('user_missions').update({ status: 'judging' }).eq('id', um.id).eq('status', 'in_progress');
     if (judgingError) throw judgingError;
 
-    let judged: z.infer<typeof JudgeSchema> | null = null;
+    // 기준 사진을 하나라도 읽지 못하면 일부만 비교하지 않고 기준 사진 없이 판정한다.
+    // 대체 판정(통과)으로 넘기면 직접 촬영·개인정보 판정까지 건너뛰기 때문이다.
+    let photos: Awaited<ReturnType<typeof loadMissionPhotos>> = [];
     try {
-      const photos = await loadMissionPhotos(um.mission_id);
-      judged = await generateJson({
-        tier: 'main',
-        system: System + (photos.length ? '\n첫 번째 이미지는 제출 사진이고 나머지는 해당 미션의 기준 사진입니다. 기준 사진은 장소 비교에만 사용하세요. 조명·각도가 달라도 같은 장소일 수 있고 불확실하면 기존의 관대한 기준을 따르세요. 직접 촬영 여부와 개인정보는 제출 사진만 판정하세요.' : ''),
-        text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, reference_hints: photos.map((p) => p.hint), user_note: filterModerationText(v.text ?? '').text }),
-        image,
-        referenceImages: photos.map((p) => p.image),
-        schema: JudgeSchema,
-        timeoutMs: 20_000,
-      });
-    } catch {
-      console.error('reference photos unavailable');
+      photos = await loadMissionPhotos(um.mission_id);
+    } catch (e) {
+      console.error('reference photos unavailable', um.mission_id, e);
     }
+    let judged: z.infer<typeof JudgeSchema> | null = await generateJson({
+      tier: 'main',
+      system: System + (photos.length ? '\n첫 번째 이미지는 제출 사진이고 나머지는 해당 미션의 기준 사진입니다. 기준 사진은 장소 비교에만 사용하세요. 조명·각도가 달라도 같은 장소일 수 있고 불확실하면 기존의 관대한 기준을 따르세요. 직접 촬영 여부와 개인정보는 제출 사진만 판정하세요.' : ''),
+      text: JSON.stringify({ mission: um.missions.title, verify_hint: um.missions.verify_hint, reference_hints: photos.map((p) => p.hint), user_note: filterModerationText(v.text ?? '').text }),
+      image,
+      referenceImages: photos.map((p) => p.image),
+      schema: JudgeSchema,
+      timeoutMs: 20_000,
+    });
     let judgedBy: 'ai' | 'rule' = 'ai';
     if (!judged) {
       const { data: config } = await admin.from('app_config').select('value').eq('key', 'verify_fallback').maybeSingle();

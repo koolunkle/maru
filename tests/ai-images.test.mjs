@@ -1,11 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
-import { z } from 'zod/v4';
+import { z } from 'zod';
+import { compileSource } from './helpers/load-source.mjs';
 
-const source = await readFile(new URL('../supabase/functions/_shared/ai.ts', import.meta.url), 'utf8');
-const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
+const run = await compileSource('../supabase/functions/_shared/ai.ts');
 
 for (const provider of ['gemini', 'anthropic']) {
   test(`${provider}: 기존 텍스트·단일 사진과 다중 형식을 모두 지원한다`, async () => {
@@ -22,10 +20,7 @@ for (const provider of ['gemini', 'anthropic']) {
       'npm:@anthropic-ai/sdk@0.135.0/helpers/zod': { zodOutputFormat: () => ({}) },
       'npm:zod@4.6.7': { z },
     };
-    const exports = {};
-    new Function('require', 'exports', 'Deno', outputText)((name) => {
-      assert.ok(name in imports, name); return imports[name];
-    }, exports, { env: { get: (name) => name === 'AI_PROVIDER' ? provider : 'test-key' } });
+    const exports = run(imports, { Deno: { env: { get: (name) => name === 'AI_PROVIDER' ? provider : 'test-key' } } });
     const base = { tier: 'light', system: 'system', text: 'text', schema: z.object({ ok: z.boolean() }), timeoutMs: 50 };
     for (const extra of [{}, { image: 'submission' }, { image: 'submission', referenceImages: [{ data: 'reference', mimeType: 'image/png' }] }]) {
       assert.deepEqual(await exports.generateJson({ ...base, ...extra }), { ok: true });
@@ -46,10 +41,9 @@ test('Gemini가 응답하지 않으면 제한 시간에 null을 반환해 대체
     'npm:@anthropic-ai/sdk@0.135.0/helpers/zod': {},
     'npm:zod@4.6.7': { z },
   };
-  const exports = {};
-  new Function('require', 'exports', 'Deno', outputText)((name) => imports[name], exports, {
+  const exports = run(imports, { Deno: {
     env: { get: (name) => name === 'AI_PROVIDER' ? 'gemini' : name === 'GEMINI_API_KEY' ? 'test-key' : undefined },
-  });
+  } });
   const result = await exports.generateJson({ tier: 'light', system: 'system', text: 'text',
     schema: z.object({ ok: z.boolean() }), timeoutMs: 20 });
   assert.equal(result, null);

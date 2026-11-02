@@ -1,20 +1,9 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { loadSource } from './helpers/load-source.mjs';
 
-async function load(path, dependencies = {}) {
-  const source = await readFile(new URL(path, import.meta.url), 'utf8');
-  const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
-  const exports = {};
-  new Function('require', 'exports', outputText)((name) => {
-    assert.ok(name in dependencies, name);
-    return dependencies[name];
-  }, exports);
-  return exports;
-}
-const app = await load('../src/utils/pick-seed-missions.ts', { '@/constants/domain': { DailyMissionCount: 3 } });
-const server = await load('../supabase/functions/_shared/fallback.ts');
+const app = await loadSource('../src/utils/pick-seed-missions.ts', { '@/constants/domain': { DailyMissionCount: 3 } });
+const server = await loadSource('../supabase/functions/_shared/fallback.ts');
 const profile = { id: 'user', categories: ['walk'], difficulty: 1, daily_minutes: 5 };
 const mission = (id, difficulty, start_date = null, end_date = null) => ({ id, difficulty, start_date, end_date, minutes: 5, category: 'walk' });
 

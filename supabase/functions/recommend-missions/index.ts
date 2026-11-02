@@ -113,8 +113,7 @@ Deno.serve(
         .gte('started_at', `${addDays(today, -14)}T00:00:00+09:00`)
         .order('started_at', { ascending: false })
         .limit(30),
-      admin.from('missions').select('*').eq('source', 'seed')
-        .or(`start_date.is.null,start_date.lte.${today}`).or(`end_date.is.null,end_date.gte.${today}`),
+      admin.from('missions').select('*').eq('source', 'seed'),
       // 행사 미션은 주간 미션(기한: 이번 주 일요일)으로만 낸다. 곧 끝나는 행사는 빼고 이번 주 안에 갈 수 있는 행사만 넘긴다(#21)
       admin
         .from('events')
@@ -125,6 +124,11 @@ Deno.serve(
         .order('start_date')
         .limit(10),
     ]);
+    if (seeds.error) throw seeds.error;
+    // 추천 기간(KST, 양 끝 포함) 밖의 시드는 AI 후보와 규칙 대체 양쪽에서 뺀다
+    const activeSeeds = (seeds.data ?? []).filter(
+      (m) => (!m.start_date || m.start_date <= today) && (!m.end_date || m.end_date >= today),
+    );
 
     const context = {
       user: {
@@ -134,7 +138,7 @@ Deno.serve(
         difficulty: profile.difficulty,
       },
       recent_missions: history.data ?? [],
-      seoul_challenge: (seeds.data ?? []).map(({ seed_no, title, category, difficulty, minutes }: Record<string, unknown>) => ({
+      seoul_challenge: activeSeeds.map(({ seed_no, title, category, difficulty, minutes }: Record<string, unknown>) => ({
         seed_no,
         title,
         category,
@@ -162,9 +166,9 @@ Deno.serve(
     // AI 결과가 없거나 규칙을 어기면 시드 규칙으로 대체
     if (daily.length < 3 || !weekly) {
       const exclude = existing ? [...existing.daily_mission_ids, existing.weekly_mission_id].filter(Boolean) : [];
-      let picked = pickSeeds(seeds.data ?? [], profile, today, exclude);
+      let picked = pickSeeds(activeSeeds, profile, today, exclude);
       // 직전 추천을 빼고 3개가 안 되면 전체에서 다시 고른다
-      if (picked.daily.length < 3) picked = pickSeeds(seeds.data ?? [], profile, today);
+      if (picked.daily.length < 3) picked = pickSeeds(activeSeeds, profile, today);
       return await save(
         picked.daily.map((m) => m.id),
         picked.weekly?.id ?? null,

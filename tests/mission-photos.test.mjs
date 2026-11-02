@@ -1,10 +1,8 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
 import { test } from 'node:test';
-import ts from 'typescript';
+import { compileSource } from './helpers/load-source.mjs';
 
-const source = await readFile(new URL('../supabase/functions/_shared/mission-photos.ts', import.meta.url), 'utf8');
-const { outputText } = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS } });
+const run = await compileSource('../supabase/functions/_shared/mission-photos.ts');
 const jpeg = new Blob([new Uint8Array([255, 216, 255, 1])]);
 const png = new Blob([new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])]);
 
@@ -15,7 +13,6 @@ function setup(rows, files = {}, stall = false) {
     order() { return query; }, limit(n) { assert.equal(n, 5); return query; },
     abortSignal() { return Promise.resolve({ data: rows, error: null }); },
   };
-  const exports = {};
   const imports = {
     './clients.ts': { admin: {
       from(table) { assert.equal(table, 'mission_photos'); return query; },
@@ -30,7 +27,7 @@ function setup(rows, files = {}, stall = false) {
     } },
     'jsr:@std/encoding@1/base64': { encodeBase64: (bytes) => Buffer.from(bytes).toString('base64') },
   };
-  new Function('require', 'exports', outputText)((name) => imports[name], exports);
+  const exports = run(imports);
   return { load: () => exports.loadMissionPhotos('target'), downloads };
 }
 test('기준 사진이 없으면 저장소를 읽지 않는다', async () => {

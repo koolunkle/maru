@@ -74,16 +74,14 @@ test('제출 사진과 해당 미션의 기준 사진·원본 힌트를 전달�
   assert.match(aiRequest.system, /개인정보는 제출 사진만/);
 });
 
-test('기준 사진 오류는 AI 부분 비교 없이 재시도를 안내한다', async () => {
-  reset(); photoError = new Error('download');
-  await assert.rejects(endpoint(req()), (e) => e.status === 503);
-  assert.equal(aiCalls, 0);
-  assert.equal(rpcCalls.length, 0);
-});
-
-test('기준 사진 오류도 기존 통과 대체 설정과 원자적 보상 경로를 따른다', async () => {
-  reset(); photoError = new Error('download'); fallback = 'pass';
-  await endpoint(req());
-  assert.equal(aiCalls, 0);
-  assert.equal(rpcCalls[0].args.p_judged_by, 'rule');
+test('기준 사진을 읽지 못하면 일부만 비교하지 않고 기준 사진 없이 AI로 판정한다', async () => {
+  for (const setting of ['retry_later', 'pass']) {
+    reset(); photoError = new Error('download'); fallback = setting;
+    assert.deepEqual(await endpoint(req()), { result: 'pass' });
+    assert.equal(aiCalls, 1);
+    assert.deepEqual(aiRequest.referenceImages, []);
+    assert.deepEqual(JSON.parse(aiRequest.text).reference_hints, []);
+    assert.doesNotMatch(aiRequest.system, /기준 사진입니다/);
+    assert.equal(rpcCalls[0].args.p_judged_by, 'ai');
+  }
 });
