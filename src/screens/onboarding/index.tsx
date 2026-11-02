@@ -3,7 +3,12 @@ import { StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { Button } from '@/components/button';
-import { CategoryPicker, DistrictPicker, MinutePicker, type Category } from '@/components/profile-fields';
+import {
+  CategoryPicker,
+  DistrictPicker,
+  MinutePicker,
+  type Category,
+} from '@/components/profile-fields';
 import { Screen } from '@/components/screen';
 import { MaxCategories } from '@/constants/domain';
 import { Spacing } from '@/constants/theme';
@@ -56,14 +61,25 @@ export function Onboarding() {
       footer={
         <View style={styles.footer}>
           {failed && (
-            <AppText variant="caption" color="slate" accessibilityRole="alert" style={styles.center}>
+            <AppText
+              variant="caption"
+              color="slate"
+              accessibilityRole="alert"
+              style={styles.center}
+            >
               저장하지 못했어요. 다시 시도해 주세요.
             </AppText>
           )}
-          <Button label={isLast ? '시작하기' : '다음'} onPress={next} disabled={!canNext} loading={saving} />
+          <Button
+            label={isLast ? '시작하기' : '다음'}
+            onPress={next}
+            disabled={!canNext}
+            loading={saving}
+          />
           {step > 0 && <Button label="이전" variant="ghost" onPress={() => setStep(step - 1)} />}
         </View>
-      }>
+      }
+    >
       <ProgressBar total={Steps.length} current={step} />
 
       <View style={styles.heading}>

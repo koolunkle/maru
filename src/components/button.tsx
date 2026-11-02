@@ -38,7 +38,11 @@ export function Button({
         styles.base,
         size === 'sm' && styles.sm,
         variant === 'primary' && {
-          backgroundColor: disabled ? theme.hairline : hovered ? theme.primaryPressed : theme.primary,
+          backgroundColor: disabled
+            ? theme.hairline
+            : hovered
+              ? theme.primaryPressed
+              : theme.primary,
         },
         variant === 'secondary' && {
           backgroundColor: theme.surface,
@@ -47,15 +51,23 @@ export function Button({
         },
         variant === 'ghost' && styles.ghost,
         style,
-      ]}>
+      ]}
+    >
       {loading ? (
         <ActivityIndicator color={variant === 'primary' ? theme.onPrimary : theme.ink} />
       ) : (
         <AppText
           variant={variant === 'ghost' ? 'bodySm' : 'button'}
           color={
-            variant === 'primary' ? (disabled ? 'muted' : 'onPrimary') : variant === 'ghost' ? 'slate' : 'ink'
-          }>
+            variant === 'primary'
+              ? disabled
+                ? 'muted'
+                : 'onPrimary'
+              : variant === 'ghost'
+                ? 'slate'
+                : 'ink'
+          }
+        >
           {label}
         </AppText>
       )}

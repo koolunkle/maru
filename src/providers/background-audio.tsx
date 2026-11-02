@@ -17,11 +17,23 @@ export function BackgroundAudioProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    AsyncStorage.getItem(volumeKey).then((saved) => {
-      const value = Number(saved);
-      if (active && saved !== null && saved.trim() !== '' && Number.isFinite(value) && value >= 0 && value <= 1) setVolume(value);
-    }).catch(() => {});
-    return () => { active = false; };
+    AsyncStorage.getItem(volumeKey)
+      .then((saved) => {
+        const value = Number(saved);
+        if (
+          active &&
+          saved !== null &&
+          saved.trim() !== '' &&
+          Number.isFinite(value) &&
+          value >= 0 &&
+          value <= 1
+        )
+          setVolume(value);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -32,15 +44,17 @@ export function BackgroundAudioProvider({ children }: { children: ReactNode }) {
   }, [player, volume]);
 
   return (
-    <BackgroundAudioContext.Provider value={{
-      playing,
-      volume,
-      toggle: (enabled) => enabled ? player.play() : player.pause(),
-      setVolume: (value) => {
-        setVolume(value);
-        AsyncStorage.setItem(volumeKey, String(value)).catch(() => {});
-      },
-    }}>
+    <BackgroundAudioContext.Provider
+      value={{
+        playing,
+        volume,
+        toggle: (enabled) => (enabled ? player.play() : player.pause()),
+        setVolume: (value) => {
+          setVolume(value);
+          AsyncStorage.setItem(volumeKey, String(value)).catch(() => {});
+        },
+      }}
+    >
       {children}
     </BackgroundAudioContext.Provider>
   );

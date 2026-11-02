@@ -72,7 +72,8 @@ test('기분과 한 줄은 계정·날짜를 서버에 전달해 원자적으로
   ]);
 });
 test('기분 범위·계정·60자 제한을 지키고 한 줄은 생략할 수 있다', async () => {
-  for (const mood of [0, 6, 1.5, NaN]) await assert.rejects(daily.saveDailyNote(userId, today, mood, ''));
+  for (const mood of [0, 6, 1.5, NaN])
+    await assert.rejects(daily.saveDailyNote(userId, today, mood, ''));
   await assert.rejects(daily.saveDailyNote('', today, 1, ''));
   await assert.rejects(daily.saveDailyNote(userId, today, 1, '가'.repeat(61)));
   assert.equal(operations.length, 0);

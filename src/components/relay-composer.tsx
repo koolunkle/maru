@@ -14,7 +14,8 @@ const MaxRelay = 60;
 
 function relayStatus(relay: Relay) {
   if (relay.status === 'pending') return '검수를 기다리고 있어요. 아직 공개되지 않았어요.';
-  if (relay.status === 'rejected' || relay.status === 'crisis') return '이 한 줄은 공개되지 않았어요.';
+  if (relay.status === 'rejected' || relay.status === 'crisis')
+    return '이 한 줄은 공개되지 않았어요.';
   if (relay.status === 'published') return '다음 사람에게 한 줄이 보이고 있어요.';
   const minutes = Math.ceil((Date.parse(relay.publish_at) - Date.now()) / 60_000);
   if (minutes <= 0) return '곧 다음 사람에게 보여요.';
@@ -46,7 +47,9 @@ export function useRelayComposer(missionId: string, userId: string | undefined) 
         setRelay(saved);
       }
       if (saved.status === 'pending') {
-        const moderated = await Functions.moderateRelay(saved.id).catch(() => ({ status: 'pending' as const }));
+        const moderated = await Functions.moderateRelay(saved.id).catch(() => ({
+          status: 'pending' as const,
+        }));
         setRelay({ ...saved, status: moderated.status });
       }
     } catch {
@@ -94,7 +97,15 @@ export function RelayComposer({ body, edit, relay, busy }: RelayComposerState) {
             editable={!busy}
             placeholder="오늘도 작은 한 걸음을 응원해요"
             placeholderTextColor={theme.muted}
-            style={[styles.input, Typography.bodyMd, { color: theme.ink, backgroundColor: theme.surface, borderColor: theme.hairlineStrong }]}
+            style={[
+              styles.input,
+              Typography.bodyMd,
+              {
+                color: theme.ink,
+                backgroundColor: theme.surface,
+                borderColor: theme.hairlineStrong,
+              },
+            ]}
           />
           <AppText variant="caption" color="steel" style={styles.counter} tabular>
             {body.length}/{MaxRelay}
@@ -117,8 +128,17 @@ export function RelayActions({ body, relay, busy, notice, send }: RelayComposerS
           {notice}
         </AppText>
       )}
-      {relay?.status === 'pending' && <Button label="검수 다시 요청" variant="secondary" onPress={send} loading={busy} />}
-      {!relay && <Button label="건너뛰기" variant="ghost" onPress={() => router.dismissTo('/')} disabled={busy} />}
+      {relay?.status === 'pending' && (
+        <Button label="검수 다시 요청" variant="secondary" onPress={send} loading={busy} />
+      )}
+      {!relay && (
+        <Button
+          label="건너뛰기"
+          variant="ghost"
+          onPress={() => router.dismissTo('/')}
+          disabled={busy}
+        />
+      )}
       {relay ? (
         <Button label="홈으로" onPress={() => router.dismissTo('/')} disabled={busy} />
       ) : (

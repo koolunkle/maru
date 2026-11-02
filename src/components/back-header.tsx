@@ -16,7 +16,8 @@ export function BackHeader({ title }: { title?: string }) {
         accessibilityRole="button"
         accessibilityLabel="뒤로"
         onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-        style={styles.back}>
+        style={styles.back}
+      >
         <Feather aria-hidden name="chevron-left" size={24} color={theme.ink} />
       </PressableScale>
       {title && <AppText variant="titleLg">{title}</AppText>}

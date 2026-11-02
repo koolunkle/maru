@@ -1,0 +1,26 @@
+# 생성되거나 내려받는 파일
+node_modules/
+dist/
+.expo/
+package-lock.json
+src/types/database.ts
+supabase/seed.sql
+data/
+
+# 적용된 마이그레이션은 고치지 않는다
+supabase/migrations/
+
+# 문서·명세는 표 정렬만 바뀌어 차이가 커지므로 포맷하지 않는다
+*.md
+openspec/
+.claude/
+
+# #83(feat/integrate-mission-photos)이 고치는 파일. 충돌을 피하려고 잠시 뺀다.
+# #83이 main에 합쳐진 뒤 이 목록을 지우고 `npm run format`을 한 번 더 실행한다.
+src/screens/home.tsx
+src/utils/pick-seed-missions.ts
+supabase/functions/_shared/ai.ts
+supabase/functions/_shared/fallback.ts
+supabase/functions/recommend-missions/index.ts
+supabase/functions/verify-mission/index.ts
+tests/verify-atomic.test.mjs

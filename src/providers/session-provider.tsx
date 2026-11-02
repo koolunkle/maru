@@ -24,7 +24,11 @@ type SessionContextValue = {
 const SessionContext = createContext<SessionContextValue | null>(null);
 
 async function fetchProfile(userId: string) {
-  const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -109,7 +113,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 
   return (
     <SessionContext
-      value={{ isReady, session, profile, signInAnonymously, updateProfile, refreshProfile }}>
+      value={{ isReady, session, profile, signInAnonymously, updateProfile, refreshProfile }}
+    >
       {children}
     </SessionContext>
   );

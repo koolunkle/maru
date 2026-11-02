@@ -16,7 +16,8 @@ export function HelpCard({ subject = '이 댓글' }: { subject?: string }) {
         <AppText variant="titleMd">이야기를 들어줄 곳이 있어요</AppText>
       </View>
       <AppText variant="bodySm" color="slate">
-        외로움안녕120은 누구나 편하게 전화해 이야기할 수 있는 서울시 창구예요. {subject}은 공개되지 않았어요.
+        외로움안녕120은 누구나 편하게 전화해 이야기할 수 있는 서울시 창구예요. {subject}은 공개되지
+        않았어요.
       </AppText>
       <Button label="외로움안녕120 전화하기" onPress={() => Linking.openURL('tel:120')} />
     </View>

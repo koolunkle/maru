@@ -31,14 +31,27 @@ export function Collection({ furniture, owned, colors, state, progress }: Props)
   return (
     <View>
       <View style={styles.head}>
-        <AppText variant="titleMd" accessibilityRole="header">가구 도감</AppText>
-        <AppText variant="bodySm" color="slate" tabular>{have} / {furniture.length}</AppText>
+        <AppText variant="titleMd" accessibilityRole="header">
+          가구 도감
+        </AppText>
+        <AppText variant="bodySm" color="slate" tabular>
+          {have} / {furniture.length}
+        </AppText>
       </View>
       <View
         style={[styles.track, { backgroundColor: theme.surfaceSunken }]}
         accessibilityRole="progressbar"
-        accessibilityLabel={`가구 ${furniture.length}개 중 ${have}개 모음`}>
-        <View style={[styles.fill, { backgroundColor: theme.accent, width: `${furniture.length ? (have / furniture.length) * 100 : 0}%` }]} />
+        accessibilityLabel={`가구 ${furniture.length}개 중 ${have}개 모음`}
+      >
+        <View
+          style={[
+            styles.fill,
+            {
+              backgroundColor: theme.accent,
+              width: `${furniture.length ? (have / furniture.length) * 100 : 0}%`,
+            },
+          ]}
+        />
       </View>
 
       <View style={styles.grid}>
@@ -48,13 +61,24 @@ export function Collection({ furniture, owned, colors, state, progress }: Props)
             ? mine.slot
               ? '방에 있어요'
               : `${dateLabel(mine.acquired_at)}에 받았어요`
-            : remainingText(f.unlock_rule, progress) ?? unlockText(f.unlock_rule);
+            : (remainingText(f.unlock_rule, progress) ?? unlockText(f.unlock_rule));
           return (
             <View
               key={f.id}
               accessible
-              accessibilityLabel={mine ? `${f.name}, ${status}` : `${f.name}, 아직 없어요. ${unlockText(f.unlock_rule)}. ${status}`}
-              style={[styles.card, { backgroundColor: mine ? theme.surface : theme.surfaceSunken, borderColor: theme.hairline }]}>
+              accessibilityLabel={
+                mine
+                  ? `${f.name}, ${status}`
+                  : `${f.name}, 아직 없어요. ${unlockText(f.unlock_rule)}. ${status}`
+              }
+              style={[
+                styles.card,
+                {
+                  backgroundColor: mine ? theme.surface : theme.surfaceSunken,
+                  borderColor: theme.hairline,
+                },
+              ]}
+            >
               <View style={styles.art}>
                 <FurnitureArt id={f.id} height={44} colors={colors} state={state} locked={!mine} />
               </View>
@@ -66,7 +90,12 @@ export function Collection({ furniture, owned, colors, state, progress }: Props)
                   {unlockText(f.unlock_rule)}
                 </AppText>
               )}
-              <AppText variant="label" color={mine ? (mine.slot ? 'primary' : 'slate') : 'accentInk'} numberOfLines={2} style={styles.center}>
+              <AppText
+                variant="label"
+                color={mine ? (mine.slot ? 'primary' : 'slate') : 'accentInk'}
+                numberOfLines={2}
+                style={styles.center}
+              >
                 {status}
               </AppText>
             </View>
