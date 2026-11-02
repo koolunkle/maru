@@ -94,6 +94,7 @@ OpenSpec CLI는 개발 의존성으로 들어 있다(`npm run spec -- <명령>`)
 - `develop`으로 보낼 작업은 최신 `develop`에서 브랜치를 만들고, PR의 base를 `develop`으로 연다.
 - main에 새 PR이 합쳐지면 `develop`에도 main을 합쳐 따라오게 한다(`git switch develop && git merge origin/main`, PR 또는 관리자).
 - `develop` → main은 PR로 올리고 **"Create a merge commit"으로 합친다.** squash로 합치면 `develop`과 main의 이력이 어긋나 다음에 충돌이 난다. squash를 썼다면 합친 직후 `develop`을 main으로 다시 맞춘다.
+- `develop`은 GitHub 보호 규칙으로 삭제·강제 push를 막아 둔다. 저장소가 머지한 브랜치를 자동으로 지우게 되어 있어, 보호하지 않으면 develop → main을 합칠 때 `develop`도 지워진다. 보호 규칙을 풀지 않는다.
 - `develop`에서는 운영에 배포하지 않는다(3.4). 백엔드가 운영 하나뿐이라 `develop`을 따로 시험할 서버 환경은 없다. 서버를 바꾸는 작업은 미리보기 웹과 테스트로 확인하고, 운영 반영은 main에 들어간 뒤에 한다.
 
 ### 3.4 운영 반영 규칙
