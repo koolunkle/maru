@@ -25,8 +25,7 @@ import {
 import { formatDateRange, kstDate } from '@/utils/date';
 import { createRequestId } from '@/utils/request-id';
 
-const DeliveryNotice =
-  '검수를 거친 뒤 다른 사람에게 전달돼요. 이름이나 연락처는 함께 보내지 않아요.';
+const DeliveryNotice = '검수를 거친 뒤 다른 사람에게 전달돼요.';
 
 const DailyLimitNotice = '오늘은 이미 한 줄을 보냈어요. 내일 또 보내볼까요?';
 
@@ -342,7 +341,7 @@ export function MailboxCard({ userId }: { userId: string }) {
                 {body.length}/{MailboxMaxLength}
               </AppText>
               <AppText variant="caption" color="steel">
-                {DeliveryNotice} 연락처나 만남 제안은 적지 않아요.
+                {DeliveryNotice}
               </AppText>
               <Button
                 label="보내기"
