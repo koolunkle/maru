@@ -86,13 +86,6 @@ export function Letter({ week }: { week: string }) {
               style={[styles.card, { backgroundColor: theme.surface, borderColor: theme.hairline }]}
             >
               <AppText variant="titleMd">한 주를 돌아볼까요?</AppText>
-              <AppText>
-                편지를 만들 때 이 주의 기분과 한 줄 원문, 완료한 미션이 Google Gemini에 전달돼요.
-              </AppText>
-              <AppText variant="caption" color="steel">
-                전달된 내용은 Google이 서비스를 개선하는 데 쓸 수 있고, 이 과정에서 Google 검토자가
-                읽을 수도 있어요.
-              </AppText>
               <AppText variant="caption" color="steel">
                 기록과 편지는 자동 삭제되지 않아요. 원본을 삭제해도 이미 만든 편지에 내용이 남을 수
                 있어요.
