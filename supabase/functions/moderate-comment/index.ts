@@ -29,19 +29,19 @@ Deno.serve(
     if (!c || c.user_id !== userId) throw new HttpError(404, 'not_found');
     if (c.status !== 'pending') return json({ status: c.status, judged_by: null });
 
-    const status = await moderate(c.body);
+    const result = await moderate(c.body);
     // 검수 실패 시 pending 유지 → 공개되지 않는다
-    if (!status) return json({ status: 'pending', judged_by: null });
+    if (!result) return json({ status: 'pending', judged_by: null });
 
     const { data: updated, error: updateError } = await admin
       .from(table)
-      .update({ status })
+      .update({ status: result.status })
       .eq('id', c.id)
       .eq('status', 'pending')
       .select('status')
       .maybeSingle();
     if (updateError) throw updateError;
-    if (updated) return json({ status: updated.status, judged_by: 'ai' });
+    if (updated) return json({ status: updated.status, judged_by: result.judgedBy });
     const { data: current, error: currentError } = await admin
       .from(table)
       .select('status')
