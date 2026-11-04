@@ -110,9 +110,6 @@ export function RelayComposer({ body, edit, relay, busy }: RelayComposerState) {
           <AppText variant="caption" color="steel" style={styles.counter} tabular>
             {body.length}/{MaxRelay}
           </AppText>
-          <AppText variant="caption" color="steel">
-            연락처나 만남 제안은 적지 않아요.
-          </AppText>
         </>
       )}
     </View>
