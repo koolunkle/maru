@@ -20,6 +20,8 @@ import {
   type AdminPhoto,
 } from '@/lib/admin-missions';
 
+type NoticeArea = 'top' | 'mission' | 'photo';
+
 const Blank = {
   title: '',
   category: 'walk' as AdminMission['category'],
@@ -58,7 +60,8 @@ export function Admin() {
   const [authenticated, setAuthenticated] = useState(false);
   const [busy, setBusy] = useState(false);
   const working = useRef(false);
-  const [notice, setNotice] = useState<string | null>(null);
+  // 안내는 요청을 보낸 영역 옆에 보여 준다. 화면이 길어 맨 위에만 두면 아래쪽 버튼에서 결과가 보이지 않는다.
+  const [notice, setNotice] = useState<{ text: string; at: NoticeArea } | null>(null);
   const [q, setQ] = useState('');
   const [page, setPage] = useState<AdminMissionPage>({
     items: [],
@@ -74,15 +77,19 @@ export function Admin() {
   >(null);
   const request = <T,>(input: Record<string, unknown>) => adminRequest<T>(password, input);
 
-  async function run(action: () => Promise<void>) {
+  async function run(action: () => Promise<string | void>, at: NoticeArea = 'top') {
     if (working.current) return;
     working.current = true;
     setBusy(true);
     setNotice(null);
     try {
-      await action();
+      const text = await action();
+      if (text) setNotice({ text, at });
     } catch (e) {
-      setNotice(e instanceof Error ? e.message : '요청을 처리하지 못했어요. 다시 시도해 주세요.');
+      setNotice({
+        text: e instanceof Error ? e.message : '요청을 처리하지 못했어요. 다시 시도해 주세요.',
+        at,
+      });
     } finally {
       working.current = false;
       setBusy(false);
@@ -131,7 +138,7 @@ export function Admin() {
     const m = await request<AdminMission>({ action: 'save', id, mission });
     await load(page.page);
     await select(m);
-    setNotice('미션을 저장했어요.');
+    return '미션을 저장했어요.';
   }
   async function upload() {
     if (!id) return;
@@ -146,7 +153,7 @@ export function Admin() {
     if (image.length > 2796204) throw new Error('사진은 한 장당 2 MiB 이하로 선택해 주세요.');
     await request({ action: 'upload', id, image, hint });
     await loadPhotos(id);
-    setNotice('사진을 저장했어요.');
+    return '사진을 저장했어요.';
   }
   async function remove() {
     if (!confirm) return;
@@ -159,8 +166,15 @@ export function Admin() {
       if (id) await loadPhotos(id);
     }
     setConfirm(null);
-    setNotice('삭제했어요.');
+    return '삭제했어요.';
   }
+
+  const noticeAt = (at: NoticeArea) =>
+    notice?.at === at && (
+      <AppText accessibilityRole="alert" accessibilityLiveRegion="polite">
+        {notice.text}
+      </AppText>
+    );
 
   return (
     <Screen>
@@ -169,11 +183,7 @@ export function Admin() {
         <AppText variant="bodySm" color="slate">
           현재 Maru DB의 공용 미션과 기준 사진을 관리해요.
         </AppText>
-        {notice && (
-          <AppText accessibilityRole="alert" accessibilityLiveRegion="polite">
-            {notice}
-          </AppText>
-        )}
+        {noticeAt('top')}
         {!authenticated ? (
           <>
             <Field
@@ -316,7 +326,8 @@ export function Admin() {
             <AppText variant="caption" color="steel">
               한국 시간으로 양 끝 날짜를 포함해요. 비우면 해당 방향으로 제한이 없어요.
             </AppText>
-            <Button label="미션 저장" loading={busy} onPress={() => run(save)} />
+            <Button label="미션 저장" loading={busy} onPress={() => run(save, 'mission')} />
+            {noticeAt('mission')}
             {id && (
               <Button
                 label="미션 삭제"
@@ -357,8 +368,9 @@ export function Admin() {
             <Button
               label="사진 선택 후 등록"
               disabled={busy || !id || photos.length >= 4}
-              onPress={() => run(upload)}
+              onPress={() => run(upload, 'photo')}
             />
+            {noticeAt('photo')}
           </>
         )}
       </View>
@@ -373,7 +385,11 @@ export function Admin() {
               ? '사용자 기록이나 사진이 연결된 미션은 삭제하지 않아요.'
               : '이 미션의 비교에서 사진을 제외해요.'}
           </AppText>
-          <Button label="삭제" loading={busy} onPress={() => run(remove)} />
+          <Button
+            label="삭제"
+            loading={busy}
+            onPress={() => run(remove, confirm.kind === 'mission' ? 'mission' : 'photo')}
+          />
           <Button
             label="취소"
             variant="secondary"
