@@ -63,7 +63,7 @@ npm start          # QR 코드를 Expo Go로 찍어 휴대폰에서 확인
 | --- | --- |
 | 사용자가 겪는 동작이 바뀐다(기능 추가·변경·삭제, 문구·규칙 변경) | **change를 만든다.** 아래 3.2 |
 | spec대로 동작하지 않는 버그를 고친다 | change 없이 GitHub Issue → PR. PR 본문에 어긴 spec과 Requirement 이름을 적는다 |
-| 리팩터링·도구·문서·운영 준비처럼 동작이 그대로다 | change 없이 PR. 묶어서 관리할 만큼 크면 `skip_specs: true` change로 만든다(예: `prepare-demo-rehearsal`) |
+| 리팩터링·도구·문서·운영 준비처럼 동작이 그대로다 | change 없이 PR. 묶어서 관리할 만큼 크면 `skip_specs: true` change로 만든다(예: `prepare-demo-rehearsal`). 할 일을 다 마친 PR에서 archive한다 |
 
 spec·README·`docs/` 같은 기준 문서에는 "시연 때", "시연 후", "지금은 ~단계"처럼 특정 시점에 기대는 표현을 쓰지 않는다. 그날이 지나면 저절로 틀린 말이 되기 때문이다. 늘 맞아야 하는 내용은 조건으로 쓰고(예: "실제 참가자를 받기 전에 바꾼다"), 한 번 하고 끝나는 일(데이터 준비, 리허설, 정리)은 change의 `tasks.md`에 둔다. 날짜가 박힌 과거 일정은 그대로 둬도 된다.
 
@@ -81,8 +81,8 @@ OpenSpec CLI는 개발 의존성으로 들어 있다(`npm run spec -- <명령>`)
    - `verification.md` — 검증 기록이 PR 본문에 다 담기지 않을 때만. 그 change의 기록은 change 폴더에 두고 `docs/`에 따로 만들지 않는다(archive 폴더 이름에 날짜가 붙으므로 파일 이름에는 날짜를 넣지 않는다)
 2. **제안 리뷰**: `npm run spec:validate`를 통과시킨 뒤 제안 문서만으로 PR(draft)을 열어 방향을 먼저 맞춘다. 작은 변경이면 구현까지 한 PR에 넣어도 된다.
 3. **구현**: `/opsx:apply`로 `tasks.md`를 하나씩 체크하며 구현한다. 하다가 범위가 바뀌면 코드보다 change 문서를 먼저 고친다(`/opsx:update`).
-4. **검사 → 미리보기 배포 → PR**: 아래 검사와 미리보기 배포. PR 본문에 change 이름과 각 Scenario를 어떻게 확인했는지 적는다.
-5. **합치기**: 리뷰어 1명 승인 후 작성자가 합친다(Squash and merge. 단 `develop` → main은 3.3). 합치기 전에 같은 PR에서 `/opsx:archive`(또는 `npm run spec -- archive <이름>`)로 change를 `changes/archive/`로 옮긴다. 이때 차이가 `openspec/specs/`에 합쳐져, main의 spec이 늘 지금 동작과 같다.
+4. **검사 → 미리보기 배포 → PR**: 아래 검사와 미리보기 배포. PR 본문에 change 이름과 각 Scenario를 어떻게 확인했는지 적는다. Scenario를 확인하는 테스트를 새로 쓰면 테스트 이름에 Scenario 제목을 넣어, 나중에 제목으로 찾을 수 있게 한다.
+5. **합치기**: 리뷰어 1명 승인 후 작성자가 합친다(Squash and merge. 단 `develop` → main은 3.3). 합치기 전에 같은 PR에서 `/opsx:archive`(또는 `npm run spec -- archive <이름>`)로 change를 `changes/archive/`로 옮긴다. 이때 차이가 `openspec/specs/`에 합쳐져, main의 spec이 늘 지금 동작과 같다. main으로 가는 PR에 spec delta가 남은 열린 change가 있으면 CI(`npm run spec:archived`)가 실패한다.
 6. 운영 반영(웹·함수·마이그레이션)은 관리자가 main에 합쳐진 코드로 한다(3.4).
 
 진행 중인 작업과 남은 할 일은 `npm run spec -- list`로 본다. 담당자는 change 폴더의 PR 작성자다.
@@ -121,7 +121,7 @@ npm run lint          # 코드 규칙 + 포맷(Prettier). 포맷 오류는 npm r
 npm test
 ```
 
-PR을 열면 GitHub Actions(`.github/workflows/check.yml`)가 같은 검사와 `format:check`, `spec:validate`를 다시 돌린다. PR 화면의 **check**가 빨간색이면 합치지 않는다. 대부분은 `npm run format`을 실행하고 다시 push하면 풀린다.
+PR을 열면 GitHub Actions(`.github/workflows/check.yml`)가 같은 검사와 `format:check`, `spec:validate`, (main으로 가는 PR만) `spec:archived`를 다시 돌린다. PR 화면의 **check**가 빨간색이면 합치지 않는다. 대부분은 `npm run format`을 실행하고 다시 push하면 풀린다.
 
 포맷은 Prettier가 정한다(작은따옴표, 줄 100자, `.prettierrc.json`). VS Code는 저장할 때 자동으로 맞춘다(추천 확장 설치). 문서(`*.md`)·생성 파일·마이그레이션은 포맷하지 않는다(`.prettierignore`).
 
