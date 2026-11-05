@@ -37,3 +37,7 @@ jobs:
         run: npm test
       - name: spec
         run: npm run spec:validate
+      # develop은 여러 PR을 모으는 중이라 열린 change를 허용한다(CONTRIBUTING 3.3)
+      - name: spec archive
+        if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
+        run: npm run spec:archived
