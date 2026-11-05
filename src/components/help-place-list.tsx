@@ -7,7 +7,7 @@ import { HelpPlaces } from '@/constants/help';
 import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 
-/** 도움받을 수 있는 곳 안내와 세 곳 (spec rest-area). 별도 화면(S10)과 마음 보관함 바텀시트가 같이 쓴다 */
+/** 도움받을 수 있는 곳 안내와 세 곳 (spec mind-vault). 별도 화면(S10)과 마음 보관함 바텀시트가 같이 쓴다 */
 export function HelpPlaceList() {
   const theme = useTheme();
   return (

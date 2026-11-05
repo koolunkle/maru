@@ -148,7 +148,7 @@
 | F9 | 같이 할래요 | P1 | [mission-together](../openspec/specs/mission-together/spec.md) |
 | F10 | 응원 릴레이 | P0 | [cheer-relay](../openspec/specs/cheer-relay/spec.md) |
 | F11 | 성장 화분 | P0 | [growth-plant](../openspec/specs/growth-plant/spec.md) |
-| F12 | 빗소리·도움 안내 | P0 | [rest-area](../openspec/specs/rest-area/spec.md) |
+| F12 | 빗소리·도움 안내 | P0 | [mind-vault](../openspec/specs/mind-vault/spec.md) |
 | F13 | 주간 마음 리포트·편지 | P1 | [weekly-letter](../openspec/specs/weekly-letter/spec.md) |
 | F14 | 마음 우체통 | P2 | [mailbox](../openspec/specs/mailbox/spec.md) |
 | F15 | 한 줄 기록·기분 | P2 | [daily-note](../openspec/specs/daily-note/spec.md) |
