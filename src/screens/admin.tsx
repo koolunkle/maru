@@ -390,6 +390,8 @@ export function Admin() {
             loading={busy}
             onPress={() => run(remove, confirm.kind === 'mission' ? 'mission' : 'photo')}
           />
+          {/* 실패하면 시트가 열린 채라 화면 쪽 안내가 가려진다 */}
+          {noticeAt(confirm.kind === 'mission' ? 'mission' : 'photo')}
           <Button
             label="취소"
             variant="secondary"
