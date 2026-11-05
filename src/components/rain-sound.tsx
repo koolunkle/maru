@@ -8,7 +8,7 @@ import { Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { useBackgroundAudio } from '@/providers/background-audio';
 
-/** 빗소리 켜기·끄기와 볼륨 (spec rest-area F12). 켜져 있을 때만 볼륨 슬라이더를 보인다 */
+/** 빗소리 켜기·끄기와 볼륨 (spec mind-vault F12). 켜져 있을 때만 볼륨 슬라이더를 보인다 */
 export function RainSound() {
   const theme = useTheme();
   const { playing, volume, toggle, setVolume } = useBackgroundAudio();
