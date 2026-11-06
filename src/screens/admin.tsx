@@ -300,11 +300,18 @@ export function Admin() {
               onChangeText={(minutes) => setDraft({ ...draft, minutes })}
             />
             <Field
-              label="인증 힌트"
+              label="인증 힌트 (사진에 담을 대상)"
               value={draft.verify_hint}
               maxLength={30}
+              placeholder="예: 4층 입구 앞 조형물"
               onChangeText={(verify_hint) => setDraft({ ...draft, verify_hint })}
             />
+            {/* 미션 상세는 힌트 뒤에 " 사진 한 장"을 붙인다 */}
+            {draft.verify_hint.trim() !== '' && (
+              <AppText variant="caption" color="steel">
+                사용자에게는 &apos;{draft.verify_hint.trim()} 사진 한 장&apos;으로 보여요
+              </AppText>
+            )}
             <Field
               label="추천 이유 (선택)"
               value={draft.reason}
