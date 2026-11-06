@@ -398,7 +398,7 @@ F10~F16 화면·요소
 | 컴포넌트 | 구조 |
 | --- | --- |
 | `mission-card` | 1행: 카테고리 `label` · 소요 시간 `label` (`slate`) / 2행: 미션명 `title-md` (최대 2줄) / 3행(선택): `reward-badge` 다음 보상 / 우측 화살표 `chevron-right` 20px. 카드 전체가 터치 영역 |
-| `ai-card` | 좌상단 "AI" `label`(`primary`) → 8px → 본문 `body-md`. AI가 만든 텍스트는 이 컴포넌트로만 표시 |
+| `ai-card` | 좌상단 "MARU" `label`(`primary`) → 8px → 본문 `body-md`. AI가 만든 텍스트는 이 컴포넌트로만 표시 |
 | `help-card` | 제목 `title-md` "이야기를 들어줄 곳이 있어요" → 8px → 설명 `body-sm` → 16px → `button-primary` "외로움안녕120 전화하기"(`phone` 아이콘, `tel:120`) |
 | `reward-badge` | 아이콘 14px(`award`, `accent`) + 텍스트. 예: "스탠드 획득", "3일째" |
 | `comment-pending` | `clock` 아이콘 14px + "약 {N}시간 뒤 공개돼요" |

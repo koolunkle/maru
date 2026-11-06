@@ -11,7 +11,7 @@ export function AiCard({ children, footer }: { children: string; footer?: ReactN
   return (
     <View style={[styles.card, { backgroundColor: theme.primarySoft, borderColor: theme.primary }]}>
       <AppText variant="label" color="primary">
-        AI
+        MARU
       </AppText>
       <AppText>{children}</AppText>
       {footer}
