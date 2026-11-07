@@ -110,11 +110,11 @@ Deno.serve(
     if (message.body !== input.body) throw new HttpError(409, 'request_body_changed');
     if (message.status !== 'pending') return json(message);
 
-    const status = await moderate(message.body);
-    if (!status) return json(message);
+    const result = await moderate(message.body);
+    if (!result) return json(message);
     const { data: moderated, error: updateError } = await admin
       .from('mailbox_messages')
-      .update({ status })
+      .update({ status: result.status })
       .eq('id', message.id)
       .eq('status', 'pending')
       .select(SentColumns)
