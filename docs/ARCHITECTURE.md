@@ -14,7 +14,7 @@ flowchart LR
       Auth[Auth<br/>익명 로그인]
       DB[(Postgres + RLS<br/>트리거·RPC)]
       ST[Storage<br/>verifications 버킷]
-      FN[Edge Functions<br/>추천·인증·검수·우체통·편지·행사 동기화 등 9개]
+      FN[Edge Functions<br/>추천·인증·검수·우체통·편지·행사 동기화·미션 관리 등 10개]
       CRON[pg_cron<br/>댓글 공개·미션 만료·행사 동기화]
     end
     AI[Gemini / Claude]
