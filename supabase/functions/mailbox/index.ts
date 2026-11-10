@@ -7,6 +7,7 @@ import { moderate } from '../_shared/moderation.ts';
 
 const RequestSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('inbox') }),
+  z.object({ action: z.literal('waiting') }),
   z.object({ action: z.literal('sent') }),
   z.object({ action: z.literal('read'), id: z.uuid() }),
   z.object({
@@ -44,6 +45,13 @@ Deno.serve(
         .order('received_at', { ascending: false });
       if (error) throw error;
       return json(data);
+    }
+
+    // 탭 점: 배정하지 않고 읽을 한 줄이 있거나 열면 받을 수 있는지만 본다
+    if (input.action === 'waiting') {
+      const { data, error } = await admin.rpc('mailbox_waiting', { recipient: userId });
+      if (error) throw error;
+      return json({ waiting: data === true });
     }
 
     if (input.action === 'sent') {

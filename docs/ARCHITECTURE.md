@@ -99,11 +99,11 @@ flowchart LR
 | 난이도(F8) | `user_missions` 결과 확정 시 트리거 `adjust_difficulty`(연속 2회 만료 −1, 3회 완료 +1) |
 | 댓글(F6) | `submit-comment` 함수(요청 ID로 중복 방지) → 트리거 `prepare_comment`가 `pending`·`publish_at` 설정 → `Functions.moderateComment(id)`(AI 분류. 명백한 욕설은 AI가 승인해도 `rejected`. AI를 쓸 수 없을 때는 위기 표현이 없는 욕설 글만 `rejected`, `judged_by: 'rule'`) → cron `publish_due_comments`가 공개 |
 | 릴레이(F10) | 완료한 미션에만 `relay_messages` insert → `moderate-comment`(`relay_id`) 검수 → 같은 cron이 공개 → S4에서 `get_relay_messages`(같은 미션 우선, 모자라면 같은 카테고리 7일. 한 줄마다 `same_mission`을 돌려주고 `false`면 "비슷한 미션에서" 표시) |
-| 우체통(F14) | `mailbox` 함수: 보내기 시 AI 검수, 받은 함 조회 시 `receive_mailbox_message`가 승인 글 하나를 한 사람에게 배정 |
+| 우체통(F14) | `mailbox` 함수: 보내기 시 AI 검수, 받은 함 조회 시 `receive_mailbox_message`가 승인 글 하나를 한 사람에게 배정. 하단 탭 점은 `waiting` 동작이 `mailbox_waiting`으로 배정 없이 확인(탭 이동·앱 복귀 때) |
 | 주간 리포트(F13) | `write-weekly-letter` 함수가 한 줄 기록·완료 미션으로 편지 생성(현재 Gemini일 때만 AI, 그 외 규칙 문구) |
 | 만료(F3) | cron `expire_due_missions`(10분) |
 
-DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nicknames`, `get_feed`, `get_relay_messages`, `save_daily_note`, `list_time_capsules`, `send_time_capsule`, `open_time_capsule`, `set_demo_mode`, `publish_due_comments`, `expire_due_missions`. 서버 전용(service_role): `finish_verification`, `save_recommendation`, `start_mission`, `place_furniture`, `move_furniture`, `submit_comment`, `receive_mailbox_message`. 트리거: `handle_new_user`, `prepare_comment`, `prepare_relay_message`, `check_mission_start`, `check_furniture_slot`, `stamp_mission_resolved`, `adjust_difficulty`, `weekly_letter_version`.
+DB 함수·RPC: `get_nicknames`, `get_participant_counts`, `get_participant_nicknames`, `get_feed`, `get_relay_messages`, `save_daily_note`, `list_time_capsules`, `send_time_capsule`, `open_time_capsule`, `set_demo_mode`, `publish_due_comments`, `expire_due_missions`. 서버 전용(service_role): `finish_verification`, `save_recommendation`, `start_mission`, `place_furniture`, `move_furniture`, `submit_comment`, `receive_mailbox_message`, `mailbox_waiting`. 트리거: `handle_new_user`, `prepare_comment`, `prepare_relay_message`, `check_mission_start`, `check_furniture_slot`, `stamp_mission_resolved`, `adjust_difficulty`, `weekly_letter_version`.
 
 
 ## 5. 알아 둘 점

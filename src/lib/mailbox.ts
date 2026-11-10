@@ -64,6 +64,9 @@ export async function sendMailboxMessage(
 
 export const getReceivedMailboxMessages = () =>
   invokeMailbox<ReceivedMailboxMessage[]>({ action: 'inbox' });
+/** 마음 보관함 탭 점. 한 줄을 배정하지 않는다 */
+export const hasWaitingMailbox = async () =>
+  (await invokeMailbox<{ waiting: boolean }>({ action: 'waiting' })).waiting;
 export const getSentMailboxMessages = () => invokeMailbox<MailboxMessage[]>({ action: 'sent' });
 export const markMailboxMessageRead = (id: string) =>
   invokeMailbox<ReceivedMailboxMessage>({ action: 'read', id });

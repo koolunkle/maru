@@ -199,6 +199,7 @@ components:
     activeColor: "{colors.ink}"
     inactiveColor: "{colors.muted}"
     height: 64px
+    badge: "8px dot {colors.accent}, no number"
   room-slot:
     border: "1.5px dashed {colors.hairline-strong}"
     rounded: "{rounded.md}"
@@ -355,7 +356,7 @@ components:
 | 카드 간격 | 12px |
 | 섹션 간격 | 32px |
 | 하단 고정 버튼 | 좌우 20px, 하단 16px + safe area, 위 경계 elevation 1 |
-| 탭 바 | 64px + safe area. 아이콘 24px + `label`. 탭 5개와 Feather 아이콘: 홈 `sun`, 마음 보관함 `archive`, 피드 `message-circle`, 기록 `calendar`, 내 방 `home` |
+| 탭 바 | 64px + safe area. 아이콘 24px + `label`. 탭 5개와 Feather 아이콘: 홈 `sun`, 마음 보관함 `archive`, 피드 `message-circle`, 기록 `calendar`, 내 방 `home`. 마음 보관함 아이콘 오른쪽 위에 숫자 없는 8px `accent` 점(안 읽은 한 줄이 있거나 새 한 줄을 받을 수 있을 때, 마음 보관함 탭을 보는 동안은 숨김) |
 | 아이콘 | `@expo/vector-icons`의 Feather, 기본 24px, 선 굵기 기본값 |
 
 ### 5.2 화면별 구조 (위 → 아래)
