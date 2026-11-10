@@ -5,8 +5,15 @@ import { loadSource } from './helpers/load-source.mjs';
 
 let response;
 const calls = [];
-const mailbox = await loadSource('../src/lib/mailbox.ts', {
-  './supabase': {
+class FunctionsHttpError extends Error {
+  constructor(context) {
+    super('http');
+    this.context = context;
+  }
+}
+const functions = await loadSource('../src/lib/functions.ts', {
+  '@supabase/supabase-js': { FunctionsHttpError },
+  '@/lib/supabase': {
     supabase: {
       functions: {
         async invoke(name, options) {
@@ -17,6 +24,7 @@ const mailbox = await loadSource('../src/lib/mailbox.ts', {
     },
   },
 });
+const mailbox = await loadSource('../src/lib/mailbox.ts', { './functions': functions });
 beforeEach(() => {
   calls.length = 0;
   response = { data: [], error: null };
@@ -69,17 +77,24 @@ test('응답 유실 뒤 같은 요청 식별자로 재시도한다', async () =>
 test('함수의 HTTP 오류는 상태와 코드로 구분한다', async () => {
   response = {
     data: null,
-    error: { context: new Response(JSON.stringify({ error: 'daily_limit' }), { status: 409 }) },
+    error: new FunctionsHttpError(
+      new Response(JSON.stringify({ error: 'daily_limit' }), { status: 409 }),
+    ),
   };
   await assert.rejects(
     mailbox.sendMailboxMessage('a', '응원해요', 'request-00000003'),
     (error) =>
-      error instanceof mailbox.MailboxError && error.status === 409 && error.code === 'daily_limit',
+      error instanceof functions.FunctionError &&
+      error.status === 409 &&
+      error.code === 'daily_limit',
   );
 });
 test('수신함 오류와 빈 응답을 빈 목록으로 숨기지 않는다', async () => {
   response = { data: null, error: new Error('unavailable') };
-  await assert.rejects(mailbox.getReceivedMailboxMessages(), /unavailable/);
+  await assert.rejects(
+    mailbox.getReceivedMailboxMessages(),
+    (error) => error instanceof functions.FunctionError && error.code === 'network',
+  );
   response = { data: null, error: null };
   await assert.rejects(mailbox.getReceivedMailboxMessages(), /응답/);
 });
@@ -186,6 +201,7 @@ await loadSource(
       },
     },
     '../_shared/http.ts': { handler, HttpError, json },
+    '../_shared/kst.ts': await loadSource('../supabase/functions/_shared/kst.ts'),
   },
   {
     Deno: {

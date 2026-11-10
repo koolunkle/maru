@@ -16,7 +16,8 @@ export class FunctionError extends Error {
   }
 }
 
-async function invoke<T>(name: string, body: object): Promise<T> {
+/** Edge Function 호출. HTTP 오류는 함수의 { error } 코드로, 그 밖의 실패는 code 'network'로 던진다 */
+export async function invoke<T>(name: string, body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke<T>(name, { body });
   if (error) {
     if (error instanceof FunctionsHttpError) {
@@ -47,7 +48,7 @@ export type WeeklyLetter = {
   missions: { completed_at: string; missions: { title: string } | null }[];
 };
 type ModerationResult = {
-  status: 'approved' | 'rejected' | 'crisis' | 'pending' | 'published';
+  status: Enums<'comment_status'>;
   judged_by: JudgedBy | null;
 };
 
