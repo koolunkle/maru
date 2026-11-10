@@ -879,6 +879,7 @@ export type Database = {
         Args: { mission: string }
         Returns: {
           body: string
+          same_mission: boolean
         }[]
       }
       list_time_capsules: {

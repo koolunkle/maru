@@ -258,12 +258,21 @@ export function MissionDetail({ missionId, type }: { missionId: string; type: Mi
               이 미션을 처음 해 보는 사람이에요
             </AppText>
           ) : (
-            detail.relays.map((body, index) => (
+            detail.relays.map((relay, index) => (
               <View
                 key={index}
+                accessible
+                accessibilityLabel={
+                  relay.same_mission ? relay.body : `비슷한 미션에서, ${relay.body}`
+                }
                 style={[styles.relayItem, { backgroundColor: theme.surfaceSunken }]}
               >
-                <AppText variant="bodySm">{body}</AppText>
+                {!relay.same_mission && (
+                  <AppText variant="caption" color="steel">
+                    비슷한 미션에서
+                  </AppText>
+                )}
+                <AppText variant="bodySm">{relay.body}</AppText>
               </View>
             ))
           )}
@@ -340,7 +349,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   relays: { marginTop: Spacing.lg, gap: Spacing.xs },
-  relayItem: { borderRadius: Radius.md, padding: Spacing.sm },
+  relayItem: { borderRadius: Radius.md, padding: Spacing.sm, gap: Spacing.xxs },
   footer: {
     gap: Spacing.xs,
   },

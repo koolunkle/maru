@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Tables } from '@/types/database';
+import type { Database, Tables } from '@/types/database';
 
 type MissionEvent = Pick<Tables<'events'>, 'title' | 'place' | 'start_date' | 'end_date' | 'url'>;
 
@@ -9,7 +9,8 @@ export type MissionDetail = {
   joined: boolean;
   participants: number;
   nicknames: string[];
-  relays: string[] | null;
+  /** same_mission이 false면 같은 카테고리의 다른 미션에서 가져온 한 줄 (spec cheer-relay) */
+  relays: Database['public']['Functions']['get_relay_messages']['Returns'] | null;
   ownRelay: Pick<Tables<'relay_messages'>, 'id' | 'status'> | null;
 };
 
@@ -53,7 +54,7 @@ export async function getMissionDetail(missionId: string, userId: string): Promi
     joined: Boolean(joined.data),
     participants: counts.data?.[0]?.count ?? 0,
     nicknames: (recent.data ?? []).map((r) => r.nickname),
-    relays: relays.error ? null : (relays.data ?? []).map((r) => r.body),
+    relays: relays.error ? null : (relays.data ?? []),
     ownRelay: ownRelay.data,
   };
 }
