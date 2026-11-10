@@ -207,6 +207,13 @@ npx supabase gen types typescript --project-id jpipzrmspryzvjykxefm > src/types/
 
 - 새 테이블에는 RLS를 켜고 정책을 같은 파일에 쓴다. 클라이언트가 바꾸면 안 되는 컬럼은 컬럼 단위 권한으로 막는다(기존 `profiles` 참고).
 - 적용 후 Supabase 대시보드 Advisors에서 새 보안 경고가 없는지 확인한다.
+- 마이그레이션이나 DB 함수를 바꾸면 PR 전에 로컬 DB(Docker 필요)에서 `supabase/tests/*.sql`을 모두 돌린다. 각 파일은 끝에서 롤백한다. 바뀐 규칙 때문에 기존 시나리오가 실패하면 같은 PR에서 테스트를 고친다.
+
+  ```bash
+  npx supabase start        # 로컬 DB에 마이그레이션과 시드를 적용한다
+  for f in supabase/tests/*.sql; do docker exec -i supabase_db_maru psql -U postgres -v ON_ERROR_STOP=1 -q < "$f" > /dev/null && echo "ok $f" || echo "FAIL $f"; done
+  npx supabase stop --no-backup
+  ```
 - 이미 적용된 마이그레이션 파일은 고치지 않는다. 바꿀 내용은 새 파일로 만든다.
 
 서버 함수(관리자, 최신 main에서):

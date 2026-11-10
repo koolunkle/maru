@@ -29,7 +29,10 @@ begin
   assert (select count(*) = 1 from public.mailbox_messages where recipient_id = b), '안 읽은 글이 있으면 추가 배정하지 않음';
   update public.mailbox_messages set read_at = now() where recipient_id = b;
   perform public.receive_mailbox_message(b);
-  assert (select count(*) = 2 from public.mailbox_messages where recipient_id = b), '읽은 글 보존 및 다음 글 수신';
+  assert (select count(*) = 1 from public.mailbox_messages where recipient_id = b), '읽었어도 같은 날(KST)에는 추가 배정하지 않음';
+  update public.mailbox_messages set received_at = received_at - interval '1 day' where recipient_id = b;
+  perform public.receive_mailbox_message(b);
+  assert (select count(*) = 2 from public.mailbox_messages where recipient_id = b), '읽은 글 보존 및 다음 날 다음 글 수신';
   insert into public.mailbox_messages (user_id, request_id, body)
   values (a, 'test-approved-0001', '오늘도 응원해요') on conflict (user_id, request_id) do nothing;
   assert (select count(*) = 1 from public.mailbox_messages where request_id = 'test-approved-0001'), '재시도 중복 저장 금지';
