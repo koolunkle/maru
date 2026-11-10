@@ -103,12 +103,12 @@ export function MailboxCard({ userId }: { userId: string }) {
         try {
           const lastShown = await AsyncStorage.getItem(key);
           if (version !== loadVersion.current || opened.current || lastShown === today) return;
-          await AsyncStorage.setItem(key, today);
-          if (version !== loadVersion.current || opened.current) return;
+          // 확인과 열기 사이에 await를 두지 않는다. 기록을 먼저 쓰면 겹친 불러오기가 기록만 남기고 열지 않는다
           opened.current = true;
           setSubmitted(null);
           setVisible(true);
           void read(firstUnread);
+          await AsyncStorage.setItem(key, today);
         } catch {}
       }
     } catch {
