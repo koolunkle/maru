@@ -11,6 +11,7 @@ import { HelpCard } from '@/components/help-card';
 import { PressableScale } from '@/components/pressable-scale';
 import { Radius, Spacing, Typography } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
+import { FunctionError } from '@/lib/functions';
 import {
   getReceivedMailboxMessages,
   getSentMailboxMessages,
@@ -20,7 +21,6 @@ import {
   sendMailboxMessage,
   type MailboxMessage,
   type ReceivedMailboxMessage,
-  MailboxError,
 } from '@/lib/mailbox';
 import { formatDateRange, kstDate } from '@/utils/date';
 import { createRequestId } from '@/utils/request-id';
@@ -180,7 +180,7 @@ export function MailboxCard({ userId }: { userId: string }) {
       setFocused(false);
     } catch (e) {
       // 다른 기기에서 이미 보냈거나 요청이 겹치면 서버가 하루 한 줄로 거절한다. 다시 눌러도 같으니 안내하고 목록을 맞춘다
-      if (e instanceof MailboxError && e.code === 'daily_limit') {
+      if (e instanceof FunctionError && e.code === 'daily_limit') {
         setNotice(DailyLimitNotice);
         void loadSent();
       } else {

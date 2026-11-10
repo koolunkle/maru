@@ -3,6 +3,7 @@ import { z } from 'npm:zod@4.6.7';
 
 import { admin, requireUserId } from '../_shared/clients.ts';
 import { handler, HttpError, json } from '../_shared/http.ts';
+import { kstDate } from '../_shared/kst.ts';
 import { moderate } from '../_shared/moderation.ts';
 
 const RequestSchema = z.discriminatedUnion('action', [
@@ -86,7 +87,7 @@ Deno.serve(
     }
 
     // 하루(KST) 한 줄만 보낼 수 있다. 같은 요청의 재시도와 거절·위기 글은 세지 않는다.
-    const kstToday = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const kstToday = kstDate();
     const { data: today, error: todayError } = await admin
       .from('mailbox_messages')
       .select('id')

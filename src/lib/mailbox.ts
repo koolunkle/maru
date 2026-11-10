@@ -1,4 +1,6 @@
-import { supabase } from './supabase';
+import type { Enums } from '@/types/database';
+
+import { invoke } from './functions';
 
 export const MailboxMaxLength = 60;
 
@@ -7,7 +9,7 @@ export type MailboxMessage = {
   body: string;
   request_id: string;
   created_at: string;
-  status: 'pending' | 'approved' | 'rejected' | 'crisis' | 'published';
+  status: Enums<'comment_status'>;
 };
 
 export type ReceivedMailboxMessage = {
@@ -25,27 +27,9 @@ export const MailboxStatus: Record<MailboxMessage['status'], string> = {
   crisis: '이 한 줄은 전달되지 않았어요. 이야기를 들어줄 곳이 있어요.',
 };
 
-/** 우체통 함수가 돌려준 오류. code는 함수의 { error } 값 (예: 'daily_limit') */
-export class MailboxError extends Error {
-  constructor(
-    public status: number,
-    public code: string,
-  ) {
-    super(code);
-  }
-}
-
+/** 오류는 다른 함수와 같은 FunctionError(code 예: 'daily_limit')다. 빈 응답은 빈 목록으로 숨기지 않는다 */
 async function invokeMailbox<T>(body: object): Promise<T> {
-  const { data, error } = await supabase.functions.invoke<T>('mailbox', { body });
-  if (error) {
-    // 함수가 HTTP 오류로 답하면 context에 응답이 담긴다. 그 밖의 오류(네트워크)는 그대로 던진다
-    const context = (error as { context?: Response }).context;
-    if (context && typeof context.json === 'function') {
-      const payload = await context.json().catch(() => ({}));
-      throw new MailboxError(context.status, payload?.error ?? 'unknown');
-    }
-    throw error;
-  }
+  const data = await invoke<T | null>('mailbox', body);
   if (data === null) throw new Error('우체통 응답이 없어요');
   return data;
 }

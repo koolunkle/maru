@@ -2,10 +2,10 @@
 import { addDays, weekStart } from './kst.ts';
 
 // 서울 열린데이터광장은 https를 지원하지 않는다. 인증키가 경로에 들어가므로 주소를 로그에 남기지 않는다.
-export const SeoulOpenApi = 'http://openapi.seoul.go.kr:8088';
+const SeoulOpenApi = 'http://openapi.seoul.go.kr:8088';
 export const EventPageSize = 1000;
 /** 추천은 7일 안의 행사만 쓰지만, 동기화가 며칠 실패해도 비지 않도록 30일치를 저장한다 */
-export const EventWindowDays = 30;
+const EventWindowDays = 30;
 
 /** src/constants/domain.ts Districts와 같은 목록. 프로필 district와 일치하는 행사만 저장한다 */
 export const Districts = [
