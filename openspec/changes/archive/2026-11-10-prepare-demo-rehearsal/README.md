@@ -43,7 +43,7 @@
 시연 전날, 민수 계정을 다시 만든 뒤 실행한다. 우체통 글은 먼저 우체통을 연 사람이 받아 가므로, 실행한 뒤 **바로 민수 브라우저에서 마음 보관함 탭 → 우체통을 열어** 받아 둔다.
 
 ```bash
-node --env-file=.env.local openspec/changes/prepare-demo-rehearsal/demo-helper.mjs <노란색 사진.jpg>
+node --env-file=.env.local openspec/changes/archive/2026-11-10-prepare-demo-rehearsal/demo-helper.mjs <노란색 사진.jpg>
 ```
 
 익명 계정 생성 → 온보딩 → "길에서 노란색 찾아 찍기" 시작 → 사진 인증(실제 AI 판정) → 릴레이 한 줄 → 우체통 글 순서로 앱과 같은 경로를 탄다. 검수도 실제 서버 함수가 한다. 출력되는 보조 계정 id를 정리(tasks 3.3)까지 적어 둔다.
@@ -51,6 +51,14 @@ node --env-file=.env.local openspec/changes/prepare-demo-rehearsal/demo-helper.m
 - 인증이 통과하지 않으면 거기서 멈춘다. 노란색이 잘 보이는 사진으로 다시 실행한다(새 보조 계정이 생기므로 앞 계정도 정리 대상).
 - 릴레이는 승인 뒤 3시간(시연 모드면 1분) 뒤에 공개된다. 시연 전날 실행하면 시연 때는 공개되어 있다.
 - 11/2에 앞부분(계정·온보딩·미션 시작·사진·AI 판정)을 임시 계정으로 확인했다. 앱 아이콘 이미지는 "직접 찍은 사진이 아니"라고 판정되어 릴레이·우체통 전에 멈췄고, 임시 계정과 사진은 지웠다.
+
+## 다시 시연할 때
+
+데모 계정 c5773875…의 인증 7장은 비공개로 남겨 두었다. 피드에 다시 보이려면 아래를 실행하고, 끝나면 `false`로 되돌린다. 이 사진들은 직접 찍은 사진이 아닐 수 있으니 실제 사용자가 있는 동안에는 공개하지 않는다.
+
+```sql
+update public.verifications set is_public = true where user_id = 'c5773875-5529-4bc8-865c-0d32ddf89f24';
+```
 
 ## 3. 정리 (tasks 3.3)
 
