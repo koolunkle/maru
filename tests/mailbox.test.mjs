@@ -152,6 +152,7 @@ const admin = {
 };
 const { handler, HttpError, json } = await loadSource('../supabase/functions/_shared/http.ts', {});
 const privacy = await loadSource('../supabase/functions/_shared/moderation-privacy.ts', {});
+const profanity = await loadSource('../supabase/functions/_shared/moderation-profanity.ts');
 const moderation = await loadSource('../supabase/functions/_shared/moderation.ts', {
   'npm:zod@4.6.7': { z },
   './ai.ts': {
@@ -163,6 +164,7 @@ const moderation = await loadSource('../supabase/functions/_shared/moderation.ts
     },
   },
   './moderation-privacy.ts': privacy,
+  './moderation-profanity.ts': profanity,
 });
 await loadSource(
   '../supabase/functions/mailbox/index.ts',
@@ -293,6 +295,25 @@ test('우체통 검수에서 개인정보를 가리고 위기 판정을 우선�
     assert.doesNotMatch(aiText, /홍길동|test@example.com/);
     assert.deepEqual(operations.at(-1).update, { status: expected });
   }
+});
+test('AI 장애 중에도 욕설이 든 한 줄은 거절로 저장한다', async () => {
+  const saved = {
+    id: 'saved',
+    request_id: 'request-00000001',
+    body: '시.발 다 별로야',
+    status: 'pending',
+  };
+  results = [
+    { data: [] },
+    { error: null },
+    { data: saved },
+    { data: { ...saved, status: 'rejected' } },
+  ];
+  const response = await request({ action: 'send', requestId: saved.request_id, body: saved.body });
+  assert.equal((await response.json()).status, 'rejected');
+  assert.deepEqual(operations.at(-1).update, { status: 'rejected' });
+  // 위기 판정을 놓치지 않도록 욕설이 있어도 AI를 먼저 부른다
+  assert.equal(aiCalls, 1);
 });
 test('우체통 검수는 댓글·릴레이와 같은 공통 규칙을 쓴다', async () => {
   const saved = {

@@ -21,7 +21,7 @@ export const MailboxStatus: Record<MailboxMessage['status'], string> = {
   pending: '검수를 기다리고 있어요. 아직 전달되지 않았어요.',
   approved: '검수를 마쳤어요. 누군가의 우체통에 도착할 차례예요.',
   published: '누군가의 우체통에 한 줄이 도착했어요.',
-  rejected: '이 한 줄은 전달되지 않았어요. 연락처나 만남 제안 없이 적어볼까요?',
+  rejected: '이 한 줄은 전달되지 않았어요. 누구나 편하게 읽을 수 있는 말로 다시 적어볼까요?',
   crisis: '이 한 줄은 전달되지 않았어요. 이야기를 들어줄 곳이 있어요.',
 };
 
