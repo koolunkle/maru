@@ -56,7 +56,7 @@ const System = `당신은 서울에 사는 청년에게 하루 5분짜리 작은
 - 사진 한 장으로 인증할 수 있는 미션만 낸다. 다른 사람의 얼굴이 찍혀야 하는 미션은 내지 않는다.
 ${CopyRules}`;
 
-function sanitize(m: AiMission, maxMinutes: number | null): AiMission | null {
+function sanitize(m: AiMission): AiMission | null {
   const text = `${m.title} ${m.verify_hint} ${m.reason}`;
   if (hasBannedWord(text) || !m.title.trim() || !m.verify_hint.trim()) return null;
   return {
@@ -65,7 +65,7 @@ function sanitize(m: AiMission, maxMinutes: number | null): AiMission | null {
     verify_hint: m.verify_hint.trim().slice(0, 30),
     reason: m.reason.trim().slice(0, 50),
     difficulty: Math.min(5, Math.max(1, m.difficulty)),
-    minutes: Math.max(1, maxMinutes ? Math.min(m.minutes, maxMinutes) : m.minutes),
+    minutes: Math.max(1, m.minutes),
   };
 }
 
@@ -187,14 +187,16 @@ Deno.serve(
       timeoutMs: 25_000,
     });
 
+    // 하루 시간을 넘는 오늘 미션은 시간만 깎으면 내용과 어긋나므로 버린다. 빈자리는 save_recommendation이 시드로 채운다
     const daily = (parsed?.daily ?? [])
-      .map((m) => sanitize(m, profile.daily_minutes))
+      .map(sanitize)
       .filter((m): m is AiMission => m !== null)
+      .filter((m) => !profile.daily_minutes || m.minutes <= profile.daily_minutes)
       .slice(0, 3);
-    const weekly = parsed ? sanitize(parsed.weekly, null) : null;
+    const weekly = parsed ? sanitize(parsed.weekly) : null;
 
-    // AI 결과가 없거나 규칙을 어기면 시드 규칙으로 대체
-    if (daily.length < 3 || !weekly) {
+    // AI 결과가 없거나 쓸 수 있는 오늘 미션이 하나도 없으면 시드 규칙으로 대체
+    if (daily.length === 0 || !weekly) {
       const exclude = existing
         ? [...existing.daily_mission_ids, existing.weekly_mission_id].filter(Boolean)
         : [];

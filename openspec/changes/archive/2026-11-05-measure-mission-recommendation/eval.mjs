@@ -187,7 +187,20 @@ async function run(persona, cond) {
   let usedFallback;
   if (saved.p_ai_missions) {
     usedFallback = false;
-    missions = saved.p_ai_missions.map((m, i) => ({ ...m, kind: i < 3 ? 'daily' : 'weekly' }));
+    // 마지막 항목이 이번 주 미션이다. 오늘 미션이 3개보다 적으면 save_recommendation처럼 시드로 채운다
+    // (난이도 +1 이하, 하루 시간 안 우선, 관심 카테고리 우선). DB 함수의 random()은 첫 후보로 대신한다
+    const last = saved.p_ai_missions.length - 1;
+    missions = saved.p_ai_missions.map((m, i) => ({ ...m, kind: i < last ? 'daily' : 'weekly' }));
+    const fill = seeds
+      .filter((m) => m.difficulty <= persona.difficulty + 1)
+      .sort(
+        (x, y) =>
+          (y.minutes <= persona.daily_minutes) - (x.minutes <= persona.daily_minutes) ||
+          persona.categories.includes(y.category) - persona.categories.includes(x.category),
+      )
+      .slice(0, 3 - last)
+      .map((m) => ({ ...m, kind: 'daily', backfilled: true }));
+    missions.splice(last, 0, ...fill);
   } else {
     usedFallback = true;
     missions = [
@@ -203,6 +216,7 @@ async function run(persona, cond) {
     raw: cond === 'A' ? raw : undefined,
     missions: missions.map((m) => ({
       kind: m.kind,
+      backfilled: m.backfilled ?? false,
       key: m.source === 'seed' ? m.id : norm(m.title),
       title: m.title,
       category: m.category,

@@ -84,6 +84,18 @@ begin
   delete from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091';
   initial := public.save_recommendation('10000000-0000-4000-8000-000000000091', today, false, 'ai-initial', -1, '{}', null, ai_rows);
   assert initial->>'source' = 'ai' and jsonb_array_length(initial->'daily') = 3, 'AI 추천 원자적 생성';
+  -- 하루 시간을 넘어 버린 AI 오늘 미션 자리는 시드로 채우고, 마지막 항목을 이번 주 미션으로 둔다
+  delete from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091';
+  initial := public.save_recommendation('10000000-0000-4000-8000-000000000091', today, false, 'ai-partial', -1, '{}', null,
+    jsonb_build_array(ai_rows->0, ai_rows->3));
+  assert jsonb_array_length(initial->'daily') = 3 and initial->'daily'->0->>'title' = '하나'
+    and initial->'daily'->1->>'source' = 'seed' and initial->'weekly'->>'title' = '넷', 'AI 오늘 미션 일부만 와도 시드로 보충';
+  delete from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091';
+  begin
+    perform public.save_recommendation('10000000-0000-4000-8000-000000000091', today, false, 'ai-weekly-only', -1, '{}', null,
+      jsonb_build_array(ai_rows->3));
+    raise exception '오늘 미션 없는 AI 추천 허용';
+  exception when raise_exception then if sqlerrm <> 'invalid_missions' then raise; end if; end;
   select count(*) into before_count from public.missions where created_for = '10000000-0000-4000-8000-000000000091';
   ai_rows := jsonb_set(ai_rows, '{3,difficulty}', '"invalid"');
   delete from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091';
