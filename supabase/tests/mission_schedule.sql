@@ -9,6 +9,8 @@ declare
   day date := (now() at time zone 'Asia/Seoul')::date;
   a uuid; b uuid; c uuid; d uuid; w uuid; future uuid; response jsonb; again jsonb; ids uuid[]; due timestamptz;
 begin
+  -- 로컬 DB에는 시드 미션 36개가 있다. 보충 후보가 이 테스트의 미션만 되도록 기간을 지난 것으로 둔다(롤백됨).
+  update public.missions set end_date = day - 1 where source = 'seed';
   insert into public.missions(source,title,category,difficulty,minutes,verify_hint,start_date,end_date)
     values ('seed','경계','walk',1,5,'하늘',day,day) returning id into a;
   insert into public.missions(source,title,category,difficulty,minutes,verify_hint)

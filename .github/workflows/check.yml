@@ -1,4 +1,4 @@
-# PR마다 CONTRIBUTING의 "검사 (PR 전에 반드시)"를 그대로 돌린다.
+# PR마다 CONTRIBUTING의 "검사 (PR 전에 반드시)"와 SQL 시나리오(6절)를 돌린다.
 name: check
 
 on:
@@ -41,3 +41,18 @@ jobs:
       - name: spec archive
         if: github.base_ref == 'main' || github.ref == 'refs/heads/main'
         run: npm run spec:archived
+
+  # supabase/tests/*.sql을 마이그레이션·시드를 적용한 로컬 DB에서 돌린다. check와 나란히 돈다.
+  sql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+      # 테스트에는 DB와 Storage(마이그레이션이 버킷을 만든다)만 필요하다
+      - name: 로컬 DB 시작
+        run: npx --yes supabase@3.1.0 start -x gotrue,realtime,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+      - name: SQL 시나리오
+        run: npm run test:sql

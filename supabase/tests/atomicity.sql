@@ -62,27 +62,33 @@ begin
   assert not exists (select 1 from public.verification_responses where verification_id = v_id), '오류 시 응답 롤백';
   delete from public.furniture where id = 'bad-rule';
 end $$;
+-- 추천 저장은 온보딩을 마친 사용자의 KST 오늘 추천만 받는다(20261101091000_mission_schedule).
+update public.profiles set onboarded_at = now() where id = '10000000-0000-4000-8000-000000000091';
 do $$
 declare ids uuid[]; weekly uuid; initial jsonb; refreshed jsonb; ai_rows jsonb; before_count int;
+  today date := (now() at time zone 'Asia/Seoul')::date;
 begin
   select array_agg(id order by seed_no) into ids from public.missions where seed_no between 1 and 3;
   select id into weekly from public.missions where seed_no = 4;
-  initial := public.save_recommendation('10000000-0000-4000-8000-000000000091', current_date, false, 'initial', -1, ids, weekly, null);
-  assert initial = public.save_recommendation('10000000-0000-4000-8000-000000000091', current_date, false, 'initial', -1, ids, weekly, null), '추천 재시도 결과';
-  refreshed := public.save_recommendation('10000000-0000-4000-8000-000000000091', current_date, true, 'refresh', 0, ids, weekly, null);
-  assert refreshed = public.save_recommendation('10000000-0000-4000-8000-000000000091', current_date, true, 'refresh', 0, ids, weekly, null), '새로고침 재시도 결과';
+  initial := public.save_recommendation('10000000-0000-4000-8000-000000000091', today, false, 'initial', -1, ids, weekly, null);
+  assert initial = public.save_recommendation('10000000-0000-4000-8000-000000000091', today, false, 'initial', -1, ids, weekly, null), '추천 재시도 결과';
+  refreshed := public.save_recommendation('10000000-0000-4000-8000-000000000091', today, true, 'refresh', 0, ids, weekly, null);
+  assert refreshed = public.save_recommendation('10000000-0000-4000-8000-000000000091', today, true, 'refresh', 0, ids, weekly, null), '새로고침 재시도 결과';
   begin
-    perform public.save_recommendation('10000000-0000-4000-8000-000000000091', current_date, true, 'second-refresh', 0, ids, weekly, null);
+    perform public.save_recommendation('10000000-0000-4000-8000-000000000091', today, true, 'second-refresh', 0, ids, weekly, null);
     raise exception '두 번째 새로고침 허용';
   exception when raise_exception then if sqlerrm <> 'refresh_limit' then raise; end if; end;
-  assert (select refresh_count = 1 from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091' and rec_date = current_date), '새로고침 상한';
+  assert (select refresh_count = 1 from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091' and rec_date = today), '새로고침 상한';
   ai_rows := '[{"title":"하나","category":"walk","difficulty":1,"minutes":5,"verify_hint":"풍경","reason":"산책"},{"title":"둘","category":"walk","difficulty":1,"minutes":5,"verify_hint":"풍경","reason":"산책"},{"title":"셋","category":"walk","difficulty":1,"minutes":5,"verify_hint":"풍경","reason":"산책"},{"title":"넷","category":"walk","difficulty":1,"minutes":5,"verify_hint":"풍경","reason":"산책"}]';
-  initial := public.save_recommendation('10000000-0000-4000-8000-000000000091', current_date - 1, false, 'ai-initial', -1, '{}', null, ai_rows);
+  -- AI 경로는 그날 추천이 없을 때만 탄다. 위에서 만든 오늘 추천을 지우고 다시 시험한다(롤백됨).
+  delete from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091';
+  initial := public.save_recommendation('10000000-0000-4000-8000-000000000091', today, false, 'ai-initial', -1, '{}', null, ai_rows);
   assert initial->>'source' = 'ai' and jsonb_array_length(initial->'daily') = 3, 'AI 추천 원자적 생성';
   select count(*) into before_count from public.missions where created_for = '10000000-0000-4000-8000-000000000091';
   ai_rows := jsonb_set(ai_rows, '{3,difficulty}', '"invalid"');
+  delete from public.daily_recommendations where user_id = '10000000-0000-4000-8000-000000000091';
   begin
-    perform public.save_recommendation('10000000-0000-4000-8000-000000000091', current_date - 2, false, 'bad-ai', -1, '{}', null, ai_rows);
+    perform public.save_recommendation('10000000-0000-4000-8000-000000000091', today, false, 'bad-ai', -1, '{}', null, ai_rows);
     raise exception '잘못된 추천 허용';
   exception when invalid_text_representation then null; end;
   assert (select count(*) = before_count from public.missions where created_for = '10000000-0000-4000-8000-000000000091'), '추천 저장 실패 시 미션 롤백';

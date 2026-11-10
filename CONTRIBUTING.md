@@ -121,7 +121,7 @@ npm run lint          # 코드 규칙 + 포맷(Prettier). 포맷 오류는 npm r
 npm test
 ```
 
-PR을 열면 GitHub Actions(`.github/workflows/check.yml`)가 같은 검사와 `format:check`, `spec:validate`, (main으로 가는 PR만) `spec:archived`를 다시 돌린다. PR 화면의 **check**가 빨간색이면 합치지 않는다. 대부분은 `npm run format`을 실행하고 다시 push하면 풀린다.
+PR을 열면 GitHub Actions(`.github/workflows/check.yml`)가 같은 검사와 `format:check`, `spec:validate`, (main으로 가는 PR만) `spec:archived`를 다시 돌리고, 별도 작업(`sql`)에서 로컬 DB를 띄워 SQL 시나리오(`npm run test:sql`, 6절)를 돌린다. PR 화면의 **check**가 빨간색이면 합치지 않는다. 대부분은 `npm run format`을 실행하고 다시 push하면 풀린다.
 
 포맷은 Prettier가 정한다(작은따옴표, 줄 100자, `.prettierrc.json`). VS Code는 저장할 때 자동으로 맞춘다(추천 확장 설치). 문서(`*.md`)·생성 파일·마이그레이션은 포맷하지 않는다(`.prettierignore`).
 
@@ -207,6 +207,13 @@ npx supabase gen types typescript --project-id jpipzrmspryzvjykxefm > src/types/
 
 - 새 테이블에는 RLS를 켜고 정책을 같은 파일에 쓴다. 클라이언트가 바꾸면 안 되는 컬럼은 컬럼 단위 권한으로 막는다(기존 `profiles` 참고).
 - 적용 후 Supabase 대시보드 Advisors에서 새 보안 경고가 없는지 확인한다.
+- 마이그레이션이나 DB 함수를 바꾸면 PR 전에 로컬 DB(Docker 필요)에서 `supabase/tests/*.sql`을 모두 돌린다. 각 파일은 끝에서 롤백한다. 바뀐 규칙 때문에 기존 시나리오가 실패하면 같은 PR에서 테스트를 고친다.
+
+  ```bash
+  npx supabase start        # 로컬 DB에 마이그레이션과 시드를 적용한다
+  npm run test:sql          # 파일마다 ok/FAIL. PR에서는 CI의 sql 작업이 같은 명령을 돌린다
+  npx supabase stop --no-backup
+  ```
 - 이미 적용된 마이그레이션 파일은 고치지 않는다. 바꿀 내용은 새 파일로 만든다.
 
 서버 함수(관리자, 최신 main에서):
