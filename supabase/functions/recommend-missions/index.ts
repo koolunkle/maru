@@ -49,6 +49,7 @@ const System = `당신은 서울에 사는 청년에게 하루 5분짜리 작은
 - daily의 minutes는 사용자의 하루 가능 시간 이하, difficulty는 사용자 난이도 이하 또는 +1까지.
 - weekly의 difficulty는 사용자 난이도 +1 이상.
 - 관심 카테고리를 우선하되, 같은 미션을 반복하지 않고 최근 완료하지 못한 미션과 비슷한 것은 더 쉽게 만든다.
+- weekly도 관심 카테고리 중 하나로 낸다.
 - 365 서울챌린지 과제를 참고해도 되고 새로 만들어도 된다.
 - 문화행사는 weekly에만 쓸 수 있다(모두 이번 주 안에 갈 수 있는 행사다). 쓰면 event_id에 그 id를 넣고, title은 "OO 보러 가기"처럼 행사 이름을 짧게 줄여 할 일로 쓴다. difficulty는 4. daily의 event_id는 항상 null.
 - title 40자 이하, verify_hint(사진에 담을 대상) 30자 이하, reason(이 사용자에게 추천하는 이유) 50자 이하.
@@ -139,14 +140,17 @@ Deno.serve(
         .limit(30),
       admin.from('missions').select('*').eq('source', 'seed'),
       // 행사 미션은 주간 미션(기한: 이번 주 일요일)으로만 낸다. 곧 끝나는 행사는 빼고 이번 주 안에 갈 수 있는 행사만 넘긴다(#21)
-      admin
-        .from('events')
-        .select('id, title, place, start_date, end_date')
-        .eq('district', profile.district)
-        .gte('end_date', eventWindow.minEnd)
-        .lte('start_date', eventWindow.maxStart)
-        .order('start_date')
-        .limit(10),
+      // 행사는 모두 문화행사라 문화·전시를 고른 사람에게만 넘긴다. 넘기면 AI가 관심사와 상관없이 행사를 고른다
+      profile.categories?.includes('culture')
+        ? admin
+            .from('events')
+            .select('id, title, place, start_date, end_date')
+            .eq('district', profile.district)
+            .gte('end_date', eventWindow.minEnd)
+            .lte('start_date', eventWindow.maxStart)
+            .order('start_date')
+            .limit(10)
+        : { data: [] },
     ]);
     if (seeds.error) throw seeds.error;
     // 추천 기간(KST, 양 끝 포함) 밖의 시드는 AI 후보와 규칙 대체 양쪽에서 뺀다

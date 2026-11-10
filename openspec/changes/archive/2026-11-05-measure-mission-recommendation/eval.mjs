@@ -2,9 +2,9 @@
 // 운영 추천 함수(recommend-missions)를 그대로 불러오고 DB만 가짜로 바꾼다. 운영 DB에는 접속하지 않는다. 네트워크는 AI 호출뿐이다.
 //
 // 실행 (저장소 루트에서):
-//   가짜 AI(호출 없음):  node openspec/changes/measure-mission-recommendation/eval.mjs --fake
+//   가짜 AI(호출 없음):  node openspec/changes/archive/2026-11-05-measure-mission-recommendation/eval.mjs --fake
 //   실제 AI(Gemini):     npm install --no-save @google/genai@2.30.0
-//                        node --env-file=<GEMINI_API_KEY가 든 파일> openspec/changes/measure-mission-recommendation/eval.mjs
+//                        node --env-file=<GEMINI_API_KEY가 든 파일> openspec/changes/archive/2026-11-05-measure-mission-recommendation/eval.mjs
 // 선택: --runs-ai <n> (기본 2), --runs-rule <n> (기본 5), --delay-ms <ms> (AI 호출 사이 대기, 기본 4000), --out <결과.json>
 // 키 파일은 저장소에 두지 않는다.
 import assert from 'node:assert/strict';
@@ -12,7 +12,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { parseArgs } from 'node:util';
 import { z } from 'zod';
 
-import { compileSource, loadSource } from '../../../tests/helpers/load-source.mjs';
+import { compileSource, loadSource } from '../../../../tests/helpers/load-source.mjs';
 
 const { values: args } = parseArgs({
   options: {
@@ -29,7 +29,7 @@ const delayMs = args.fake ? 0 : Number(args['delay-ms']);
 
 const here = new URL('./', import.meta.url);
 const snapshot = JSON.parse(await readFile(new URL('events-snapshot.json', here), 'utf8'));
-const seedFile = JSON.parse(await readFile(new URL('../../../data/seoul-challenge-2026-2.json', here), 'utf8'));
+const seedFile = JSON.parse(await readFile(new URL('../../../../data/seoul-challenge-2026-2.json', here), 'utf8'));
 const seeds = Object.values(seedFile)
   .find(Array.isArray)
   .map((s) => ({ ...s, id: `seed-${s.seed_no}`, source: 'seed', start_date: null, end_date: null }));
