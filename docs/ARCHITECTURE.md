@@ -97,7 +97,7 @@ flowchart LR
 | 추천(F2) | 홈 진입 → `Functions.recommendMissions()` → 당일 추천이 없으면 AI 생성(실패 시 기간 내 시드) → DB 함수 `save_recommendation`이 저장·캐시·동일 요청 재시도 모두 KST 기간을 검증하고 무효 항목만 보충 → 일일 최대 3 + 주간 최대 1 반환. 자동 보충은 새로고침 횟수를 유지하며 진행 중 미션의 기한은 바꾸지 않는다 |
 | 인증(F4·F5·F7) | 사진 리사이즈 → Storage `verifications/{uid}/…` 업로드 → `verifications` insert(`ai_result` 없음) → `Functions.verifyMission(id)` → 소유권·상태 확인 → 미션의 비공개 기준 사진이 있으면 함께 AI에 전달 → DB 함수 `finish_verification`이 완료·출석·가구 보상을 한 트랜잭션으로 처리. 같은 요청을 다시 보내면 저장된 응답을 돌려준다 |
 | 난이도(F8) | `user_missions` 결과 확정 시 트리거 `adjust_difficulty`(연속 2회 만료 −1, 3회 완료 +1) |
-| 댓글(F6) | `submit-comment` 함수(요청 ID로 중복 방지) → 트리거 `prepare_comment`가 `pending`·`publish_at` 설정 → `Functions.moderateComment(id)`(명백한 욕설은 위기 표현이 없으면 AI 없이 `rejected`, `judged_by: 'rule'`. 그 밖은 AI 분류) → cron `publish_due_comments`가 공개 |
+| 댓글(F6) | `submit-comment` 함수(요청 ID로 중복 방지) → 트리거 `prepare_comment`가 `pending`·`publish_at` 설정 → `Functions.moderateComment(id)`(AI 분류. 명백한 욕설은 AI가 승인해도 `rejected`. AI를 쓸 수 없을 때는 위기 표현이 없는 욕설 글만 `rejected`, `judged_by: 'rule'`) → cron `publish_due_comments`가 공개 |
 | 릴레이(F10) | 완료한 미션에만 `relay_messages` insert → `moderate-comment`(`relay_id`) 검수 → 같은 cron이 공개 → S4에서 `get_relay_messages` |
 | 우체통(F14) | `mailbox` 함수: 보내기 시 AI 검수, 받은 함 조회 시 `receive_mailbox_message`가 승인 글 하나를 한 사람에게 배정 |
 | 주간 리포트(F13) | `write-weekly-letter` 함수가 한 줄 기록·완료 미션으로 편지 생성(현재 Gemini일 때만 AI, 그 외 규칙 문구) |

@@ -312,7 +312,8 @@ test('AI 장애 중에도 욕설이 든 한 줄은 거절로 저장한다', asyn
   const response = await request({ action: 'send', requestId: saved.request_id, body: saved.body });
   assert.equal((await response.json()).status, 'rejected');
   assert.deepEqual(operations.at(-1).update, { status: 'rejected' });
-  assert.equal(aiCalls, 0);
+  // 위기 판정을 놓치지 않도록 욕설이 있어도 AI를 먼저 부른다
+  assert.equal(aiCalls, 1);
 });
 test('우체통 검수는 댓글·릴레이와 같은 공통 규칙을 쓴다', async () => {
   const saved = {

@@ -35,21 +35,20 @@
 
 ### 4. `moderate()` 흐름
 ```
-filtered = filterModerationText(body)
 profane = hasProfanity(body)
-crisisHint = hasCrisisHint(body)
-if (profane && !crisisHint) return { status: 'rejected', judgedBy: 'rule' }
-ai = generateJson(...)                      // 기존
-if (!ai) return null                        // 위기 힌트가 있거나 욕설이 없으면 pending
+filtered = filterModerationText(body)
+ai = generateJson(...)                      // 기존. 욕설이 있어도 부른다
+if (!ai) return profane && !hasCrisisHint(body) ? { status: 'rejected', judgedBy: 'rule' } : null
 status = ai.status === 'approved' && (filtered.hasContact || profane) ? 'rejected' : ai.status
 return { status, judgedBy: 'ai' }
 ```
 - 반환 타입을 `{ status, judgedBy } | null`로 바꾼다. `moderate-comment`는 `judged_by`에 그대로 쓰고, `mailbox`는 `status`만 쓴다.
-- 위기 힌트가 있는 욕설 글은 AI가 `approved`로 봐도 `profane`이라 거절된다(위기면 위기 유지).
-- `hasCrisisHint`는 분류가 아니라 "규칙 거절을 보류할지"만 정한다. 키워드: `죽고 싶`, `죽고싶`, `자살`(허용어 제거 후), `자해`, `끝내고 싶`, `사라지고 싶`, `살기 싫` 등. 넓게 잡아도 결과는 AI 판정으로 넘어가는 것뿐이라 오탐 비용이 낮다.
+- 욕설 글도 AI를 먼저 부른다. 처음에는 위기 힌트가 없는 욕설 글을 AI 없이 거절했으나, "병신같은 나 죽어야지", "ㅅㅂ 살 이유가 없어"처럼 힌트 목록에 없는 위기 표현이 도움 안내 없이 거절되는 문제가 리뷰에서 나왔다. 키워드 목록으로는 위기 표현을 다 덮을 수 없으므로 위기 판정은 늘 AI가 한다. 대가는 욕설 글 한 건당 AI 호출 한 번이다.
+- 욕설 글은 AI가 `approved`로 봐도 `profane`이라 거절된다(위기면 위기 유지).
+- `hasCrisisHint`는 분류가 아니라 "AI를 쓸 수 없을 때 규칙 거절을 보류할지"만 정한다. 키워드: `죽고 싶`, `죽고싶`, `자살`(허용어 제거 후), `자해`, `끝내고 싶`, `사라지고 싶`, `살기 싫` 등. 넓게 잡아도 결과는 AI 판정으로 넘어가는 것뿐이라 오탐 비용이 낮다.
 
 ### 5. AI 기준 문구 강화
-`ModerationSystem`의 rejected 줄을 spec 분류와 같게 넓히고 "판단이 애매하면 rejected"를 넣는다. crisis 우선 문장은 유지한다.
+`ModerationSystem`의 rejected 줄을 spec 분류와 같게 넓히고 "crisis가 아닌 글이 rejected에 해당하는지 애매하면 rejected"를 넣는다. 위기가 애매한 글이 거절로 밀리지 않도록 범위를 crisis가 아닌 글로 한정한다. crisis 우선 문장은 유지한다.
 
 ## Risks / Trade-offs
 
