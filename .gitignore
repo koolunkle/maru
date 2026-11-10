@@ -47,3 +47,4 @@ supabase/.temp/
 
 # Supabase 함수 로컬 실행용 시크릿
 supabase/functions/.env
+supabase/.branches
