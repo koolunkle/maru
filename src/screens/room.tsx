@@ -6,17 +6,17 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 
 import { AppText } from '@/components/app-text';
-import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { PressableScale } from '@/components/pressable-scale';
 import { Collection } from '@/components/room/collection';
 import { ArtAspect, FurnitureArt, type FurnitureState } from '@/components/room/furniture-art';
 import { RoomLight, RoomScene, SceneHeight, SlotAnchor } from '@/components/room/room-scene';
-import { SurfaceSwatch } from '@/components/room/room-surfaces';
+import { SlotSheet } from '@/components/room/slot-sheet';
+import { ThemePicker } from '@/components/room/theme-picker';
 import { Screen } from '@/components/screen';
 import { SlotName, SlotTypeOf } from '@/constants/room';
 import { RoomArt, Sky, type DayPart } from '@/constants/room-art';
-import { DefaultTheme, Floors, themeStorageKey, Wallpapers } from '@/constants/room-themes';
+import { DefaultTheme, themeStorageKey } from '@/constants/room-themes';
 import { Radius, Spacing } from '@/constants/theme';
 import { useIsDark, useTheme } from '@/hooks/use-theme';
 import { Functions } from '@/lib/functions';
@@ -24,14 +24,7 @@ import { getRoom, getRoomProgress } from '@/lib/room';
 import { useSession } from '@/providers/session-provider';
 import type { Enums, Tables } from '@/types/database';
 import { kstDate } from '@/utils/date';
-import {
-  dayPartOf,
-  kstClock,
-  plantStageOf,
-  themeRuleText,
-  themeUnlocked,
-  withObject,
-} from '@/utils/room-state';
+import { dayPartOf, kstClock, plantStageOf, withObject } from '@/utils/room-state';
 import { currentStreak } from '@/utils/streak';
 
 type Slot = Enums<'room_slot'>;
@@ -228,7 +221,7 @@ export function Room() {
   }
 
   /** 벽지·바닥 고르기 (이 기기에만 저장) */
-  function chooseTheme(kind: 'wallpaper' | 'floor', id: string) {
+  function chooseTheme(kind: keyof typeof DefaultTheme, id: string) {
     const next = { ...roomTheme, [kind]: id };
     setRoomTheme(next);
     AsyncStorage.setItem(themeStorageKey(userId), JSON.stringify(next)).catch(() => {});
@@ -379,72 +372,7 @@ export function Room() {
       </View>
 
       {decorating && (
-        <View style={styles.themes}>
-          {(
-            [
-              ['wallpaper', '벽지', Wallpapers, 'wall'],
-              ['floor', '바닥', Floors, 'floor'],
-            ] as const
-          ).map(([kind, label, items, swatch]) => (
-            <View key={kind} style={styles.themeGroup}>
-              <AppText variant="titleMd" accessibilityRole="header">
-                {label}
-              </AppText>
-              <View style={styles.themeRow}>
-                {items.map((item) => {
-                  const open = themeUnlocked(item.rule, themeProgress);
-                  const selected = roomTheme[kind] === item.id;
-                  return (
-                    <PressableScale
-                      key={item.id}
-                      accessibilityRole="radio"
-                      accessibilityState={{ selected, disabled: !open }}
-                      accessibilityLabel={
-                        open
-                          ? `${label} ${item.name}`
-                          : `${label} ${item.name}, 잠김. ${themeRuleText(item.rule, themeProgress)}`
-                      }
-                      disabled={!open}
-                      onPress={() => chooseTheme(kind, item.id)}
-                      style={[
-                        styles.themeItem,
-                        {
-                          borderColor: selected ? theme.primary : theme.hairline,
-                          backgroundColor: selected ? theme.primarySoft : theme.surface,
-                        },
-                      ]}
-                    >
-                      <View style={[styles.swatch, !open && styles.lockedSwatch]}>
-                        <SurfaceSwatch kind={swatch} id={item.id} size={44} dark={isDark} />
-                        {!open && (
-                          <View style={styles.lock}>
-                            <Feather aria-hidden name="lock" size={14} color={theme.slate} />
-                          </View>
-                        )}
-                      </View>
-                      <AppText variant="caption" color={open ? 'ink' : 'steel'} numberOfLines={1}>
-                        {item.name}
-                      </AppText>
-                      {!open && (
-                        <AppText
-                          variant="label"
-                          color="accentInk"
-                          numberOfLines={2}
-                          style={styles.centerText}
-                        >
-                          {themeRuleText(item.rule, themeProgress)}
-                        </AppText>
-                      )}
-                    </PressableScale>
-                  );
-                })}
-              </View>
-            </View>
-          ))}
-          <AppText variant="caption" color="steel">
-            벽지·바닥은 이 기기에만 저장돼요.
-          </AppText>
-        </View>
+        <ThemePicker value={roomTheme} progress={themeProgress} onChoose={chooseTheme} />
       )}
 
       <View style={styles.collection}>
@@ -477,66 +405,23 @@ export function Room() {
       </View>
 
       {editing !== null && (
-        <BottomSheet
-          title={`${SlotName[editing]} 자리`}
+        <SlotSheet
+          slot={editing}
+          candidates={candidates}
+          placedId={editingItem?.furniture_id}
+          canMove={!!canMove}
+          busy={busy}
+          error={error}
+          colors={colors}
+          state={state}
+          onChoose={(id) => choose(editing, id)}
+          onMove={() => {
+            if (!editingItem) return;
+            setMoving(editingItem.furniture_id);
+            setEditing(null);
+          }}
           onClose={() => setEditing(null)}
-          closeDisabled={busy}
-        >
-          {error && (
-            <AppText accessibilityRole="alert" color="slate">
-              가구를 놓지 못했어요. 다시 시도해 주세요.
-            </AppText>
-          )}
-          {candidates.length === 0 ? (
-            <AppText variant="bodySm" color="steel">
-              이 자리에 놓을 수 있는 가구가 아직 없어요. 도감에서 받는 방법을 볼 수 있어요.
-            </AppText>
-          ) : (
-            <View style={styles.sheetList}>
-              {candidates.map((f) => {
-                const here = editingItem?.furniture_id === f.id;
-                return (
-                  <PressableScale
-                    key={f.id}
-                    accessibilityRole="button"
-                    accessibilityLabel={here ? `${f.name}, 지금 놓여 있어요` : `${f.name} 놓기`}
-                    disabled={busy || here}
-                    onPress={() => editing && choose(editing, f.id)}
-                    style={[
-                      styles.choice,
-                      {
-                        backgroundColor: here ? theme.primarySoft : theme.surface,
-                        borderColor: here ? theme.primary : theme.hairline,
-                      },
-                    ]}
-                  >
-                    <FurnitureArt id={f.id} height={40} colors={colors} state={state} />
-                    <AppText variant="caption">{f.name}</AppText>
-                  </PressableScale>
-                );
-              })}
-            </View>
-          )}
-          {editing && editingItem && canMove && (
-            <Button
-              label="다른 자리로 옮기기"
-              variant="secondary"
-              onPress={() => {
-                setMoving(editingItem.furniture_id);
-                setEditing(null);
-              }}
-              disabled={busy}
-            />
-          )}
-          {editing && editingItem && (
-            <Button
-              label="비우기"
-              variant="secondary"
-              onPress={() => choose(editing, null)}
-              disabled={busy}
-            />
-          )}
-        </BottomSheet>
+        />
       )}
     </Screen>
   );
@@ -585,63 +470,8 @@ const styles = StyleSheet.create({
   collection: {
     marginTop: Spacing.md,
   },
-  themes: {
-    marginTop: Spacing.sm,
-    gap: Spacing.md,
-  },
-  themeGroup: {
-    gap: Spacing.xs,
-  },
-  themeRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.xs,
-  },
-  themeItem: {
-    width: 76,
-    minHeight: 96,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    padding: Spacing.xs,
-    alignItems: 'center',
-    gap: 2,
-  },
-  swatch: {
-    borderRadius: Radius.md,
-    overflow: 'hidden',
-  },
-  lockedSwatch: {
-    opacity: 0.45,
-  },
-  lock: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  centerText: {
-    textAlign: 'center',
-  },
   failed: {
     alignItems: 'flex-start',
     gap: Spacing.sm,
-  },
-  sheetList: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: Spacing.xs,
-  },
-  choice: {
-    width: 88,
-    minHeight: 88,
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    padding: Spacing.xs,
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: 4,
   },
 });

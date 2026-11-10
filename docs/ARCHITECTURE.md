@@ -53,7 +53,8 @@ flowchart LR
 | `src/constants/theme.ts` | 디자인 토큰(DESIGN.md와 같은 값) |
 | `src/constants/domain.ts`, `room.ts` | 카테고리·구 목록, 방 자리 이름·종류, 가구 획득 조건 문구 |
 | `src/constants/room-art.ts`, `room-themes.ts` | 내 방 일러스트 색·시간대 하늘, 벽지·바닥 목록과 잠금 규칙 |
-| `src/components/room/` | 내 방 그림(방 배경·가구 일러스트·벽지 무늬), 가구 도감, 가구 받는 순간 |
+| `src/components/room/` | 내 방 그림(방 배경·가구 일러스트·벽지 무늬), 가구 도감, 가구 받는 순간, 꾸미기의 벽지·바닥 고르기(`theme-picker`)와 자리 시트(`slot-sheet`) |
+| `src/components/mailbox/` | `mailbox-card` 시트 안의 받은 목록(`inbox`)·한 줄 쓰기(`compose`)·보낸 목록(`sent-list`). 상태와 서버 호출은 `mailbox-card`에 둔다 |
 | `src/utils/room-state.ts` | 시간대·벽시계·화분 단계·도감 남은 조건 계산 |
 | `src/utils/` | KST 날짜(`date.ts`), 시드 미션 고르기, 사진 리사이즈 |
 | `src/types/database.ts` | `supabase gen types`로 생성. 직접 수정 금지 |

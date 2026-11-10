@@ -2,14 +2,18 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useRef, useState } from 'react';
-import { ActivityIndicator, Keyboard, StyleSheet, TextInput, View } from 'react-native';
+import { Keyboard, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/app-text';
 import { BottomSheet } from '@/components/bottom-sheet';
 import { Button } from '@/components/button';
 import { HelpCard } from '@/components/help-card';
+import { MailboxCompose } from '@/components/mailbox/compose';
+import { MailboxInbox } from '@/components/mailbox/inbox';
+import { MailboxSentList } from '@/components/mailbox/sent-list';
+import { mailboxStyles } from '@/components/mailbox/styles';
 import { PressableScale } from '@/components/pressable-scale';
-import { Radius, Spacing, Typography } from '@/constants/theme';
+import { Radius, Spacing } from '@/constants/theme';
 import { useTheme } from '@/hooks/use-theme';
 import { FunctionError } from '@/lib/functions';
 import {
@@ -22,10 +26,8 @@ import {
   type MailboxMessage,
   type ReceivedMailboxMessage,
 } from '@/lib/mailbox';
-import { formatDateRange, kstDate } from '@/utils/date';
+import { kstDate } from '@/utils/date';
 import { createRequestId } from '@/utils/request-id';
-
-const DeliveryNotice = '검수를 거친 뒤 다른 사람에게 전달돼요.';
 
 const DailyLimitNotice = '오늘은 이미 한 줄을 보냈어요. 내일 또 보내볼까요?';
 
@@ -34,7 +36,6 @@ export function MailboxCard({ userId }: { userId: string }) {
   const theme = useTheme();
   const [visible, setVisible] = useState(false);
   const [body, setBody] = useState('');
-  const [focused, setFocused] = useState(false);
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState<MailboxMessage | null>(null);
@@ -149,7 +150,6 @@ export function MailboxCard({ userId }: { userId: string }) {
     Keyboard.dismiss();
     setVisible(false);
     opened.current = false;
-    setFocused(false);
   }
 
   async function send(retry?: MailboxMessage) {
@@ -177,7 +177,6 @@ export function MailboxCard({ userId }: { userId: string }) {
         setBody('');
         requestId.current = createRequestId();
       }
-      setFocused(false);
     } catch (e) {
       // 다른 기기에서 이미 보냈거나 요청이 겹치면 서버가 하루 한 줄로 거절한다. 다시 눌러도 같으니 안내하고 목록을 맞춘다
       if (e instanceof FunctionError && e.code === 'daily_limit') {
@@ -282,7 +281,7 @@ export function MailboxCard({ userId }: { userId: string }) {
                 variant="secondary"
                 onPress={() => show('inbox')}
                 disabled={busy}
-                style={styles.button}
+                style={mailboxStyles.button}
               />
             </>
           ) : mode === 'read' && selected ? (
@@ -306,173 +305,44 @@ export function MailboxCard({ userId }: { userId: string }) {
                 variant="secondary"
                 onPress={() => show('inbox')}
                 disabled={busy}
-                style={styles.button}
+                style={mailboxStyles.button}
               />
             </>
           ) : mode === 'compose' ? (
-            <>
-              <TextInput
-                accessibilityLabel="보낼 한 줄"
-                accessibilityHint="60자까지 적을 수 있어요"
-                placeholder="오늘의 작은 응원을 적어주세요"
-                placeholderTextColor={theme.steel}
-                value={body}
-                onChangeText={(value) => {
-                  setBody(value.slice(0, MailboxMaxLength));
-                  requestId.current = createRequestId();
-                  setNotice(null);
-                }}
-                maxLength={MailboxMaxLength}
-                multiline
-                editable={!busy}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                style={[
-                  styles.input,
-                  Typography.bodyMd,
-                  {
-                    backgroundColor: theme.surface,
-                    color: theme.ink,
-                    borderColor: focused ? theme.primary : theme.hairlineStrong,
-                  },
-                ]}
-              />
-              <AppText color="steel" style={styles.counter}>
-                {body.length}/{MailboxMaxLength}
-              </AppText>
-              <AppText variant="caption" color="steel">
-                {DeliveryNotice}
-              </AppText>
-              <Button
-                label="보내기"
-                disabled={!body.trim() || !userId || wroteToday}
-                loading={busy}
-                onPress={() => void send()}
-                style={styles.button}
-              />
-              <Button
-                label="목록으로"
-                variant="ghost"
-                onPress={() => show('inbox')}
-                disabled={busy}
-              />
-            </>
+            <MailboxCompose
+              body={body}
+              busy={busy}
+              canSend={!!userId && !wroteToday}
+              onChange={(value) => {
+                setBody(value);
+                requestId.current = createRequestId();
+                setNotice(null);
+              }}
+              onSend={() => void send()}
+              onBack={() => show('inbox')}
+            />
           ) : mode === 'sent' ? (
-            <>
-              {sentError ? (
-                <>
-                  <AppText color="slate" accessibilityRole="alert">
-                    보낸 한 줄을 불러오지 못했어요.
-                  </AppText>
-                  <Button
-                    label="다시 불러오기"
-                    variant="secondary"
-                    onPress={() => void loadSent()}
-                  />
-                </>
-              ) : !sent ? (
-                <ActivityIndicator color={theme.primary} />
-              ) : sent.length === 0 ? (
-                <AppText color="steel">아직 보낸 한 줄이 없어요.</AppText>
-              ) : (
-                sent.map((message) => (
-                  <View
-                    key={message.id}
-                    style={[styles.row, { borderBottomColor: theme.hairline }]}
-                  >
-                    <AppText>{message.body}</AppText>
-                    <AppText variant="caption" color="steel">
-                      {MailboxStatus[message.status]}
-                    </AppText>
-                    {message.status === 'pending' && (
-                      <Button
-                        label="검수 다시 요청"
-                        variant="secondary"
-                        size="sm"
-                        onPress={() => void send(message)}
-                        disabled={busy}
-                        style={styles.rowButton}
-                      />
-                    )}
-                  </View>
-                ))
-              )}
-              <Button
-                label="목록으로"
-                variant="secondary"
-                onPress={() => show('inbox')}
-                disabled={busy}
-                style={styles.button}
-              />
-            </>
+            <MailboxSentList
+              sent={sent}
+              loadError={sentError}
+              busy={busy}
+              onReload={() => void loadSent()}
+              onResend={(message) => void send(message)}
+              onBack={() => show('inbox')}
+            />
           ) : (
-            <>
-              {loadError ? (
-                <>
-                  <AppText color="slate" accessibilityRole="alert">
-                    우체통을 불러오지 못했어요.
-                  </AppText>
-                  <Button
-                    label="다시 불러오기"
-                    variant="secondary"
-                    onPress={() => void reload()}
-                    disabled={loading}
-                  />
-                </>
-              ) : loading && received.length === 0 ? (
-                <ActivityIndicator color={theme.primary} />
-              ) : received.length === 0 ? (
-                <AppText color="steel">
-                  아직 도착한 응원이 없어요. 누군가에게 먼저 따뜻한 마음을 전해볼까요?
-                </AppText>
-              ) : (
-                received.map((message) => {
-                  const day = formatDateRange(
-                    kstDate(new Date(message.received_at)),
-                    kstDate(new Date(message.received_at)),
-                  );
-                  return (
-                    <PressableScale
-                      key={message.id}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${day}, ${message.read_at ? message.body : '아직 읽지 않은 한 줄'}`}
-                      disabled={busy}
-                      onPress={() => void read(message)}
-                      style={[styles.row, { borderBottomColor: theme.hairline }]}
-                    >
-                      <AppText variant="caption" color="steel">
-                        {day}
-                      </AppText>
-                      {message.read_at ? (
-                        <AppText numberOfLines={1}>{message.body}</AppText>
-                      ) : (
-                        <View style={styles.unread}>
-                          <View style={[styles.dot, { backgroundColor: theme.accent }]} />
-                          <AppText variant="titleMd">아직 읽지 않은 한 줄</AppText>
-                        </View>
-                      )}
-                    </PressableScale>
-                  );
-                })
-              )}
-              {!sentChecking && !wroteToday && (
-                <Button
-                  label="한 줄 쓰기"
-                  disabled={busy}
-                  onPress={() => show('compose')}
-                  style={styles.button}
-                />
-              )}
-              {!sentChecking && hasSent && (
-                <Button
-                  label="보낸 한 줄"
-                  variant="secondary"
-                  disabled={busy}
-                  onPress={() => show('sent')}
-                  style={wroteToday ? styles.button : undefined}
-                />
-              )}
-            </>
+            <MailboxInbox
+              received={received}
+              loading={loading}
+              loadError={loadError}
+              busy={busy}
+              canCompose={sentChecking ? null : !wroteToday}
+              hasSent={hasSent}
+              onReload={() => void reload()}
+              onRead={(message) => void read(message)}
+              onCompose={() => show('compose')}
+              onShowSent={() => show('sent')}
+            />
           )}
         </BottomSheet>
       )}
@@ -494,23 +364,4 @@ const styles = StyleSheet.create({
   envelope: { alignSelf: 'center' },
   label: { alignSelf: 'center', fontWeight: '700' },
   letter: { padding: Spacing.xl, borderRadius: Radius.xl, gap: Spacing.md },
-  input: {
-    minHeight: 100,
-    borderWidth: 2,
-    borderRadius: Radius.lg,
-    padding: Spacing.md,
-    textAlignVertical: 'top',
-  },
-  counter: { textAlign: 'right' },
-  button: { borderRadius: Radius.lg },
-  row: {
-    minHeight: 56,
-    paddingVertical: Spacing.xs,
-    justifyContent: 'center',
-    gap: Spacing.xxs,
-    borderBottomWidth: 1,
-  },
-  rowButton: { alignSelf: 'flex-start' },
-  unread: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  dot: { width: 8, height: 8, borderRadius: Radius.full },
 });
