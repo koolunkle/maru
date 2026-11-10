@@ -94,7 +94,7 @@ flowchart LR
 | 흐름 | 순서 |
 | --- | --- |
 | 가입 | `signInAnonymously()` → 트리거 `handle_new_user`가 `profiles` 생성(닉네임 자동) → 온보딩 저장(`onboarded_at`) |
-| 추천(F2) | 홈 진입 → `Functions.recommendMissions()` → 당일 추천이 없으면 AI 생성(실패 시 기간 내 시드) → DB 함수 `save_recommendation`이 저장·캐시·동일 요청 재시도 모두 KST 기간을 검증하고 무효 항목만 보충 → 일일 최대 3 + 주간 최대 1 반환. 자동 보충은 새로고침 횟수를 유지하며 진행 중 미션의 기한은 바꾸지 않는다 |
+| 추천(F2) | 홈 진입 → `Functions.recommendMissions()` → 당일 추천이 없으면 AI 생성(실패 시 기간 내 시드. 하루 시간을 넘거나 금칙어가 든 AI 오늘 미션은 버리고 1~3개만 넘긴다) → DB 함수 `save_recommendation`이 저장·캐시·동일 요청 재시도 모두 KST 기간을 검증하고 무효·빈 항목만 시드로 보충 → 일일 최대 3 + 주간 최대 1 반환. 자동 보충은 새로고침 횟수를 유지하며 진행 중 미션의 기한은 바꾸지 않는다 |
 | 인증(F4·F5·F7) | 사진 리사이즈 → Storage `verifications/{uid}/…` 업로드 → `verifications` insert(`ai_result` 없음) → `Functions.verifyMission(id)` → 소유권·상태 확인 → 미션의 비공개 기준 사진이 있으면 함께 AI에 전달 → DB 함수 `finish_verification`이 완료·출석·가구 보상을 한 트랜잭션으로 처리. 같은 요청을 다시 보내면 저장된 응답을 돌려준다 |
 | 난이도(F8) | `user_missions` 결과 확정 시 트리거 `adjust_difficulty`(연속 2회 만료 −1, 3회 완료 +1) |
 | 댓글(F6) | `submit-comment` 함수(요청 ID로 중복 방지) → 트리거 `prepare_comment`가 `pending`·`publish_at` 설정 → `Functions.moderateComment(id)`(AI 분류. 명백한 욕설은 AI가 승인해도 `rejected`. AI를 쓸 수 없을 때는 위기 표현이 없는 욕설 글만 `rejected`, `judged_by: 'rule'`) → cron `publish_due_comments`가 공개 |
