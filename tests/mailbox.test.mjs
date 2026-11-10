@@ -54,6 +54,11 @@ test('수신·발신 목록과 읽음은 서버 세션을 따른다', async () =
     [{ action: 'inbox' }, { action: 'sent' }, { action: 'read', id: 'message-id' }],
   );
 });
+test('탭 점 조회는 waiting 동작을 부르고 참·거짓만 돌려준다', async () => {
+  response = { data: { waiting: true }, error: null };
+  assert.equal(await mailbox.hasWaitingMailbox(), true);
+  assert.deepEqual(calls[0].body, { action: 'waiting' });
+});
 test('응답 유실 뒤 같은 요청 식별자로 재시도한다', async () => {
   response = { data: null, error: new Error('network') };
   await assert.rejects(mailbox.sendMailboxMessage('a', '응원해요', 'request-00000001'), /network/);
@@ -87,10 +92,11 @@ let aiText;
 let aiSystem;
 const operations = [];
 let results = [];
+let rpcData = null;
 const admin = {
   async rpc(name, args) {
     operations.push({ name, args });
-    return { error: null };
+    return { data: rpcData, error: null };
   },
   from(table) {
     const operation = { table, filters: [] };
@@ -195,6 +201,7 @@ beforeEach(() => {
   user = '10000000-0000-4000-8000-000000000001';
   aiResult = null;
   aiCalls = 0;
+  rpcData = null;
 });
 const request = (body) =>
   endpoint(
@@ -220,6 +227,14 @@ test('수신함은 JWT 사용자에게만 배정하고 작성자 식별자를 �
   assert.deepEqual(operations[0], { name: 'receive_mailbox_message', args: { recipient: user } });
   assert.ok(operations[1].filters.some(([key, value]) => key === 'recipient_id' && value === user));
   assert.equal(operations[1].columns, 'id, body, received_at, read_at');
+});
+test('탭 점 조회는 JWT 사용자로만 묻고 한 줄을 배정하지 않는다', async () => {
+  rpcData = true;
+  const response = await request({ action: 'waiting', recipient: 'attacker-target' });
+  assert.deepEqual(await response.json(), { waiting: true });
+  assert.deepEqual(operations, [{ name: 'mailbox_waiting', args: { recipient: user } }]);
+  rpcData = null;
+  assert.deepEqual(await (await request({ action: 'waiting' })).json(), { waiting: false });
 });
 test('타인의 글 읽음 요청은 404이고 수신자·공개 상태로 한정한다', async () => {
   results = [{ error: null }, { data: null, error: null }];

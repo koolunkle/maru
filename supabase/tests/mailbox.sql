@@ -16,6 +16,9 @@ begin
     (a, 'test-pending-00001', '아직 검수 중이에요', 'pending'),
     (a, 'test-rejected-0001', '전달하지 않는 글', 'rejected'),
     (a, 'test-crisis-000001', '비공개 글', 'crisis');
+  assert not public.mailbox_waiting(a), '본인 글만 있으면 점 없음';
+  assert public.mailbox_waiting(b), '받을 승인 글이 있으면 점';
+  assert not exists (select 1 from public.mailbox_messages where recipient_id is not null), '점 확인은 배정하지 않음';
   perform public.receive_mailbox_message(a);
   assert not exists (select 1 from public.mailbox_messages where recipient_id = a), '본인 글 수신 금지';
   perform public.receive_mailbox_message(b);
@@ -27,7 +30,9 @@ begin
   values (a, 'test-approved-0002', '다음 한 줄', 'approved');
   perform public.receive_mailbox_message(b);
   assert (select count(*) = 1 from public.mailbox_messages where recipient_id = b), '안 읽은 글이 있으면 추가 배정하지 않음';
+  assert public.mailbox_waiting(b), '안 읽은 글이 있으면 점';
   update public.mailbox_messages set read_at = now() where recipient_id = b;
+  assert not public.mailbox_waiting(b), '오늘 받아 읽었으면 승인 글이 남아도 점 없음';
   perform public.receive_mailbox_message(b);
   assert (select count(*) = 1 from public.mailbox_messages where recipient_id = b), '읽었어도 같은 날(KST)에는 추가 배정하지 않음';
   update public.mailbox_messages set received_at = received_at - interval '1 day' where recipient_id = b;
@@ -56,6 +61,10 @@ begin
   begin
     update public.mailbox_messages set status = 'approved';
     raise exception '클라이언트 상태 위조가 허용됨';
+  exception when insufficient_privilege then null; end;
+  begin
+    perform public.mailbox_waiting('10000000-0000-4000-8000-000000000003');
+    raise exception '클라이언트 점 조회가 허용됨';
   exception when insufficient_privilege then null; end;
   begin
     perform public.receive_mailbox_message('10000000-0000-4000-8000-000000000003');
