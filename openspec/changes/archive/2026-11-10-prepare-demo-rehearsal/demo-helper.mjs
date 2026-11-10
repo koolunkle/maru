@@ -2,7 +2,7 @@
 // 익명 계정 생성 → 온보딩 → 산책 미션 시작 → 사진 인증(AI 판정) → 릴레이 한 줄 → 우체통 글.
 // 검수도 실제 서버 함수가 한다. 앱의 publishable 키만 쓰고 서버 키는 쓰지 않는다.
 //
-// 실행 (저장소 루트에서): node --env-file=.env.local openspec/changes/prepare-demo-rehearsal/demo-helper.mjs <사진.jpg>
+// 실행 (저장소 루트에서): node --env-file=.env.local openspec/changes/archive/2026-11-10-prepare-demo-rehearsal/demo-helper.mjs <사진.jpg>
 // 사진은 "노란색이 보이는 풍경이나 사물"이어야 인증이 통과한다. 출력된 사용자 id는 정리(tasks 3.3) 때 쓴다.
 import { readFile } from 'node:fs/promises';
 import { createClient } from '@supabase/supabase-js';
