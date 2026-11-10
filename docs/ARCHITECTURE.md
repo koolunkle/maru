@@ -14,7 +14,7 @@ flowchart LR
       Auth[Auth<br/>익명 로그인]
       DB[(Postgres + RLS<br/>트리거·RPC)]
       ST[Storage<br/>verifications 버킷]
-      FN[Edge Functions<br/>추천·인증·검수·우체통·편지·행사 동기화 등 9개]
+      FN[Edge Functions<br/>추천·인증·검수·우체통·편지·행사 동기화·미션 관리 등 10개]
       CRON[pg_cron<br/>댓글 공개·미션 만료·행사 동기화]
     end
     AI[Gemini / Claude]
@@ -79,8 +79,8 @@ flowchart LR
 | S7 | `/record` | `screens/record.tsx` | attendance-streak, weekly-letter |
 | S8 | `/room` | `screens/room.tsx` | room-rewards |
 | S9 | `/settings`, `/settings/[field]` | `screens/settings/` | onboarding |
-| S10 | `/help` | `screens/help.tsx` | rest-area의 도움받을 수 있는 곳(스택 화면). 주간 리포트·설정에서 연다. 마음 보관함은 같은 목록(`components/help-place-list.tsx`)을 바텀 시트로 연다. 기관 주소는 `constants/help.ts` |
-| S14 | `/vault` | `screens/vault.tsx` | rest-area의 마음 보관함 탭. 카드가 우체통·한 줄 기록·타임캡슐 시트를 연다. 아래에 빗소리(`components/rain-sound.tsx`)와 도움 안내 링크 |
+| S10 | `/help` | `screens/help.tsx` | mind-vault의 도움받을 수 있는 곳(스택 화면). 주간 리포트·설정에서 연다. 마음 보관함은 같은 목록(`components/help-place-list.tsx`)을 바텀 시트로 연다. 기관 주소는 `constants/help.ts` |
+| S14 | `/vault` | `screens/vault.tsx` | mind-vault의 마음 보관함 탭. 카드가 우체통·한 줄 기록·타임캡슐 시트를 연다. 아래에 빗소리(`components/rain-sound.tsx`)와 도움 안내 링크 |
 | S11 | `/letter/[week]` | `screens/letter.tsx` | weekly-letter |
 | S12 | `/capsule`, 마음 보관함 시트 | `screens/capsule.tsx` | time-capsule |
 | S13 | 마음 보관함 시트 | `components/daily-note-card.tsx` | daily-note. 별도 경로 없음 |

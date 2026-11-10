@@ -64,7 +64,8 @@
     "test:next-reward": "node --test tests/next-reward.test.mjs",
     "seed:build": "python scripts/build-seed.py",
     "spec": "openspec",
-    "spec:validate": "openspec validate --all --strict"
+    "spec:validate": "openspec validate --all --strict",
+    "spec:archived": "node scripts/check-open-changes.mjs"
   },
   "private": true
 }

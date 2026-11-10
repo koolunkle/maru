@@ -1,8 +1,26 @@
 # MY서울루틴 (Maru)
 
-작은 성공이 쌓이는 AI 일상 루틴. 고립·은둔 전 단계의 청년이 오늘 할 수 있는 한 가지에서 다시 시작하도록 돕는다.
+잃어버린 일상을 되찾아주는 일상 루틴 추천 서비스. 일을 기다리는 시간이 길어지며 외출·연락이 줄기 시작한 서울 청년(19~39세)이 오늘의 루틴 하나에서 다시 시작해, 지지를 받고, 서울의 청년 정책 프로그램까지 나가도록 돕는다. **365 서울챌린지의 청년 트랙**(2027 서울챌린지)으로 제안한다.
 
-10/20 해커톤 제출본에 동료 프로토타입의 기능을 합쳤다. 진행 중인 작업은 `npm run spec -- list`(열린 change)로 본다.
+- 운영: https://seoul-challenge.expo.app (웹 주력, 휴대폰은 Expo Go)
+- 미션 관리: 운영 주소 뒤에 `/admin` ([docs/ADMIN.md](./docs/ADMIN.md))
+- 팀 그고깃집 · 본선 발표 2026-11-09
+
+## MARU의 세 단계
+
+| 단계 | Maru가 하는 일 | 상태 |
+| --- | --- | --- |
+| 1 · 초개인화 미션으로 일상 되찾기 | 관심사·동네·하루 시간·최근 기록에 맞춰 AI가 오늘의 미션 3개와 동네 행사 주간 미션을 만들고 고른 이유를 쓴다. 해내면 난이도를 올리고 놓치면 내린다 | 구현 |
+| 2 · 지지로 자기비난 벗어나기 | AI가 인증 사진을 보고 '해냈다'를 알아봐 준다. 응원 글을 먼저 검수하고, 주말에는 한 주를 읽고 편지를 쓴다. 익명 응원·릴레이·마음 우체통 | 구현 |
+| 3 · 정책 프로그램으로 밖에 나가기 | 쌓인 기록에 맞는 서울 청년 프로그램을 난이도 5 미션으로 건넨다 | 2027 제안 |
+
+AI는 정해진 틀 안에서만 만들고 코드가 한 번 더 검사한다. AI를 쓸 수 없으면 규칙으로 대체한다. 순위·비교·끊기면 사라지는 보상은 넣지 않는다.
+
+주요 기능(F1~F16): 익명 시작 · AI 미션 추천 · 사진 인증 · 연속 출석 · 성장 화분 · 가구 보상과 내 방 · 피드와 익명 응원 · 같이 할래요 · 응원 릴레이 · 주간 편지 · 마음 우체통 · 한 줄 기록 · 타임캡슐 · 빗소리와 도움 안내. 전체 표는 [PRODUCT 3.1절](./docs/PRODUCT.md#31-기능과-spec).
+
+## 기술 스택
+
+Expo SDK 58 (React Native, Expo Router, TypeScript strict) · Supabase (익명 Auth, Postgres + RLS, Storage, Edge Functions, pg_cron) · Gemini API(기본, Claude 전환 가능) · 서울 열린데이터광장 문화행사 · EAS Hosting. 구성도는 [ARCHITECTURE 1절](./docs/ARCHITECTURE.md#1-시스템-구성).
 
 ## 문서
 
@@ -16,6 +34,7 @@
 | [DESIGN.md](./DESIGN.md) | 어떻게 보이나. 디자인 토큰과 화면 구조 |
 | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) | 어디에 구현되어 있나. 폴더 지도·데이터 모델·함수·주요 흐름·설정값과 시크릿 |
 | [CONTRIBUTING.md](./CONTRIBUTING.md) | 권한 요청, 실행·점검표, 작업 흐름(OpenSpec), 커밋·PR, DB 변경 |
+| [docs/ADMIN.md](./docs/ADMIN.md) | 관리자 웹으로 미션·기준 사진을 관리하는 법 |
 | [AGENTS.md](./AGENTS.md) | AI 코딩 도구에 주는 규칙 |
 
 ## 실행
@@ -25,8 +44,17 @@ npm install
 cp .env.example .env.local   # publishable 키가 들어 있다
 npm run web                  # 웹
 npm start                    # Expo Go (폰)
-npm run spec -- list         # 진행 중인 change 목록
 ```
+
+PR 전 점검:
+
+```bash
+npm run lint && npm run typecheck && npm test
+npm run spec:validate        # 명세 검사
+npm run spec -- list         # 진행 중인 change
+```
+
+권한 요청과 작업 흐름은 [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ## 이름과 식별자
 
@@ -42,7 +70,6 @@ npm run spec -- list         # 진행 중인 change 목록
 
 ## 배포
 
-- 운영 URL: https://seoul-challenge.expo.app
 - 명령과 절차: [CONTRIBUTING.md](./CONTRIBUTING.md) 3절(미리보기·운영 배포), AI 키·시연 모드 등 운영 설정: [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) 9절
 
 ## 데이터 출처·라이선스

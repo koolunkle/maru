@@ -18,7 +18,7 @@ import { getDailyNote, MoodLabels } from '@/lib/daily-note';
 import { useSession } from '@/providers/session-provider';
 import { kstDate } from '@/utils/date';
 
-/** S14 마음 보관함 탭 (spec rest-area, mailbox, daily-note, time-capsule / DESIGN.md §5.2). 우체통·한 줄 기록·타임캡슐, 배경음, 도움 안내 링크 */
+/** S14 마음 보관함 탭 (spec mind-vault, mailbox, daily-note, time-capsule / DESIGN.md §5.2). 우체통·한 줄 기록·타임캡슐, 배경음, 도움 안내 링크 */
 export function Vault() {
   const theme = useTheme();
   const { profile } = useSession();
