@@ -83,6 +83,7 @@ declare messages text[];
 begin
   select array_agg(body) into messages from public.get_relay_messages('20000000-0000-4000-8000-000000000011');
   assert messages = array['같은 미션 응원', '같은 분야 응원'], '같은 미션 우선·같은 분야 보충·본인 글 제외';
+  assert (select array_agg(same_mission) from public.get_relay_messages('20000000-0000-4000-8000-000000000011')) = array[true, false], '같은 미션 글과 비슷한 미션 글 구분';
   assert not exists (select 1 from public.get_relay_messages('20000000-0000-4000-8000-000000000013')), '다른 분야 제외';
   assert not exists (select 1 from public.get_relay_messages('20000000-0000-4000-8000-000000000014')), '타인의 AI 미션 접근 차단';
 end $$;
