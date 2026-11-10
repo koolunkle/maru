@@ -15,16 +15,16 @@ export const HelpPlaces: {
     url: 'tel:120',
   },
   {
-    name: '서울마음편의점',
-    description: '예약 없이 들러 쉬어 가는 동네 공간',
-    icon: 'map-pin',
-    url: 'https://news.seoul.go.kr/welfare/archives/569285',
-  },
-  {
     name: '청년마음편의점',
-    description: '청년을 위한 쉼 공간 · 성동구 서울잇다플레이스 안, 평일 10~18시',
+    description: '청년 전용 공간 · 성동구 뚝섬역 근처, 평일 10~18시',
     icon: 'coffee',
     url: 'https://news.seoul.go.kr/welfare/archives/583054',
+  },
+  {
+    name: '서울마음편의점',
+    description: '동네 복지관 19곳 · 누구나 예약 없이 들러 쉬어 가는 곳',
+    icon: 'map-pin',
+    url: 'https://news.seoul.go.kr/welfare/archives/569285',
   },
   {
     name: '청년마음건강 지원사업',
