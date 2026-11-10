@@ -49,7 +49,7 @@ const System = `당신은 서울에 사는 청년에게 하루 5분짜리 작은
 - daily의 minutes는 사용자의 하루 가능 시간 이하, difficulty는 사용자 난이도 이하 또는 +1까지.
 - weekly의 difficulty는 사용자 난이도 +1 이상.
 - 관심 카테고리를 우선하되, 같은 미션을 반복하지 않고 최근 완료하지 못한 미션과 비슷한 것은 더 쉽게 만든다.
-- weekly도 관심 카테고리 중 하나로 낸다.
+- weekly도 관심 카테고리 중 하나로 낸다. seoul_challenge에 관심 카테고리이면서 weekly 난이도에 맞는 과제가 없으면 다른 카테고리 과제를 가져오지 말고 관심 카테고리로 새로 만든다.
 - 365 서울챌린지 과제를 참고해도 되고 새로 만들어도 된다.
 - 문화행사는 weekly에만 쓸 수 있다(모두 이번 주 안에 갈 수 있는 행사다). 쓰면 event_id에 그 id를 넣고, title은 "OO 보러 가기"처럼 행사 이름을 짧게 줄여 할 일로 쓴다. difficulty는 4. daily의 event_id는 항상 null.
 - title 40자 이하, verify_hint(사진에 담을 대상) 30자 이하, reason(이 사용자에게 추천하는 이유) 50자 이하.
@@ -212,13 +212,19 @@ Deno.serve(
     );
     const rows = [...daily, weekly].map((m, i) => {
       // 행사 연계는 주간 미션(마지막)만 허용한다. 난이도 4 = 행사 참여(spec mission-recommendation)
-      const event = i === daily.length && m.event_id ? eventsById.get(m.event_id) : undefined;
+      const isWeekly = i === daily.length;
+      const event = isWeekly && m.event_id ? eventsById.get(m.event_id) : undefined;
+      // 이번 주 미션은 사용자 난이도 +1 이상(spec mission-recommendation). AI가 시드 난이도를 그대로 가져와도 맞춘다
+      const minDifficulty = Math.min(
+        5,
+        Math.max(event ? 4 : 1, isWeekly ? profile.difficulty + 1 : 1),
+      );
       return {
         source: 'ai',
         created_for: userId,
         title: event ? eventMissionTitle(m.title, event.title) : m.title,
         category: m.category,
-        difficulty: event ? Math.max(4, m.difficulty) : m.difficulty,
+        difficulty: Math.max(minDifficulty, m.difficulty),
         minutes: event ? Math.max(60, m.minutes) : m.minutes,
         verify_hint: m.verify_hint,
         reason: m.reason,
